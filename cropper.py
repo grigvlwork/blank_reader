@@ -1,5 +1,6 @@
 import sys
 import qdarkstyle
+import traceback
 
 from PyQt5 import uic, QtCore, QtGui
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox, QMenu, QGraphicsPixmapItem, \
@@ -20,6 +21,8 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.theme = 'Dark'
         self.theme_btn.clicked.connect(self.change_theme)
         self.open_btn.clicked.connect(self.open_image)
+        self.source_lb.setText('')
+        self.result_lb.setText('')
 
     def change_theme(self):
         if self.theme == 'Dark':
