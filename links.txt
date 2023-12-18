@@ -1,1 +1,5 @@
 https://habr.com/ru/articles/466565/
+https://codeby.net/threads/raspoznaem-tekst-na-izobrazhenii-dvumja-bibliotekami-s-pomoschju-python.80139/
+Распознаем текст на изображении двумя библиотеками с помощью Python
+https://ramziv.com/article/32 Распознаем текст на изображении с Python Tesseract
+https://habr.com/ru/articles/691598/ Дообучение EasyOCR
