@@ -52,6 +52,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                       os.path.isfile(os.path.join(self.source_dir, f))]
         if os.path.isdir(self.source_dir + '/cropper'):
             self.work_dir = self.source_dir + '/cropper'
+            self.load_thumbnails()
         else:
             os.mkdir(self.source_dir + '/cropper')
             self.work_dir = self.source_dir + '/cropper'
@@ -81,10 +82,29 @@ class MyWidget(QMainWindow, Ui_MainWindow):
     def generate_thumbnails(self):
         for file in self.files:
             image = Image.open(file)
-            image.thumbnail((1200, 1200))
+            image.thumbnail((400, 400))
             new_name = self.work_dir + '/thumbnails/' + os.path.basename(file)
             image.save(new_name)
             self.thumbnails.append(new_name)
+
+    def load_thumbnails(self):
+        td = self.work_dir + '/thumbnails'
+        self.thumbnails = [os.path.join(td, f) for f in os.listdir(td) if
+                      os.path.isfile(os.path.join(td, f))]
+
+
+    def check_thumbnails(self):
+        source = []
+        thumbs = []
+        for file in self.files:
+            source.append(os.path.basename(file))
+        for file in self.thumbnails:
+            thumbs.append(os.path.basename(file))
+        if source != thumbs:
+            return False
+        return True
+
+
 
     def open_image(self):
         # https://ru.stackoverflow.com/questions/1263508/Как-добавить-изображение-на-qgraphicsview
