@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="images">
+    <file>images/check.svg</file>
+    <file>images/approve.svg</file>
     <file>images/hand.svg</file>
     <file>images/zoom_out.svg</file>
     <file>images/zoom_in.svg</file>
