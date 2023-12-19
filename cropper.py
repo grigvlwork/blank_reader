@@ -100,6 +100,11 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.thumbnails = [os.path.join(td, f) for f in os.listdir(td) if
                            os.path.isfile(os.path.join(td, f))]
 
+    def rotate_image(self):
+        pass
+
+    # https://python-scripts.com/draw-circle-rectangle-line
+
     def check_thumbnails(self):
         source = []
         thumbs = []
