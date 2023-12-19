@@ -179,6 +179,52 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="rotate_clock_btn">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/images/images/clockwise_rotate.svg</normaloff>:/images/images/clockwise_rotate.svg</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="rotate_counter_clock_btn">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/images/images/counterclockwise_rotate.svg</normaloff>:/images/images/counterclockwise_rotate.svg</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="sciss_btn">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -350,10 +396,33 @@
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="source_lb">
-            <property name="text">
-             <string>TextLabel</string>
+           <widget class="QScrollArea" name="image_sa">
+            <property name="widgetResizable">
+             <bool>true</bool>
             </property>
+            <widget class="QWidget" name="scrollAreaWidgetContents_2">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>758</width>
+               <height>723</height>
+              </rect>
+             </property>
+             <widget class="QLabel" name="source_lb">
+              <property name="geometry">
+               <rect>
+                <x>340</x>
+                <y>-10</y>
+                <width>47</width>
+                <height>725</height>
+               </rect>
+              </property>
+              <property name="text">
+               <string>TextLabel</string>
+              </property>
+             </widget>
+            </widget>
            </widget>
           </item>
          </layout>

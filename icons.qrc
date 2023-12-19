@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="images">
+    <file>images/counterclockwise_rotate.svg</file>
+    <file>images/clockwise_rotate.svg</file>
     <file>images/check.svg</file>
     <file>images/approve.svg</file>
     <file>images/hand.svg</file>
