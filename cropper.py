@@ -18,6 +18,7 @@ from PyQt5.QtGui import QPixmap
 from PIL import Image
 
 from cropper_ui import Ui_MainWindow
+from classes import myLabel
 
 
 class MyWidget(QMainWindow, Ui_MainWindow):
@@ -71,13 +72,20 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             for file in self.thumbnails:
                 label_num = QLabel(f'{num}:')
                 num += 1
-                label = QLabel(self)
+                label = myLabel(self)
                 label.setPixmap(QPixmap(file).scaled(200, 400, QtCore.Qt.KeepAspectRatio))
                 self.labels.append(label)
                 v_layout.addRow(label_num, label)
+                label.clicked.connect(self.thumbnail_click)
             group_box.setLayout(v_layout)
             self.thumbnails_sa.setWidget(group_box)
             self.thumbnails_sa.show()
+
+    def thumbnail_click(self):
+        for i in range(len(self.labels)):
+            if self.labels[i] == self.sender():
+                file = self.files[i]
+                self.source_lb.setPixmap(QPixmap(file).scaled(1000, 1000, QtCore.Qt.KeepAspectRatio))
 
     def generate_thumbnails(self):
         for file in self.files:
@@ -90,8 +98,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
     def load_thumbnails(self):
         td = self.work_dir + '/thumbnails'
         self.thumbnails = [os.path.join(td, f) for f in os.listdir(td) if
-                      os.path.isfile(os.path.join(td, f))]
-
+                           os.path.isfile(os.path.join(td, f))]
 
     def check_thumbnails(self):
         source = []
@@ -103,8 +110,6 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         if source != thumbs:
             return False
         return True
-
-
 
     def open_image(self):
         # https://ru.stackoverflow.com/questions/1263508/Как-добавить-изображение-на-qgraphicsview

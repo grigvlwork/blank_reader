@@ -1,3 +1,7 @@
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
+
+
 class Point:
     def __init__(self, x, y):
         self.x = x
@@ -34,3 +38,11 @@ class Area:
             if abs(p.x - x) == 1 or abs(p.y - y) == 1:
                 return True
         return False
+
+
+class myLabel(QLabel):
+    clicked = pyqtSignal()
+
+    def mouseReleaseEvent(self, QMouseEvent):
+        if QMouseEvent.button() == Qt.LeftButton:
+            self.clicked.emit()
