@@ -8,7 +8,7 @@ import os
 
 from PyQt5 import uic, QtCore, QtGui
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox, QMenu, QGraphicsPixmapItem, \
-    QGraphicsItem
+    QGraphicsItem, QLabel, QGroupBox, QVBoxLayout, QFormLayout
 from PyQt5.QtGui import QStandardItem, QStandardItemModel
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox
 from PyQt5.Qt import QClipboard
@@ -29,10 +29,10 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.source_dir = None
         self.files = []
         self.thumbnails = []
+        self.labels = []
         self.theme_btn.clicked.connect(self.change_theme)
         self.open_btn.clicked.connect(self.open_folder)
         self.source_lb.setText('')
-        self.result_lb.setText('')
 
     def change_theme(self):
         if self.theme == 'Dark':
@@ -49,7 +49,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
     def open_folder(self):
         self.source_dir = QFileDialog.getExistingDirectory(self, 'Select Folder')
         self.files = [os.path.join(self.source_dir, f) for f in os.listdir(self.source_dir) if
-                     os.path.isfile(os.path.join(self.source_dir, f))]
+                      os.path.isfile(os.path.join(self.source_dir, f))]
         if os.path.isdir(self.source_dir + '/cropper'):
             self.work_dir = self.source_dir + '/cropper'
         else:
@@ -60,15 +60,31 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             os.mkdir(self.work_dir + '/output')
             if len(self.files) > 0:
                 self.generate_thumbnails()
+        self.show_thumbnails()
+
+    def show_thumbnails(self):
+        if len(self.thumbnails) > 0:
+            v_layout = QFormLayout()
+            group_box = QGroupBox()
+            num = 1
+            for file in self.thumbnails:
+                label_num = QLabel(f'{num}:')
+                num += 1
+                label = QLabel(self)
+                label.setPixmap(QPixmap(file).scaled(200, 400, QtCore.Qt.KeepAspectRatio))
+                self.labels.append(label)
+                v_layout.addRow(label_num, label)
+            group_box.setLayout(v_layout)
+            self.thumbnails_sa.setWidget(group_box)
+            self.thumbnails_sa.show()
 
     def generate_thumbnails(self):
         for file in self.files:
             image = Image.open(file)
-            image.thumbnail((300, 300))
+            image.thumbnail((1200, 1200))
             new_name = self.work_dir + '/thumbnails/' + os.path.basename(file)
             image.save(new_name)
             self.thumbnails.append(new_name)
-
 
     def open_image(self):
         # https://ru.stackoverflow.com/questions/1263508/Как-добавить-изображение-на-qgraphicsview
@@ -78,7 +94,6 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             pic = QGraphicsPixmapItem()
             pic.setPixmap(QPixmap(fname).scaled(160, 160))
             pic.setFlags(QGraphicsItem.ItemIsSelectable | QGraphicsItem.ItemIsMovable)
-
 
 
 def excepthook(exc_type, exc_value, exc_tb):
