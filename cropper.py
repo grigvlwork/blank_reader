@@ -31,9 +31,16 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.files = []
         self.thumbnails = []
         self.labels = []
+        self.current_image_index = None
+        self.rotates = []
         self.theme_btn.clicked.connect(self.change_theme)
         self.open_btn.clicked.connect(self.open_folder)
         self.source_lb.setText('')
+
+    def pil2_pixmap(self, pil_img):
+        print("PIL format to QPixmap format")
+        pixmap = ImageQt.toqpixmap(pil_img)
+        return pixmap
 
     def change_theme(self):
         if self.theme == 'Dark':
@@ -63,6 +70,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             if len(self.files) > 0:
                 self.generate_thumbnails()
         self.show_thumbnails()
+        self.rotates = [0] * len(self.files)
 
     def show_thumbnails(self):
         if len(self.thumbnails) > 0:
@@ -85,7 +93,27 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         for i in range(len(self.labels)):
             if self.labels[i] == self.sender():
                 file = self.files[i]
+                self.current_image_index = i
                 self.source_lb.setPixmap(QPixmap(file).scaled(1000, 1000, QtCore.Qt.KeepAspectRatio))
+
+    def rotate_right(self):
+        self.rotates[self.current_image_index] += 90
+        self.rotates[self.current_image_index] %= 360
+        if self.rotates[self.current_image_index] >= 0:
+            self.write_on_thumbnails(f'Right {self.rotates[self.current_image_index]}')
+        else:
+            self.write_on_thumbnails(f'Left {-self.rotates[self.current_image_index]}')
+
+    def write_on_thumbnails(self, text):
+        im = Image.open(self.thumbnails[self.current_image_index])
+        draw_text = ImageDraw.Draw(im)
+        draw_text.text(
+            (5, 5),
+            text,
+            fill=('#FF0000')
+        )
+        pix = self.pil2_pixmap(im)
+        self.labels[self.current_image_index].setPixmap(pix.scaled(200, 400, QtCore.Qt.KeepAspectRatio))
 
     def generate_thumbnails(self):
         for file in self.files:
@@ -100,7 +128,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.thumbnails = [os.path.join(td, f) for f in os.listdir(td) if
                            os.path.isfile(os.path.join(td, f))]
 
-    def rotate_image(self):
+    def rotate_image(self, angle):
         pass
 
     # https://python-scripts.com/draw-circle-rectangle-line
