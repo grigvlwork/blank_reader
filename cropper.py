@@ -36,6 +36,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.theme_btn.clicked.connect(self.change_theme)
         self.open_btn.clicked.connect(self.open_folder)
         self.rotate_clock_btn.clicked.connect(self.rotate_right)
+        self.execute_btn.clicked.connect(self.execute)
         self.source_lb.setText('')
 
     def pil2pixmap(self, image):
@@ -106,6 +107,16 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 file = self.files[i]
                 self.current_image_index = i
                 self.source_lb.setPixmap(QPixmap(file).scaled(1000, 1000, QtCore.Qt.KeepAspectRatio))
+
+    def execute(self):
+        if any(x != 0 for x in self.rotates):
+            for i in range(len(self.rotates)):
+                file = self.files[i]
+                new_file = self.work_dir + '/output/' + os.path.basename(file)
+                im = Image.open(file)
+                im_rotate = im.rotate(-self.rotates[i], expand=True)
+                im_rotate.save(new_file, quality=100)
+                im.close()
 
     def rotate_right(self):
         self.rotates[self.current_image_index] += 90
