@@ -15,7 +15,7 @@ from PyQt5.Qt import QClipboard
 from PyQt5.QtCore import QModelIndex
 import icons_rc
 from PyQt5.QtGui import QPixmap
-from PIL import Image
+from PIL import Image, ImageFont, ImageDraw
 
 from cropper_ui import Ui_MainWindow
 from classes import myLabel
@@ -35,11 +35,22 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.rotates = []
         self.theme_btn.clicked.connect(self.change_theme)
         self.open_btn.clicked.connect(self.open_folder)
+        self.rotate_clock_btn.clicked.connect(self.rotate_right)
         self.source_lb.setText('')
 
-    def pil2_pixmap(self, pil_img):
-        print("PIL format to QPixmap format")
-        pixmap = ImageQt.toqpixmap(pil_img)
+    def pil2pixmap(self, image):
+        if image.mode == "RGB":
+            r, g, b = image.split()
+            im = Image.merge("RGB", (b, g, r))
+        elif image.mode == "RGBA":
+            r, g, b, a = image.split()
+            im = Image.merge("RGBA", (b, g, r, a))
+        elif image.mode == "L":
+            im = image.convert("RGBA")
+        im2 = im.convert("RGBA")
+        data = im2.tobytes("raw", "RGBA")
+        qim = QtGui.QImage(data, im.size[0], im.size[1], QtGui.QImage.Format_ARGB32)
+        pixmap = QtGui.QPixmap.fromImage(qim)
         return pixmap
 
     def change_theme(self):
@@ -106,13 +117,15 @@ class MyWidget(QMainWindow, Ui_MainWindow):
 
     def write_on_thumbnails(self, text):
         im = Image.open(self.thumbnails[self.current_image_index])
+        font = ImageFont.truetype('./data/consolas.ttf', size=42)
         draw_text = ImageDraw.Draw(im)
         draw_text.text(
             (5, 5),
             text,
+            font=font,
             fill=('#FF0000')
         )
-        pix = self.pil2_pixmap(im)
+        pix = self.pil2pixmap(im)
         self.labels[self.current_image_index].setPixmap(pix.scaled(200, 400, QtCore.Qt.KeepAspectRatio))
 
     def generate_thumbnails(self):
