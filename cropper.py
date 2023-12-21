@@ -33,6 +33,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.labels = []
         self.current_image_index = None
         self.rotates = []
+        self.v_cut_x = []
         self.theme_btn.clicked.connect(self.change_theme)
         self.open_btn.clicked.connect(self.open_folder)
         self.rotate_clock_btn.clicked.connect(self.rotate_right)
@@ -69,7 +70,17 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         print(x, y)
 
     def mousePressEvent(self, a0):
-        self.statusbar.showMessage(f'x:{(a0.x())} y:{a0.y()}')
+        self.statusbar.showMessage(f'x:{a0.x()} y:{a0.y()}')
+        if self.v_cut:
+            self.v_cut_x[self.current_image_index] = a0.x()
+            im = Image.open(self.files[self.current_image_index])
+            k = im.height / 1000
+            print(im.width, im.height)
+            draw = ImageDraw.Draw(im)
+            draw.line(xy=((int(a0.x() * k), 0), (int(a0.x() * k), im.height)), width=10)
+            pix_map = self.pil2pixmap(im)
+            self.source_lb.setPixmap(pix_map.scaled(1500, 1000, QtCore.Qt.KeepAspectRatio))
+            self.labels[self.current_image_index].setPixmap(pix_map.scaled(200, 400, QtCore.Qt.KeepAspectRatio))
 
     def vertical_cut(self):
         self.v_cut = True
@@ -109,6 +120,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 self.generate_thumbnails()
         self.show_thumbnails()
         self.rotates = [0] * len(self.files)
+        self.v_cut_x = [0] * len(self.files)
 
     def show_thumbnails(self):
         if len(self.thumbnails) > 0:
