@@ -36,8 +36,12 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.theme_btn.clicked.connect(self.change_theme)
         self.open_btn.clicked.connect(self.open_folder)
         self.rotate_clock_btn.clicked.connect(self.rotate_right)
+        self.rotate_counter_clock_btn.clicked.connect(self.rotate_left)
         self.execute_btn.clicked.connect(self.execute)
         self.source_lb.setText('')
+        # self.source_lb.setFixedWidth(1000)
+        # self.source_lb.setFixedHeight(1000)
+        self.source_lb.setGeometry(0, 0, 1000, 1000)
 
     def pil2pixmap(self, image):
         if image.mode == "RGB":
@@ -70,6 +74,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.source_dir = QFileDialog.getExistingDirectory(self, 'Select Folder')
         self.files = [os.path.join(self.source_dir, f) for f in os.listdir(self.source_dir) if
                       os.path.isfile(os.path.join(self.source_dir, f))]
+        print(self.files)
         if os.path.isdir(self.source_dir + '/cropper'):
             self.work_dir = self.source_dir + '/cropper'
             self.load_thumbnails()
@@ -120,7 +125,15 @@ class MyWidget(QMainWindow, Ui_MainWindow):
 
     def rotate_right(self):
         self.rotates[self.current_image_index] += 90
-        self.rotates[self.current_image_index] %= 360
+        # self.rotates[self.current_image_index] %= 360
+        if self.rotates[self.current_image_index] >= 0:
+            self.write_on_thumbnails(f'Right {self.rotates[self.current_image_index]}')
+        else:
+            self.write_on_thumbnails(f'Left {-self.rotates[self.current_image_index]}')
+
+    def rotate_left(self):
+        self.rotates[self.current_image_index] -= 90
+        # self.rotates[self.current_image_index] %= 360
         if self.rotates[self.current_image_index] >= 0:
             self.write_on_thumbnails(f'Right {self.rotates[self.current_image_index]}')
         else:

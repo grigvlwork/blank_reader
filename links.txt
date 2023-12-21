@@ -3,3 +3,5 @@ https://codeby.net/threads/raspoznaem-tekst-na-izobrazhenii-dvumja-bibliotekami-
 Распознаем текст на изображении двумя библиотеками с помощью Python
 https://ramziv.com/article/32 Распознаем текст на изображении с Python Tesseract
 https://habr.com/ru/articles/691598/ Дообучение EasyOCR
+https://github.com/PaddlePaddle/PaddleOCR Библиотека OCR
+https://stackoverflow.com/questions/53114177/scrollable-qlabel-image-in-pyqt5 Прокручиваемое изображение
