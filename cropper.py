@@ -38,10 +38,15 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.rotate_clock_btn.clicked.connect(self.rotate_right)
         self.rotate_counter_clock_btn.clicked.connect(self.rotate_left)
         self.execute_btn.clicked.connect(self.execute)
+        self.horiz_btn.clicked.connect(self.horizontal_cut)
+        self.vert_btn.clicked.connect(self.vertical_cut)
         self.source_lb.setText('')
         # self.source_lb.setFixedWidth(1000)
         # self.source_lb.setFixedHeight(1000)
         self.source_lb.setGeometry(0, 0, 1000, 1000)
+        self.source_lb.mousePressEvent = self.mousePressEvent
+        self.v_cut = False
+        self.h_cut = False
 
     def pil2pixmap(self, image):
         if image.mode == "RGB":
@@ -57,6 +62,22 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         qim = QtGui.QImage(data, im.size[0], im.size[1], QtGui.QImage.Format_ARGB32)
         pixmap = QtGui.QPixmap.fromImage(qim)
         return pixmap
+
+    def get_pos(self, event):
+        x = event.pos().x()
+        y = event.pos().y()
+        print(x, y)
+
+    def mousePressEvent(self, a0):
+        self.statusbar.showMessage(f'x:{(a0.x())} y:{a0.y()}')
+
+    def vertical_cut(self):
+        self.v_cut = True
+        self.h_cut = False
+
+    def horizontal_cut(self):
+        self.h_cut = True
+        self.v_cut = False
 
     def change_theme(self):
         if self.theme == 'Dark':
@@ -111,7 +132,14 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             if self.labels[i] == self.sender():
                 file = self.files[i]
                 self.current_image_index = i
-                self.source_lb.setPixmap(QPixmap(file).scaled(1000, 1000, QtCore.Qt.KeepAspectRatio))
+                # self.source_lb.setPixmap(QPixmap(file).scaled(1000, 1000, QtCore.Qt.KeepAspectRatio))
+                lay = QVBoxLayout(self.image_sa)
+                lay.setContentsMargins(0, 0, 0, 0)
+                lay.addWidget(self.source_lb)
+                pixMap = QtGui.QPixmap(file)
+                self.source_lb.setPixmap(pixMap.scaled(2000, 1000, QtCore.Qt.KeepAspectRatio))
+                self.image_sa.setWidgetResizable(True)
+                self.source_lb.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
 
     def execute(self):
         if any(x != 0 for x in self.rotates):
