@@ -71,15 +71,17 @@ class MyWidget(QMainWindow, Ui_MainWindow):
 
     def mousePressEvent(self, a0):
         self.statusbar.showMessage(f'x:{a0.x()} y:{a0.y()}')
-        if self.v_cut:
+        if self.v_cut and self.current_image_index is not None:
             self.v_cut_x[self.current_image_index] = a0.x()
+            print(str(self.sender()))
             im = Image.open(self.files[self.current_image_index])
             k = im.height / 1000
-            print(im.width, im.height)
             draw = ImageDraw.Draw(im)
             draw.line(xy=((int(a0.x() * k), 0), (int(a0.x() * k), im.height)), width=10)
             pix_map = self.pil2pixmap(im)
             self.source_lb.setPixmap(pix_map.scaled(1500, 1000, QtCore.Qt.KeepAspectRatio))
+            draw.line(xy=((int(a0.x() * k), 0), (int(a0.x() * k), im.height)), width=40)
+            pix_map = self.pil2pixmap(im)
             self.labels[self.current_image_index].setPixmap(pix_map.scaled(200, 400, QtCore.Qt.KeepAspectRatio))
 
     def vertical_cut(self):
