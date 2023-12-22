@@ -8,7 +8,7 @@ import os
 
 from PyQt5 import uic, QtCore, QtGui
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox, QMenu, QGraphicsPixmapItem, \
-    QGraphicsItem, QLabel, QGroupBox, QVBoxLayout, QFormLayout
+    QGraphicsItem, QLabel, QGroupBox, QVBoxLayout, QFormLayout, QWidget
 from PyQt5.QtGui import QStandardItem, QStandardItemModel
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox
 from PyQt5.Qt import QClipboard
@@ -123,6 +123,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.show_thumbnails()
         self.rotates = [0] * len(self.files)
         self.v_cut_x = [0] * len(self.files)
+        self.source_lb = myLabel()
 
     def show_thumbnails(self):
         if len(self.thumbnails) > 0:
@@ -147,7 +148,8 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 file = self.files[i]
                 self.current_image_index = i
                 # self.source_lb.setPixmap(QPixmap(file).scaled(1000, 1000, QtCore.Qt.KeepAspectRatio))
-                lay = QVBoxLayout(self.image_sa)
+                w = QWidget()
+                lay = QVBoxLayout(w)
                 lay.setContentsMargins(0, 0, 0, 0)
                 lay.addWidget(self.source_lb)
                 pixMap = QtGui.QPixmap(file)
