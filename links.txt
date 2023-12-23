@@ -5,7 +5,10 @@ https://ramziv.com/article/32 Распознаем текст на изобра�
 https://habr.com/ru/articles/691598/ Дообучение EasyOCR
 https://github.com/PaddlePaddle/PaddleOCR Библиотека OCR
 https://github.com/open-mmlab/mmocr Библиотека OCR
-https://github.com/Leviuss/project-X Нейросеть
+https://github.com/kk7nc/RMDL нейросетевая модель
+***
+https://pythonru.com/primery/raspoznavanie-rukopisnyh-cifr-na-p-ython-gui Распознавание рукописных цифр на Python + GUI
+***
 https://stackoverflow.com/questions/53114177/scrollable-qlabel-image-in-pyqt5 Прокручиваемое изображение
 https://russianblogs.com/article/52851088961/ События мыши
 2. Указатель мыши.
