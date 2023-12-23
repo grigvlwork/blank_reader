@@ -4,6 +4,7 @@ https://codeby.net/threads/raspoznaem-tekst-na-izobrazhenii-dvumja-bibliotekami-
 https://ramziv.com/article/32 Распознаем текст на изображении с Python Tesseract
 https://habr.com/ru/articles/691598/ Дообучение EasyOCR
 https://github.com/PaddlePaddle/PaddleOCR Библиотека OCR
+https://github.com/open-mmlab/mmocr Библиотека OCR
 https://stackoverflow.com/questions/53114177/scrollable-qlabel-image-in-pyqt5 Прокручиваемое изображение
 https://russianblogs.com/article/52851088961/ События мыши
 2. Указатель мыши.
@@ -18,3 +19,4 @@ https://russianblogs.com/article/52851088961/ События мыши
  родительского окна нет, оно эквивалентно mapFromGlobal (QPoint);
  mapTo (QWidget, QPoint) - Преобразование координат окна в координаты родительского окна QWidget;
  mapFrom (QWidget, QPoint) -Преобразование координат родительского окна QWidget в координаты окна;
+
