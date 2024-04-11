@@ -24,3 +24,4 @@ https://russianblogs.com/article/52851088961/ События мыши
  mapTo (QWidget, QPoint) - Преобразование координат окна в координаты родительского окна QWidget;
  mapFrom (QWidget, QPoint) -Преобразование координат родительского окна QWidget в координаты окна;
 
+https://www.perplexity.ai/search/how-to-find-ivCMLHd9T_iP5QkyB8DclA
