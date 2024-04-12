@@ -24,4 +24,7 @@ https://russianblogs.com/article/52851088961/ События мыши
  mapTo (QWidget, QPoint) - Преобразование координат окна в координаты родительского окна QWidget;
  mapFrom (QWidget, QPoint) -Преобразование координат родительского окна QWidget в координаты окна;
 
+Обнаружение черных квадратов
 https://www.perplexity.ai/search/how-to-find-ivCMLHd9T_iP5QkyB8DclA
+https://www.tutorialspoint.com/how-to-detect-a-rectangle-and-square-in-an-image-using-opencv-python
+
