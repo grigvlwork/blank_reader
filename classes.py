@@ -50,7 +50,7 @@ class myLabel(QLabel):
 
 
 class Project:
-    def __init__(self, directory_name):
+    def __init__(self, directory_name=None):
         self.work_dir = directory_name
 
     def __getstate__(self) -> dict:
@@ -67,8 +67,8 @@ class Project:
                 temp = pickle.load(fp)
                 self.work_dir = temp.work_dir
                 return True
-        except IOError as e:
-            print("I/O error({0}): {1}".format(e.errno, e.strerror)
+        except OSError as e:
+            print("OS error({0}): {1}".format(e.errno, e.strerror))
             return False
 
     def save_project(self, file_name):
@@ -76,6 +76,6 @@ class Project:
             with open(file_name, "wb") as fp:
                 pickle.dump(self, fp)
                 return True
-        except IOError as e:
-            print("I/O error({0}): {1}".format(e.errno, e.strerror)
+        except OSError as e:
+            print("OS error({0}): {1}".format(e.errno, e.strerror))
             return False
