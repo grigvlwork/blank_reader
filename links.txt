@@ -1,3 +1,8 @@
+Ссылка на архив с файлами
+https://disk.yandex.ru/d/3wIHsKCdmx3T0w
+
+
+
 https://habr.com/ru/articles/466565/
 https://codeby.net/threads/raspoznaem-tekst-na-izobrazhenii-dvumja-bibliotekami-s-pomoschju-python.80139/
 Распознаем текст на изображении двумя библиотеками с помощью Python
