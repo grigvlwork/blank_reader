@@ -89,10 +89,10 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         print(x, y)
 
     def mousePressEvent(self, a0):
-        self.statusbar.showMessage(f'x:{a0.x()} y:{a0.y()}')
+        # self.statusbar.showMessage(f'x:{a0.x()} y:{a0.y()}')
         if self.v_cut and self.current_image_index is not None:
             self.v_cut_x[self.current_image_index] = a0.x()
-            print(str(self.sender()))
+            # print(str(self.sender()))
             im = Image.open(self.files[self.current_image_index])
             k = im.height / 1000
             draw = ImageDraw.Draw(im)
@@ -127,7 +127,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.source_dir = QFileDialog.getExistingDirectory(self, 'Select Folder')
         self.files = [os.path.join(self.source_dir, f) for f in os.listdir(self.source_dir) if
                       os.path.isfile(os.path.join(self.source_dir, f))]
-        print(self.files)
+        # print(self.files)
         if os.path.isdir(self.source_dir + '/cropper'):
             self.work_dir = self.source_dir + '/cropper'
             self.load_thumbnails()
