@@ -33,3 +33,9 @@ https://russianblogs.com/article/52851088961/ События мыши
 https://www.perplexity.ai/search/how-to-find-ivCMLHd9T_iP5QkyB8DclA
 https://www.tutorialspoint.com/how-to-detect-a-rectangle-and-square-in-an-image-using-opencv-python
 
+
+Сериализация объекта
+https://ru.stackoverflow.com/questions/1097641/Как-сохранить-экземпляр-класса-в-файл
+
+
+

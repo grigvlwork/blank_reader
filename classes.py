@@ -1,5 +1,6 @@
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
+import pickle
 
 
 class Point:
@@ -46,3 +47,35 @@ class myLabel(QLabel):
     def mouseReleaseEvent(self, QMouseEvent):
         if QMouseEvent.button() == Qt.LeftButton:
             self.clicked.emit()
+
+
+class Project:
+    def __init__(self, directory_name):
+        self.work_dir = directory_name
+
+    def __getstate__(self) -> dict:
+        state = {}
+        state["work_dir"] = self.work_dir
+        return state
+
+    def __setstate__(self, state: dict):
+        self.work_dir = state["work_dir"]
+
+    def load_project(self, file_name):
+        try:
+            with open(file_name, "rb") as fp:
+                temp = pickle.load(fp)
+                self.work_dir = temp.work_dir
+                return True
+        except IOError as e:
+            print("I/O error({0}): {1}".format(e.errno, e.strerror)
+            return False
+
+    def save_project(self, file_name):
+        try:
+            with open(file_name, "wb") as fp:
+                pickle.dump(self, fp)
+                return True
+        except IOError as e:
+            print("I/O error({0}): {1}".format(e.errno, e.strerror)
+            return False
