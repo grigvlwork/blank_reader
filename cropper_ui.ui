@@ -25,6 +25,9 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="toolTip">
+         <string>Сохранить проект</string>
+        </property>
         <property name="text">
          <string/>
         </property>
@@ -48,6 +51,9 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="toolTip">
+         <string>Открыть проект</string>
+        </property>
         <property name="text">
          <string/>
         </property>
@@ -64,19 +70,22 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="hand_btn">
+       <widget class="QPushButton" name="new_project_btn">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="toolTip">
+         <string>Новый проект</string>
+        </property>
         <property name="text">
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="icons.qrc">
-          <normaloff>:/images/images/hand.svg</normaloff>:/images/images/hand.svg</iconset>
+         <iconset>
+          <normaloff>images/newfile.svg</normaloff>images/newfile.svg</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -93,6 +102,9 @@
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Вертикальный разрез</string>
         </property>
         <property name="text">
          <string/>
@@ -117,6 +129,9 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="toolTip">
+         <string>Горизонатльный разрез</string>
+        </property>
         <property name="text">
          <string/>
         </property>
@@ -139,6 +154,9 @@
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Обрезка</string>
         </property>
         <property name="text">
          <string/>
@@ -163,6 +181,9 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="toolTip">
+         <string>Поворот на угол</string>
+        </property>
         <property name="text">
          <string/>
         </property>
@@ -185,6 +206,9 @@
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Поворот вправо на 90 градусов</string>
         </property>
         <property name="text">
          <string/>
@@ -209,6 +233,9 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="toolTip">
+         <string>Поворот влево на 90 градусов</string>
+        </property>
         <property name="text">
          <string/>
         </property>
@@ -231,6 +258,9 @@
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Разрезать</string>
         </property>
         <property name="text">
          <string/>
@@ -255,6 +285,9 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="toolTip">
+         <string>Уменьшить масштаб</string>
+        </property>
         <property name="text">
          <string/>
         </property>
@@ -277,6 +310,9 @@
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Увеличить масштаб</string>
         </property>
         <property name="text">
          <string/>
@@ -301,12 +337,15 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="toolTip">
+         <string>Перейти на следующий этап</string>
+        </property>
         <property name="text">
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="icons.qrc">
-          <normaloff>:/images/images/check.svg</normaloff>:/images/images/check.svg</iconset>
+         <iconset>
+          <normaloff>images/run.svg</normaloff>images/run.svg</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -336,6 +375,9 @@
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Переключение темы</string>
         </property>
         <property name="text">
          <string/>

@@ -1,6 +1,7 @@
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 import pickle
+import os
 
 
 class Point:
@@ -50,16 +51,18 @@ class myLabel(QLabel):
 
 
 class Project:
-    def __init__(self, directory_name=None):
+    def __init__(self, directory_name=None, file_project_name=None):
         self.work_dir = directory_name
+        self.file_project_name = file_project_name
 
     def __getstate__(self) -> dict:
         state = {}
         state["work_dir"] = self.work_dir
+        state["file_project_name"] = self.file_project_name
         return state
 
     def __setstate__(self, state: dict):
-        self.work_dir = state["work_dir"]
+        self.work_dir = state["file_project_name"]
 
     def load_project(self, file_name):
         try:
@@ -79,3 +82,33 @@ class Project:
         except OSError as e:
             print("OS error({0}): {1}".format(e.errno, e.strerror))
             return False
+
+    def new_project(self):
+        self.work_dir = QFileDialog.getExistingDirectory(self, 'Select Folder')
+        self.file_project_name = os.path.basename(self.work_dir)
+        print(self.file_project_name)
+
+    def make_structure(self):
+        if not os.path.isdir(self.source_dir + '/processing'):
+            os.mkdir(self.source_dir + '/processing')
+        if not os.path.isdir(self.source_dir + '/processing/rotates'):
+            os.mkdir(self.source_dir + '/processing/rotates')
+        if not os.path.isdir(self.source_dir + '/processing/v_cut'):
+            os.mkdir(self.source_dir + '/processing/v_cut')
+        if not os.path.isdir(self.source_dir + '/processing/h_cut'):
+            os.mkdir(self.source_dir + '/processing/h_cut')
+        if not os.path.isdir(self.source_dir + '/processing/angle_adjust'):
+            os.mkdir(self.source_dir + '/processing/angle_adjust')
+        if not os.path.isdir(self.source_dir + '/processing/word_select'):
+            os.mkdir(self.source_dir + '/processing/word_select')
+        if not os.path.isdir(self.source_dir + '/processing/letter_select'):
+            os.mkdir(self.source_dir + '/processing/letter_select')
+
+
+
+
+
+
+
+
+
