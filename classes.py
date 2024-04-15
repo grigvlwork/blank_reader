@@ -84,7 +84,7 @@ class Project:
             return False
 
     def new_project(self):
-        self.work_dir = QFileDialog.getExistingDirectory(self, 'Select Folder')
+        self.work_dir = QFileDialog.getExistingDirectory(None, 'Select Folder')
         self.file_project_name = os.path.basename(self.work_dir)
         print(self.file_project_name)
 
