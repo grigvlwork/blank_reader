@@ -62,7 +62,8 @@ class Project:
         return state
 
     def __setstate__(self, state: dict):
-        self.work_dir = state["file_project_name"]
+        self.work_dir = state["work_dir"]
+        self.file_project_name = state["file_project_name"]
 
     def load_project(self, file_name):
         try:
@@ -74,35 +75,37 @@ class Project:
             print("OS error({0}): {1}".format(e.errno, e.strerror))
             return False
 
-    def save_project(self, file_name):
+    def save_project(self):
         try:
-            with open(file_name, "wb") as fp:
+            with open(self.file_project_name, "wb") as fp:
                 pickle.dump(self, fp)
                 return True
         except OSError as e:
             print("OS error({0}): {1}".format(e.errno, e.strerror))
             return False
 
-    def new_project(self):
-        self.work_dir = QFileDialog.getExistingDirectory(None, 'Select Folder')
-        self.file_project_name = os.path.basename(self.work_dir)
-        print(self.file_project_name)
+    def new_project(self, window):
+        self.work_dir = QFileDialog.getExistingDirectory(window, 'Select Folder')
+        self.make_structure()
+        self.file_project_name = self.work_dir + '/processing/' + os.path.basename(self.work_dir)
+        self.save_project()
+
 
     def make_structure(self):
-        if not os.path.isdir(self.source_dir + '/processing'):
-            os.mkdir(self.source_dir + '/processing')
-        if not os.path.isdir(self.source_dir + '/processing/rotates'):
-            os.mkdir(self.source_dir + '/processing/rotates')
-        if not os.path.isdir(self.source_dir + '/processing/v_cut'):
-            os.mkdir(self.source_dir + '/processing/v_cut')
-        if not os.path.isdir(self.source_dir + '/processing/h_cut'):
-            os.mkdir(self.source_dir + '/processing/h_cut')
-        if not os.path.isdir(self.source_dir + '/processing/angle_adjust'):
-            os.mkdir(self.source_dir + '/processing/angle_adjust')
-        if not os.path.isdir(self.source_dir + '/processing/word_select'):
-            os.mkdir(self.source_dir + '/processing/word_select')
-        if not os.path.isdir(self.source_dir + '/processing/letter_select'):
-            os.mkdir(self.source_dir + '/processing/letter_select')
+        if not os.path.isdir(self.work_dir + '/processing'):
+            os.mkdir(self.work_dir + '/processing')
+        if not os.path.isdir(self.work_dir + '/processing/rotates'):
+            os.mkdir(self.work_dir + '/processing/rotates')
+        if not os.path.isdir(self.work_dir + '/processing/v_cut'):
+            os.mkdir(self.work_dir + '/processing/v_cut')
+        if not os.path.isdir(self.work_dir + '/processing/h_cut'):
+            os.mkdir(self.work_dir + '/processing/h_cut')
+        if not os.path.isdir(self.work_dir + '/processing/angle_adjust'):
+            os.mkdir(self.work_dir + '/processing/angle_adjust')
+        if not os.path.isdir(self.work_dir + '/processing/word_select'):
+            os.mkdir(self.work_dir + '/processing/word_select')
+        if not os.path.isdir(self.work_dir + '/processing/letter_select'):
+            os.mkdir(self.work_dir + '/processing/letter_select')
 
 
 

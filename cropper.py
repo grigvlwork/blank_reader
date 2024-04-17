@@ -37,7 +37,7 @@ from PyQt5.QtGui import QPixmap
 from PIL import Image, ImageFont, ImageDraw
 
 from cropper_ui import Ui_MainWindow
-from classes import myLabel
+from classes import myLabel, Project
 
 
 class MyWidget(QMainWindow, Ui_MainWindow):
@@ -60,6 +60,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.execute_btn.clicked.connect(self.execute)
         self.horiz_btn.clicked.connect(self.horizontal_cut)
         self.vert_btn.clicked.connect(self.vertical_cut)
+        self.new_project_btn.clicked.connect(self.create_new_project)
         self.source_lb.setText('')
         # self.source_lb.setFixedWidth(1000)
         # self.source_lb.setFixedHeight(1000)
@@ -110,6 +111,12 @@ class MyWidget(QMainWindow, Ui_MainWindow):
     def horizontal_cut(self):
         self.h_cut = True
         self.v_cut = False
+
+    def create_new_project(self):
+        self.project = Project()
+        self.project.new_project(self)
+
+
 
     def change_theme(self):
         if self.theme == 'Dark':
