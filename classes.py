@@ -2,6 +2,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 import pickle
 import os
+import shutil
 
 
 class Point:
@@ -54,16 +55,19 @@ class Project:
     def __init__(self, directory_name=None, file_project_name=None):
         self.work_dir = directory_name
         self.file_project_name = file_project_name
+        self.current_step = 'rotates'
 
     def __getstate__(self) -> dict:
         state = {}
         state["work_dir"] = self.work_dir
         state["file_project_name"] = self.file_project_name
+        state["current_step"] = self.current_step
         return state
 
     def __setstate__(self, state: dict):
         self.work_dir = state["work_dir"]
         self.file_project_name = state["file_project_name"]
+        self.current_step = state["current_step"]
 
     def load_project(self, file_name):
         try:
@@ -96,6 +100,10 @@ class Project:
             os.mkdir(self.work_dir + '/processing')
         if not os.path.isdir(self.work_dir + '/processing/rotates'):
             os.mkdir(self.work_dir + '/processing/rotates')
+        files = os.listdir(self.work_dir)
+        for fname in files:
+            if os.path.isfile(os.path.join(self.work_dir,fname)):
+                shutil.copy2(os.path.join(self.work_dir,fname), self.work_dir + '/processing/rotates')
         if not os.path.isdir(self.work_dir + '/processing/v_cut'):
             os.mkdir(self.work_dir + '/processing/v_cut')
         if not os.path.isdir(self.work_dir + '/processing/h_cut'):
