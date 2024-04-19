@@ -109,7 +109,8 @@ class MyWidget(QMainWindow, Ui_MainWindow):
 
     def create_new_project(self):
         self.project = Project()
-        self.project.new_project(self)
+        if not self.project.new_project(self):
+            return
         self.work_dir = self.project.work_dir + '/processing/rotates'        
         self.files = [os.path.join(self.work_dir, f) for f in os.listdir(self.work_dir) if
                       os.path.isfile(os.path.join(self.work_dir, f))]

@@ -90,22 +90,31 @@ class Project:
             return False
 
     def new_project(self, window):
+        self.work_dir = ""
         self.work_dir = QFileDialog.getExistingDirectory(window, 'Select Folder')
-        self.make_structure()
-        self.file_project_name = self.work_dir + '/processing/' + os.path.basename(self.work_dir)
-        self.save_project()
+        if self.work_dir == "":
+            return False
+        if self.make_structure():
+            self.file_project_name = self.work_dir + '/processing/' + os.path.basename(self.work_dir)+".blr"
+            self.save_project()
+            return True
+        else:
+            return False
 
     def make_structure(self):
-        if not os.path.isdir(self.work_dir + '/processing'):
-            os.mkdir(self.work_dir + '/processing')
-        for step in self.steps:
-            if not os.path.isdir(self.work_dir + '/processing/' + step):
-                os.mkdir(self.work_dir + '/processing/' + step)
-        files = os.listdir(self.work_dir)
-        for fname in files:
-            if os.path.isfile(os.path.join(self.work_dir, fname)):
-                shutil.copy2(os.path.join(self.work_dir, fname), self.work_dir + '/processing/rotates')
-
+        try:
+            if not os.path.isdir(self.work_dir + '/processing'):
+                os.mkdir(self.work_dir + '/processing')
+            for step in self.steps:
+                if not os.path.isdir(self.work_dir + '/processing/' + step):
+                    os.mkdir(self.work_dir + '/processing/' + step)
+            files = os.listdir(self.work_dir)
+            for fname in files:
+                if os.path.isfile(os.path.join(self.work_dir, fname)):
+                    shutil.copy2(os.path.join(self.work_dir, fname), self.work_dir + '/processing/rotates')
+            return True
+        except OSError:
+            return False
     def next_step(self):
         if self.current_step < 6:
             self.current_step += 1
