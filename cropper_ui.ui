@@ -96,6 +96,58 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="check_btn">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Пометить готовым</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>images/check.svg</normaloff>images/check.svg</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="check_all_btn">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Пометить все</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>images/check_all.svg</normaloff>images/check_all.svg</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="vert_btn">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -214,8 +266,8 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="icons.qrc">
-          <normaloff>:/images/images/clockwise_rotate.svg</normaloff>:/images/images/clockwise_rotate.svg</iconset>
+         <iconset>
+          <normaloff>images/clockwise_rotate.svg</normaloff>images/clockwise_rotate.svg</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -240,8 +292,8 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="icons.qrc">
-          <normaloff>:/images/images/counterclockwise_rotate.svg</normaloff>:/images/images/counterclockwise_rotate.svg</iconset>
+         <iconset>
+          <normaloff>images/counterclockwise_rotate.svg</normaloff>images/counterclockwise_rotate.svg</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -440,7 +492,7 @@
           <item>
            <widget class="QGroupBox" name="groupBox">
             <property name="title">
-             <string>GroupBox</string>
+             <string>Просмотр</string>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_2">
              <item>
