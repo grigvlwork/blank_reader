@@ -182,15 +182,18 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             if self.labels[i] == self.sender():
                 file = self.files[i]
                 self.current_image_index = i
-                self.source_lb.setPixmap(QPixmap(file).scaled(1000, 1000, QtCore.Qt.KeepAspectRatio))
-                w = QWidget()
-                lay = QVBoxLayout(w)
-                lay.setContentsMargins(0, 0, 0, 0)
-                lay.addWidget(self.source_lb)
+                # self.source_lb.setPixmap(QPixmap(file).scaled(1000, 1000, QtCore.Qt.KeepAspectRatio))
+                # w = QWidget()
+                # lay = QFormLayout(w)
+                # lay.setContentsMargins(0, 0, 0, 0)
+                # lay.addWidget(self.source_lb)
+                # self.scroll_view_sa.setLayout(lay)
+                # self.scroll_view_sa.show()
                 pixMap = QtGui.QPixmap(file)
-                self.source_lb.setPixmap(pixMap.scaled(2000, 1000, QtCore.Qt.KeepAspectRatio))
+                self.source_lb.setPixmap(pixMap.scaled(1500, 1000, QtCore.Qt.KeepAspectRatio))
                 self.image_sa.setWidgetResizable(True)
                 self.source_lb.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+                break
 
     def execute(self):
         if any(x != 0 for x in self.rotates):

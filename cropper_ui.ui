@@ -500,7 +500,7 @@
                <property name="widgetResizable">
                 <bool>true</bool>
                </property>
-               <widget class="QWidget" name="scrollAreaWidgetContents_2">
+               <widget class="QWidget" name="scroll_view_sa">
                 <property name="geometry">
                  <rect>
                   <x>0</x>
@@ -512,21 +512,25 @@
                 <layout class="QVBoxLayout" name="verticalLayout_3">
                  <item>
                   <widget class="QWidget" name="scroll_w" native="true">
-                   <layout class="QHBoxLayout" name="horizontalLayout_4">
-                    <item>
-                     <widget class="QLabel" name="source_lb">
-                      <property name="sizePolicy">
-                       <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-                        <horstretch>0</horstretch>
-                        <verstretch>0</verstretch>
-                       </sizepolicy>
-                      </property>
-                      <property name="text">
-                       <string>TextLabel</string>
-                      </property>
-                     </widget>
-                    </item>
-                   </layout>
+                   <widget class="QLabel" name="source_lb">
+                    <property name="geometry">
+                     <rect>
+                      <x>336</x>
+                      <y>329</y>
+                      <width>47</width>
+                      <height>16</height>
+                     </rect>
+                    </property>
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="text">
+                     <string>TextLabel</string>
+                    </property>
+                   </widget>
                   </widget>
                  </item>
                 </layout>
