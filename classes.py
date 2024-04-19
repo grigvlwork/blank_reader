@@ -55,7 +55,8 @@ class Project:
     def __init__(self, directory_name=None, file_project_name=None):
         self.work_dir = directory_name
         self.file_project_name = file_project_name
-        self.current_step = 'rotates'
+        self.current_step = 0
+        self.steps = ["rotates", "vertical_cut", "horizontal_cut", "angle_adjust", "word_select", "letter_select", "output"]
 
     def __getstate__(self) -> dict:
         state = {}
@@ -94,32 +95,20 @@ class Project:
         self.file_project_name = self.work_dir + '/processing/' + os.path.basename(self.work_dir)
         self.save_project()
 
-
     def make_structure(self):
         if not os.path.isdir(self.work_dir + '/processing'):
             os.mkdir(self.work_dir + '/processing')
-        if not os.path.isdir(self.work_dir + '/processing/rotates'):
-            os.mkdir(self.work_dir + '/processing/rotates')
+        for step in self.steps:
+            if not os.path.isdir(self.work_dir + '/processing/' + step):
+                os.mkdir(self.work_dir + '/processing/' + step)
         files = os.listdir(self.work_dir)
         for fname in files:
-            if os.path.isfile(os.path.join(self.work_dir,fname)):
-                shutil.copy2(os.path.join(self.work_dir,fname), self.work_dir + '/processing/rotates')
-        if not os.path.isdir(self.work_dir + '/processing/v_cut'):
-            os.mkdir(self.work_dir + '/processing/v_cut')
-        if not os.path.isdir(self.work_dir + '/processing/h_cut'):
-            os.mkdir(self.work_dir + '/processing/h_cut')
-        if not os.path.isdir(self.work_dir + '/processing/angle_adjust'):
-            os.mkdir(self.work_dir + '/processing/angle_adjust')
-        if not os.path.isdir(self.work_dir + '/processing/word_select'):
-            os.mkdir(self.work_dir + '/processing/word_select')
-        if not os.path.isdir(self.work_dir + '/processing/letter_select'):
-            os.mkdir(self.work_dir + '/processing/letter_select')
+            if os.path.isfile(os.path.join(self.work_dir, fname)):
+                shutil.copy2(os.path.join(self.work_dir, fname), self.work_dir + '/processing/rotates')
 
-
-
-
-
-
-
-
-
+    def next_step(self):
+        if self.current_step < 6:
+            self.current_step += 1
+            return self.steps[self.current_step]
+        else:
+            return False

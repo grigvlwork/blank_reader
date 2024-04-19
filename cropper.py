@@ -12,11 +12,6 @@
 # К следующему этапу можно перейти если обработаны или подтверждены файлы текущего этапа
 
 
-
-
-
-
-
 import os
 from os import listdir
 from os.path import isfile, join
