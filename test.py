@@ -1,31 +1,45 @@
-from PyQt5.QtWidgets import QApplication, QLabel, QScrollArea, QWidget, QVBoxLayout
+import sys
+from PyQt5.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem, QGraphicsLineItem
+from PyQt5.QtCore import Qt, QPointF
 from PyQt5.QtGui import QPixmap
 
 
-class ImageScrollArea(QWidget):
+class ImageViewer(QGraphicsView):
     def __init__(self, image_path):
         super().__init__()
 
-        self.setWindowTitle('Image Scroll Area')
+        scene = QGraphicsScene(self)
+        self.setScene(scene)
 
-        self.scroll_area = QScrollArea(self)
-        self.scroll_area.setWidgetResizable(True)
+        pixmap = QGraphicsPixmapItem(QPixmap(image_path))
+        scene.addItem(pixmap)
 
-        self.image_label = QLabel(self)
-        self.image_label.setPixmap(QPixmap(image_path))
+        self.line = QGraphicsLineItem(0, 0, 100, 0)
+        self.line.setPen(Qt.red)
+        scene.addItem(self.line)
 
-        self.scroll_area.setWidget(self.image_label)
+        self.mouse_press_pos = None
 
-        layout = QVBoxLayout(self)
-        layout.addWidget(self.scroll_area)
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.mouse_press_pos = event.pos()
+
+    def mouseMoveEvent(self, event):
+        if self.mouse_press_pos is not None:
+            delta = event.pos() - self.mouse_press_pos
+            new_pos = self.line.pos() + delta
+            self.line.setPos(new_pos)
+            self.mouse_press_pos = event.pos()
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.mouse_press_pos = None
 
 
 if __name__ == '__main__':
-    app = QApplication([])
+    app = QApplication(sys.argv)
 
-    image_path = 'image.jpg'
-    window = ImageScrollArea(image_path)
-    window.resize(640, 480)
-    window.show()
+    image_viewer = ImageViewer('image.jpg')
+    image_viewer.show()
 
-    app.exec_()
+    sys.exit(app.exec_())

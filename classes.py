@@ -1,5 +1,7 @@
+from PyQt5 import QtCore
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
+from PyQt5.QtGui import QPixmap
 import pickle
 import os
 import shutil
@@ -56,7 +58,8 @@ class Project:
         self.work_dir = directory_name
         self.file_project_name = file_project_name
         self.current_step = 0
-        self.steps = ["rotates", "vertical_cut", "horizontal_cut", "angle_adjust", "word_select", "letter_select", "output"]
+        self.steps = ["rotates", "vertical_cut", "horizontal_cut", "angle_adjust", "word_select", "letter_select",
+                      "output"]
 
     def __getstate__(self) -> dict:
         state = {}
@@ -95,7 +98,7 @@ class Project:
         if self.work_dir == "":
             return False
         if self.make_structure():
-            self.file_project_name = self.work_dir + '/processing/' + os.path.basename(self.work_dir)+".blr"
+            self.file_project_name = self.work_dir + '/processing/' + os.path.basename(self.work_dir) + ".blr"
             self.save_project()
             return True
         else:
@@ -115,9 +118,43 @@ class Project:
             return True
         except OSError:
             return False
+
     def next_step(self):
         if self.current_step < 6:
             self.current_step += 1
             return self.steps[self.current_step]
         else:
             return False
+
+
+class ImageViewer(QGraphicsView):
+    def __init__(self, image_path):
+        super().__init__()
+
+        scene = QGraphicsScene(self)
+        self.setScene(scene)
+
+        pixmap = QGraphicsPixmapItem(QPixmap(image_path).scaled(2000, 1000,
+                                                                aspectRatioMode=2))
+        print(pixmap.pixmap().height(), pixmap.pixmap().width())
+        scene.addItem(pixmap)
+
+        self.line = QGraphicsLineItem(0, 0, 100, 0)
+        self.line.setPen(Qt.red)
+        scene.addItem(self.line)
+        self.mouse_press_pos = None
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.mouse_press_pos = event.pos()
+
+    def mouseMoveEvent(self, event):
+        if self.mouse_press_pos is not None:
+            delta = event.pos() - self.mouse_press_pos
+            new_pos = self.line.pos() + delta
+            self.line.setPos(new_pos)
+            self.mouse_press_pos = event.pos()
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.mouse_press_pos = None

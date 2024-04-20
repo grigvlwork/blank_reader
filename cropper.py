@@ -22,7 +22,8 @@ import os
 
 from PyQt5 import uic, QtCore, QtGui
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox, QMenu, QGraphicsPixmapItem, \
-    QGraphicsItem, QLabel, QGroupBox, QVBoxLayout, QFormLayout, QWidget
+    QGraphicsItem, QLabel, QGroupBox, QVBoxLayout, QFormLayout, QWidget, QGraphicsView, QGraphicsScene, \
+    QGraphicsPixmapItem, QGraphicsLineItem
 from PyQt5.QtGui import QStandardItem, QStandardItemModel
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox
 from PyQt5.Qt import QClipboard
@@ -32,7 +33,7 @@ from PyQt5.QtGui import QPixmap
 from PIL import Image, ImageFont, ImageDraw
 
 from cropper_ui import Ui_MainWindow
-from classes import myLabel, Project
+from classes import *
 
 
 class MyWidget(QMainWindow, Ui_MainWindow):
@@ -48,6 +49,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.current_image_index = None
         self.rotates = []
         self.v_cut_x = []
+        self.check_list = []
         self.theme_btn.clicked.connect(self.change_theme)
         self.open_btn.clicked.connect(self.open_folder)
         self.rotate_clock_btn.clicked.connect(self.rotate_right)
@@ -85,19 +87,20 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         print(x, y)
 
     def mousePressEvent(self, a0):
+        pass
         # self.statusbar.showMessage(f'x:{a0.x()} y:{a0.y()}')
-        if self.v_cut and self.current_image_index is not None:
-            self.v_cut_x[self.current_image_index] = a0.x()
-            # print(str(self.sender()))
-            im = Image.open(self.files[self.current_image_index])
-            k = im.height / 1000
-            draw = ImageDraw.Draw(im)
-            draw.line(xy=((int(a0.x() * k), 0), (int(a0.x() * k), im.height)), width=10)
-            pix_map = self.pil2pixmap(im)
-            self.source_lb.setPixmap(pix_map.scaled(1500, 1000, QtCore.Qt.KeepAspectRatio))
-            draw.line(xy=((int(a0.x() * k), 0), (int(a0.x() * k), im.height)), width=40)
-            pix_map = self.pil2pixmap(im)
-            self.labels[self.current_image_index].setPixmap(pix_map.scaled(200, 400, QtCore.Qt.KeepAspectRatio))
+        # if self.v_cut and self.current_image_index is not None:
+        #     self.v_cut_x[self.current_image_index] = a0.x()
+        #     # print(str(self.sender()))
+        #     im = Image.open(self.files[self.current_image_index])
+        #     k = im.height / 1000
+        #     draw = ImageDraw.Draw(im)
+        #     draw.line(xy=((int(a0.x() * k), 0), (int(a0.x() * k), im.height)), width=10)
+        #     pix_map = self.pil2pixmap(im)
+        #     self.source_lb.setPixmap(pix_map.scaled(1500, 1000, QtCore.Qt.KeepAspectRatio))
+        #     draw.line(xy=((int(a0.x() * k), 0), (int(a0.x() * k), im.height)), width=40)
+        #     pix_map = self.pil2pixmap(im)
+        #     self.labels[self.current_image_index].setPixmap(pix_map.scaled(200, 400, QtCore.Qt.KeepAspectRatio))
 
     def vertical_cut(self):
         self.v_cut = True
@@ -162,16 +165,26 @@ class MyWidget(QMainWindow, Ui_MainWindow):
 
     def show_thumbnails(self):
         if len(self.thumbnails) > 0:
-            v_layout = QFormLayout()
+            v_layout = QVBoxLayout()
             group_box = QGroupBox()
             num = 1
             for file in self.thumbnails:
+                mini_v_layout = QVBoxLayout()
                 label_num = QLabel(f'{num}:')
+                check_box = QCheckBox()
                 num += 1
                 label = myLabel(self)
                 label.setPixmap(QPixmap(file).scaled(200, 400, QtCore.Qt.KeepAspectRatio))
                 self.labels.append(label)
-                v_layout.addRow(label_num, label)
+                v_sp = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+                mini_v_layout.addWidget(label_num)
+                mini_v_layout.addWidget(check_box)
+                mini_v_layout.addItem(v_sp)
+                h_layout = QHBoxLayout()
+                h_layout.addLayout(mini_v_layout)
+                h_layout.addWidget(label)
+                # v_layout.addRow(mini_v_layout, label)
+                v_layout.addLayout(h_layout)
                 label.clicked.connect(self.thumbnail_click)
             group_box.setLayout(v_layout)
             self.thumbnails_sa.setWidget(group_box)
@@ -182,10 +195,16 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             if self.labels[i] == self.sender():
                 file = self.files[i]
                 self.current_image_index = i
-                pixMap = QtGui.QPixmap(file)
-                self.source_lb.setPixmap(pixMap.scaled(2000, 1000, QtCore.Qt.KeepAspectRatio))
-                self.image_sa.setWidgetResizable(True)
-                self.source_lb.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+                # pixMap = QtGui.QPixmap(file)
+                # self.source_lb.setPixmap(pixMap.scaled(2000, 1000, QtCore.Qt.KeepAspectRatio))
+                # self.image_sa.setWidgetResizable(True)
+                # self.source_lb.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+
+    # Попробую разместить картинку на сцене https://www.perplexity.ai/search/pyqt5-how-to-YfrjKbH0QuCC7qA1BMmkfA
+                self.image_viewer = ImageViewer(file)
+                self.image_sa.setWidget(self.image_viewer)
+                self.image_sa.show()
+
 
     def execute(self):
         if any(x != 0 for x in self.rotates):
