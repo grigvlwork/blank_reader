@@ -57,6 +57,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.open_btn.clicked.connect(self.open_folder)
         self.rotate_clock_btn.clicked.connect(self.rotate_right)
         self.rotate_counter_clock_btn.clicked.connect(self.rotate_left)
+        self.check_all_btn.clicked.connect(self.check_all)
         self.execute_btn.clicked.connect(self.execute)
         # self.horiz_btn.clicked.connect(self.horizontal_cut)
         # self.vert_btn.clicked.connect(self.vertical_cut)
@@ -81,6 +82,10 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             for i in range(10):
                 self.buttons[i].setVisible(button_state[i])
 
+    def check_all(self):
+        print(self.check_list)
+        for check_box in self.check_list:
+            check_box.setChecked(True)
 
     def pil2pixmap(self, image):
         if image.mode == "RGB":
@@ -170,6 +175,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 mini_v_layout = QVBoxLayout()
                 label_num = QLabel(f'{num}:')
                 check_box = QCheckBox()
+                self.check_list.append(check_box)
                 num += 1
                 label = myLabel(self)
                 label.setPixmap(QPixmap(file).scaled(200, 400, QtCore.Qt.KeepAspectRatio))
