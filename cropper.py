@@ -50,8 +50,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.rotates = []
         self.v_cut_x = []
         self.check_list = []
-        self.buttons = [self.save_btn, self.open_btn, self.new_project_btn, self.check_all_btn,
-                        self.vert_btn, self.horiz_btn, self.crop_btn, self.angle_btn,
+        self.buttons = [self.new_project_btn, self.open_btn, self.save_btn, self.check_all_btn,
                         self.rotate_clock_btn, self.rotate_counter_clock_btn,
                         self.sciss_btn, self.zoom_out_btn, self.zoom_in_btn, self.execute_btn]
         self.theme_btn.clicked.connect(self.change_theme)
@@ -59,8 +58,8 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.rotate_clock_btn.clicked.connect(self.rotate_right)
         self.rotate_counter_clock_btn.clicked.connect(self.rotate_left)
         self.execute_btn.clicked.connect(self.execute)
-        self.horiz_btn.clicked.connect(self.horizontal_cut)
-        self.vert_btn.clicked.connect(self.vertical_cut)
+        # self.horiz_btn.clicked.connect(self.horizontal_cut)
+        # self.vert_btn.clicked.connect(self.vertical_cut)
         self.new_project_btn.clicked.connect(self.create_new_project)
         self.source_lb.setText('')
         # self.source_lb.setFixedWidth(1000)
@@ -74,12 +73,12 @@ class MyWidget(QMainWindow, Ui_MainWindow):
 
     def show_buttons(self):
         if self.project is None:
-            button_state = [0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-            for i in range(14):
+            button_state = [1, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+            for i in range(10):
                 self.buttons[i].setVisible(button_state[i])
         elif self.project.current_step == 0:
-            button_state = [1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1]
-            for i in range(14):
+            button_state = [1, 1, 1, 1, 1, 1, 0, 0, 0, 1]
+            for i in range(10):
                 self.buttons[i].setVisible(button_state[i])
 
 
@@ -126,6 +125,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.show_thumbnails()
         self.rotates = [0] * len(self.files)
         self.v_cut_x = [0] * len(self.files)
+        self.setWindowTitle('Обработка изображений - выбор ориентации')
         self.show_buttons()
 
     def change_theme(self):
