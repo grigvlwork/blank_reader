@@ -50,6 +50,10 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.rotates = []
         self.v_cut_x = []
         self.check_list = []
+        self.buttons = [self.save_btn, self.open_btn, self.new_project_btn, self.check_all_btn,
+                        self.vert_btn, self.horiz_btn, self.crop_btn, self.angle_btn,
+                        self.rotate_clock_btn, self.rotate_counter_clock_btn,
+                        self.sciss_btn, self.zoom_out_btn, self.zoom_in_btn, self.execute_btn]
         self.theme_btn.clicked.connect(self.change_theme)
         self.open_btn.clicked.connect(self.open_folder)
         self.rotate_clock_btn.clicked.connect(self.rotate_right)
@@ -65,6 +69,19 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.source_lb.mousePressEvent = self.mousePressEvent
         self.v_cut = False
         self.h_cut = False
+        self.project = None
+        self.show_buttons()
+
+    def show_buttons(self):
+        if self.project is None:
+            button_state = [0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            for i in range(14):
+                self.buttons[i].setVisible(button_state[i])
+        elif self.project.current_step == 0:
+            button_state = [1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1]
+            for i in range(14):
+                self.buttons[i].setVisible(button_state[i])
+
 
     def pil2pixmap(self, image):
         if image.mode == "RGB":
@@ -81,27 +98,6 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         pixmap = QtGui.QPixmap.fromImage(qim)
         return pixmap
 
-    def get_pos(self, event):
-        x = event.pos().x()
-        y = event.pos().y()
-        print(x, y)
-
-    def mousePressEvent(self, a0):
-        pass
-        # self.statusbar.showMessage(f'x:{a0.x()} y:{a0.y()}')
-        # if self.v_cut and self.current_image_index is not None:
-        #     self.v_cut_x[self.current_image_index] = a0.x()
-        #     # print(str(self.sender()))
-        #     im = Image.open(self.files[self.current_image_index])
-        #     k = im.height / 1000
-        #     draw = ImageDraw.Draw(im)
-        #     draw.line(xy=((int(a0.x() * k), 0), (int(a0.x() * k), im.height)), width=10)
-        #     pix_map = self.pil2pixmap(im)
-        #     self.source_lb.setPixmap(pix_map.scaled(1500, 1000, QtCore.Qt.KeepAspectRatio))
-        #     draw.line(xy=((int(a0.x() * k), 0), (int(a0.x() * k), im.height)), width=40)
-        #     pix_map = self.pil2pixmap(im)
-        #     self.labels[self.current_image_index].setPixmap(pix_map.scaled(200, 400, QtCore.Qt.KeepAspectRatio))
-
     def vertical_cut(self):
         self.v_cut = True
         self.h_cut = False
@@ -117,7 +113,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.project = Project()
         if not self.project.new_project(self):
             return
-        self.work_dir = self.project.work_dir + '/processing/rotates'        
+        self.work_dir = self.project.work_dir + '/processing/rotates'
         self.files = [os.path.join(self.work_dir, f) for f in os.listdir(self.work_dir) if
                       os.path.isfile(os.path.join(self.work_dir, f))]
         if os.path.isdir(self.work_dir + '/thumbnails'):
@@ -130,8 +126,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.show_thumbnails()
         self.rotates = [0] * len(self.files)
         self.v_cut_x = [0] * len(self.files)
-
-
+        self.show_buttons()
 
     def change_theme(self):
         if self.theme == 'Dark':
@@ -198,16 +193,9 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             if self.labels[i] == self.sender():
                 file = self.files[i]
                 self.current_image_index = i
-                # pixMap = QtGui.QPixmap(file)
-                # self.source_lb.setPixmap(pixMap.scaled(2000, 1000, QtCore.Qt.KeepAspectRatio))
-                # self.image_sa.setWidgetResizable(True)
-                # self.source_lb.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
-
-    # Попробую разместить картинку на сцене https://www.perplexity.ai/search/pyqt5-how-to-YfrjKbH0QuCC7qA1BMmkfA
                 self.image_viewer = ImageViewer(file)
                 self.image_sa.setWidget(self.image_viewer)
                 self.image_sa.show()
-
 
     def execute(self):
         if any(x != 0 for x in self.rotates):
