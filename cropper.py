@@ -83,7 +83,6 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 self.buttons[i].setVisible(button_state[i])
 
     def check_all(self):
-        print(self.check_list)
         for check_box in self.check_list:
             check_box.setChecked(True)
 
