@@ -111,7 +111,7 @@
         </property>
         <property name="icon">
          <iconset>
-          <normaloff>images/check.svg</normaloff>images/check.svg</iconset>
+          <normaloff>images/checkmark.svg</normaloff>images/checkmark.svg</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -137,7 +137,7 @@
         </property>
         <property name="icon">
          <iconset>
-          <normaloff>images/check_all.svg</normaloff>images/check_all.svg</iconset>
+          <normaloff>images/check_list.svg</normaloff>images/check_list.svg</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -511,22 +511,16 @@
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_3">
                  <item>
-                  <widget class="QWidget" name="scroll_w" native="true">
-                   <layout class="QHBoxLayout" name="horizontalLayout_4">
-                    <item>
-                     <widget class="QLabel" name="source_lb">
-                      <property name="sizePolicy">
-                       <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-                        <horstretch>0</horstretch>
-                        <verstretch>0</verstretch>
-                       </sizepolicy>
-                      </property>
-                      <property name="text">
-                       <string>TextLabel</string>
-                      </property>
-                     </widget>
-                    </item>
-                   </layout>
+                  <widget class="QLabel" name="source_lb">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string>TextLabel</string>
+                   </property>
                   </widget>
                  </item>
                 </layout>

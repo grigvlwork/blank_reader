@@ -182,11 +182,6 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             if self.labels[i] == self.sender():
                 file = self.files[i]
                 self.current_image_index = i
-                self.source_lb.setPixmap(QPixmap(file).scaled(1000, 1000, QtCore.Qt.KeepAspectRatio))
-                w = QWidget()
-                lay = QVBoxLayout(w)
-                lay.setContentsMargins(0, 0, 0, 0)
-                lay.addWidget(self.source_lb)
                 pixMap = QtGui.QPixmap(file)
                 self.source_lb.setPixmap(pixMap.scaled(2000, 1000, QtCore.Qt.KeepAspectRatio))
                 self.image_sa.setWidgetResizable(True)
