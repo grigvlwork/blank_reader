@@ -128,33 +128,37 @@ class Project:
 
 
 class ImageViewer(QGraphicsView):
-    def __init__(self, image_path):
+    def __init__(self, image_path, v_cut=False, h_cut=False):
         super().__init__()
-
-        scene = QGraphicsScene(self)
-        self.setScene(scene)
-
-        pixmap = QGraphicsPixmapItem(QPixmap(image_path).scaled(2000, 1000,
-                                                                aspectRatioMode=2))
-        print(pixmap.pixmap().height(), pixmap.pixmap().width())
-        scene.addItem(pixmap)
-
-        self.line = QGraphicsLineItem(0, 0, 100, 0)
-        self.line.setPen(Qt.red)
-        scene.addItem(self.line)
+        self.v_cut = v_cut
+        self.h_cut = h_cut
+        self.scene = QGraphicsScene(self)
+        self.setScene(self.scene)
+        self.pixmap = QGraphicsPixmapItem(QPixmap(image_path).scaled(2000, 1000,
+                                                                     aspectRatioMode=2))
+        self.scene.addItem(self.pixmap)
         self.mouse_press_pos = None
 
+    def add_line(self, v_cut=False, h_cut=False):
+        self.v_cut = v_cut
+        self.h_cut = h_cut
+        if self.v_cut:
+            self.line = QGraphicsLineItem(self.pixmap.pixmap().width() // 2, 0,
+                                          self.pixmap.pixmap().width() // 2, self.pixmap.pixmap().height())
+            self.line.setPen(Qt.red)
+            self.scene.addItem(self.line)
+
     def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.LeftButton and (self.v_cut or self.h_cut):
             self.mouse_press_pos = event.pos()
 
     def mouseMoveEvent(self, event):
-        if self.mouse_press_pos is not None:
+        if self.mouse_press_pos is not None and (self.v_cut or self.h_cut):
             delta = event.pos() - self.mouse_press_pos
             new_pos = self.line.pos() + delta
             self.line.setPos(new_pos)
             self.mouse_press_pos = event.pos()
 
     def mouseReleaseEvent(self, event):
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.LeftButton and (self.v_cut or self.h_cut):
             self.mouse_press_pos = None

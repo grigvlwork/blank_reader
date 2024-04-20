@@ -105,6 +105,9 @@ class MyWidget(QMainWindow, Ui_MainWindow):
     def vertical_cut(self):
         self.v_cut = True
         self.h_cut = False
+        if self.image_viewer is not None:
+            self.image_viewer.add_line(self.h_cut, self.h_cut)
+            self.image_sa.show()
 
     def horizontal_cut(self):
         self.h_cut = True
