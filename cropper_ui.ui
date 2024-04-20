@@ -11,7 +11,11 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Обрезка изображений</string>
+   <string>Обработка изображений</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>images/character.svg</normaloff>images/character.svg</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -137,7 +141,7 @@
         </property>
         <property name="icon">
          <iconset>
-          <normaloff>images/check_list.svg</normaloff>images/check_list.svg</iconset>
+          <normaloff>images/checklist.svg</normaloff>images/checklist.svg</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -240,8 +244,8 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="icons.qrc">
-          <normaloff>:/images/images/angle.svg</normaloff>:/images/images/angle.svg</iconset>
+         <iconset>
+          <normaloff>images/Angle.png</normaloff>images/Angle.png</iconset>
         </property>
         <property name="iconSize">
          <size>
