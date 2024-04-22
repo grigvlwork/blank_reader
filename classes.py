@@ -58,6 +58,7 @@ class Project:
         self.work_dir = directory_name
         self.file_project_name = file_project_name
         self.current_step = 0
+        self.rotates = None
         self.steps = ["rotates", "vertical_cut", "horizontal_cut", "orientation", "angle_adjust", "word_select",
                       "letter_select", "output"]
 
@@ -66,12 +67,14 @@ class Project:
         state["work_dir"] = self.work_dir
         state["file_project_name"] = self.file_project_name
         state["current_step"] = self.current_step
+        state["rotates"] = self.rotates
         return state
 
     def __setstate__(self, state: dict):
         self.work_dir = state["work_dir"]
         self.file_project_name = state["file_project_name"]
         self.current_step = state["current_step"]
+        self.rotates = state["rotates"]
 
     def load_project(self, file_name):
         try:
