@@ -58,7 +58,7 @@ class Project:
         self.work_dir = directory_name
         self.file_project_name = file_project_name
         self.current_step = 0
-        self.steps = ["rotates", "vertical_cut", "horizontal_cut", "angle_adjust", "word_select", "letter_select",
+        self.steps = ["rotates", "vertical_cut", "horizontal_cut", "orientation", "angle_adjust", "word_select", "letter_select",
                       "output"]
 
     def __getstate__(self) -> dict:
@@ -95,14 +95,26 @@ class Project:
     def new_project(self, window):
         self.work_dir = ""
         self.work_dir = QFileDialog.getExistingDirectory(window, 'Select Folder')
+        # Проверить что в папке нет уже существующего проекта, если есть то либо загружаем старый либо создаем новый
         if self.work_dir == "":
             return False
-        if self.make_structure():
-            self.file_project_name = self.work_dir + '/processing/' + os.path.basename(self.work_dir) + ".blr"
-            self.save_project()
-            return True
-        else:
-            return False
+        possible_project_name = self.work_dir + '/processing/' + os.path.basename(self.work_dir) + ".blr"
+        if os.path.isfile(possible_project_name):
+            reply = QMessageBox.question(None, 'Проект существует',
+                                         'В папке имеется проект, загрузить его?',
+                                         QMessageBox.Yes | QMessageBox.No,
+                                         QMessageBox.No)
+
+            if reply == QMessageBox.Yes:
+                self.load_project(possible_project_name)
+                return True
+            else:
+                if self.make_structure():
+                    self.file_project_name = possible_project_name
+                    self.save_project()
+                    return True
+                else:
+                    return False
 
     def make_structure(self):
         try:
