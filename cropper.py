@@ -115,7 +115,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.project = Project()
         if not self.project.new_project(self):
             return
-        self.work_dir = self.project.work_dir + '/processing/rotates'
+        self.work_dir = self.project.work_dir + '/processing/' + self.project.steps[self.project.current_step]
         self.files = [os.path.join(self.work_dir, f) for f in os.listdir(self.work_dir) if
                       os.path.isfile(os.path.join(self.work_dir, f))]
         if os.path.isdir(self.work_dir + '/thumbnails'):

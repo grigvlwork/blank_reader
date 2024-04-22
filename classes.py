@@ -58,8 +58,8 @@ class Project:
         self.work_dir = directory_name
         self.file_project_name = file_project_name
         self.current_step = 0
-        self.steps = ["rotates", "vertical_cut", "horizontal_cut", "orientation", "angle_adjust", "word_select", "letter_select",
-                      "output"]
+        self.steps = ["rotates", "vertical_cut", "horizontal_cut", "orientation", "angle_adjust", "word_select",
+                      "letter_select", "output"]
 
     def __getstate__(self) -> dict:
         state = {}
@@ -132,7 +132,7 @@ class Project:
             return False
 
     def next_step(self):
-        if self.current_step < 6:
+        if self.current_step < 8:
             self.current_step += 1
             return self.steps[self.current_step]
         else:
