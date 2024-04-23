@@ -117,15 +117,6 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             return
         self.work_dir = self.project.work_dir + '/processing/' + self.project.steps[self.project.current_step]
         self.files = self.project.get_current_files()
-        # self.files = [os.path.join(self.work_dir, f) for f in os.listdir(self.work_dir) if
-        #               os.path.isfile(os.path.join(self.work_dir, f))]
-        # if os.path.isdir(self.work_dir + '/thumbnails'):
-        #     # Сделать отдельное хранение иконок файлов в каждой папке
-        #     self.load_thumbnails()
-        # else:
-        #     os.mkdir(self.work_dir + '/thumbnails')
-        #     if len(self.files) > 0:
-        #         self.generate_thumbnails()
         self.thumbnails = self.project.get_current_thumbnails()
         self.show_thumbnails()
         self.rotates = [0] * len(self.files)
@@ -149,7 +140,16 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         temp_dir = QFileDialog.getExistingDirectory(self, 'Select Folder')
         if temp_dir == '':
             return False
-        print(os.path.basename(temp_dir))
+        self.project = Project(directory_name=temp_dir)
+        if not self.project.load_project():
+            return False
+        self.files = self.project.get_current_files()
+        self.thumbnails = self.project.get_current_thumbnails()
+        self.show_thumbnails()
+        self.rotates = [0] * len(self.files)
+        self.v_cut_x = [0] * len(self.files)
+        self.setWindowTitle('Обработка изображений - выбор ориентации')
+        self.show_buttons()
         # self.files = [os.path.join(self.source_dir, f) for f in os.listdir(self.source_dir) if
         #               os.path.isfile(os.path.join(self.source_dir, f))]
         # # print(self.files)

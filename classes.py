@@ -62,6 +62,9 @@ class Project:
         self.rotates = None
         self.steps = ["rotates", "vertical_cut", "horizontal_cut", "orientation", "angle_adjust", "word_select",
                       "letter_select", "output"]
+        self.text_steps = ["выбор ориентации листа", "вертикальный разрез", "горизонтальный разрез",
+                           "ориентация бланка", "подгонка угла поворота бланка", "выбор слов",
+                           "выбор букв", "вывод результата"]
 
     def __getstate__(self) -> dict:
         state = {}
@@ -77,7 +80,8 @@ class Project:
         self.current_step = state["current_step"]
         self.rotates = state["rotates"]
 
-    def load_project(self, file_name):
+    def load_project(self):
+        file_name = self.get_possible_project_name()
         try:
             with open(file_name, "rb") as fp:
                 temp = pickle.load(fp)
@@ -96,13 +100,16 @@ class Project:
             print("OS error({0}): {1}".format(e.errno, e.strerror))
             return False
 
+    def get_possible_project_name(self):
+        return self.work_dir + '/processing/' + os.path.basename(self.work_dir) + ".blr"
+
     def new_project(self, window):
         self.work_dir = ""
         self.work_dir = QFileDialog.getExistingDirectory(window, 'Select Folder')
         # Проверить что в папке нет уже существующего проекта, если есть то либо загружаем старый либо создаем новый
         if self.work_dir == "":
             return False
-        possible_project_name = self.work_dir + '/processing/' + os.path.basename(self.work_dir) + ".blr"
+        possible_project_name = self.get_possible_project_name()
         if os.path.isfile(possible_project_name):
             reply = QMessageBox.question(None, 'Проект существует',
                                          'В папке имеется проект, загрузить его?',
@@ -136,7 +143,7 @@ class Project:
             return False
 
     def next_step(self):
-        if self.current_step < 8:
+        if self.current_step < 7:
             self.current_step += 1
             return self.steps[self.current_step]
         else:
