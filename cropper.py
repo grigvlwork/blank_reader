@@ -116,15 +116,17 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         if not self.project.new_project(self):
             return
         self.work_dir = self.project.work_dir + '/processing/' + self.project.steps[self.project.current_step]
-        self.files = [os.path.join(self.work_dir, f) for f in os.listdir(self.work_dir) if
-                      os.path.isfile(os.path.join(self.work_dir, f))]
-        if os.path.isdir(self.work_dir + '/thumbnails'):
-            # Сделать отдельное хранение иконок файлов в каждой папке
-            self.load_thumbnails()
-        else:
-            os.mkdir(self.work_dir + '/thumbnails')
-            if len(self.files) > 0:
-                self.generate_thumbnails()
+        self.files = self.project.get_current_files()
+        # self.files = [os.path.join(self.work_dir, f) for f in os.listdir(self.work_dir) if
+        #               os.path.isfile(os.path.join(self.work_dir, f))]
+        # if os.path.isdir(self.work_dir + '/thumbnails'):
+        #     # Сделать отдельное хранение иконок файлов в каждой папке
+        #     self.load_thumbnails()
+        # else:
+        #     os.mkdir(self.work_dir + '/thumbnails')
+        #     if len(self.files) > 0:
+        #         self.generate_thumbnails()
+        self.thumbnails = self.project.get_current_thumbnails()
         self.show_thumbnails()
         self.rotates = [0] * len(self.files)
         self.v_cut_x = [0] * len(self.files)
@@ -144,24 +146,27 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             app.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5', palette=qdarkstyle.DarkPalette))
 
     def open_folder(self):
-        self.source_dir = QFileDialog.getExistingDirectory(self, 'Select Folder')
-        self.files = [os.path.join(self.source_dir, f) for f in os.listdir(self.source_dir) if
-                      os.path.isfile(os.path.join(self.source_dir, f))]
-        # print(self.files)
-        if os.path.isdir(self.source_dir + '/cropper'):
-            self.work_dir = self.source_dir + '/cropper'
-            self.load_thumbnails()
-        else:
-            os.mkdir(self.source_dir + '/cropper')
-            self.work_dir = self.source_dir + '/cropper'
-            os.mkdir(self.work_dir + '/data')
-            os.mkdir(self.work_dir + '/thumbnails')
-            os.mkdir(self.work_dir + '/output')
-            if len(self.files) > 0:
-                self.generate_thumbnails()
-        self.show_thumbnails()
-        self.rotates = [0] * len(self.files)
-        self.v_cut_x = [0] * len(self.files)
+        temp_dir = QFileDialog.getExistingDirectory(self, 'Select Folder')
+        if temp_dir == '':
+            return False
+        print(os.path.basename(temp_dir))
+        # self.files = [os.path.join(self.source_dir, f) for f in os.listdir(self.source_dir) if
+        #               os.path.isfile(os.path.join(self.source_dir, f))]
+        # # print(self.files)
+        # if os.path.isdir(self.source_dir + '/cropper'):
+        #     self.work_dir = self.source_dir + '/cropper'
+        #     self.load_thumbnails()
+        # else:
+        #     os.mkdir(self.source_dir + '/cropper')
+        #     self.work_dir = self.source_dir + '/cropper'
+        #     os.mkdir(self.work_dir + '/data')
+        #     os.mkdir(self.work_dir + '/thumbnails')
+        #     os.mkdir(self.work_dir + '/output')
+        #     if len(self.files) > 0:
+        #         self.generate_thumbnails()
+        # self.show_thumbnails()
+        # self.rotates = [0] * len(self.files)
+        # self.v_cut_x = [0] * len(self.files)
         # self.source_lb = myLabel()
 
     def show_thumbnails(self):

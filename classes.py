@@ -5,6 +5,7 @@ from PyQt5.QtGui import QPixmap
 import pickle
 import os
 import shutil
+from PIL import Image
 
 
 class Point:
@@ -140,6 +141,35 @@ class Project:
             return self.steps[self.current_step]
         else:
             return False
+
+    def get_current_files(self):
+        if self.work_dir is None:
+            return ''
+        else:
+            current_step_dir = self.work_dir + '/processing/' + self.steps[self.current_step]
+            files = [os.path.join(current_step_dir, f) for f in os.listdir(current_step_dir) if
+                     os.path.isfile(os.path.join(self.work_dir, f))]
+            return files
+
+    def generate_thumbnails(self):
+        thumbnails = []
+        for file in self.get_current_files():
+            image = Image.open(file)
+            image.thumbnail((400, 400))
+            new_name = self.work_dir + '/thumbnails/' + os.path.basename(file)
+            image.save(new_name)
+            thumbnails.append(new_name)
+        return thumbnails
+
+    def get_current_thumbnails(self):
+        if os.path.isdir(self.work_dir + '/processing/' + self.steps[self.current_step] + '/thumbnails'):
+            td = self.work_dir + '/processing/' + self.steps[self.current_step] + '/thumbnails'
+            thumbnails = [os.path.join(td, f) for f in os.listdir(td) if
+                          os.path.isfile(os.path.join(td, f))]
+            return thumbnails
+        else:
+            os.mkdir(self.work_dir + '/processing/' + self.steps[self.current_step] + '/thumbnails')
+            return self.generate_thumbnails()
 
 
 class ImageViewer(QGraphicsView):
