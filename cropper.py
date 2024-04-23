@@ -56,6 +56,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.open_btn.clicked.connect(self.open_folder)
         self.rotate_clock_btn.clicked.connect(self.rotate_right)
         self.rotate_counter_clock_btn.clicked.connect(self.rotate_left)
+        self.save_btn.clicked.connect(self.save_project)
         self.check_all_btn.clicked.connect(self.check_all)
         self.execute_btn.clicked.connect(self.execute)
         # self.horiz_btn.clicked.connect(self.horizontal_cut)
@@ -150,24 +151,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.v_cut_x = [0] * len(self.files)
         self.setWindowTitle('Обработка изображений - выбор ориентации')
         self.show_buttons()
-        # self.files = [os.path.join(self.source_dir, f) for f in os.listdir(self.source_dir) if
-        #               os.path.isfile(os.path.join(self.source_dir, f))]
-        # # print(self.files)
-        # if os.path.isdir(self.source_dir + '/cropper'):
-        #     self.work_dir = self.source_dir + '/cropper'
-        #     self.load_thumbnails()
-        # else:
-        #     os.mkdir(self.source_dir + '/cropper')
-        #     self.work_dir = self.source_dir + '/cropper'
-        #     os.mkdir(self.work_dir + '/data')
-        #     os.mkdir(self.work_dir + '/thumbnails')
-        #     os.mkdir(self.work_dir + '/output')
-        #     if len(self.files) > 0:
-        #         self.generate_thumbnails()
-        # self.show_thumbnails()
-        # self.rotates = [0] * len(self.files)
-        # self.v_cut_x = [0] * len(self.files)
-        # self.source_lb = myLabel()
+
 
     def show_thumbnails(self):
         if len(self.thumbnails) > 0:
@@ -283,6 +267,9 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             pic = QGraphicsPixmapItem()
             pic.setPixmap(QPixmap(fname).scaled(160, 160))
             pic.setFlags(QGraphicsItem.ItemIsSelectable | QGraphicsItem.ItemIsMovable)
+
+    def save_project(self):
+        self.project.save_project()
 
 
 def excepthook(exc_type, exc_value, exc_tb):

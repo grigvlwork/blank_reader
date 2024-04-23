@@ -65,6 +65,7 @@ class Project:
         self.text_steps = ["выбор ориентации листа", "вертикальный разрез", "горизонтальный разрез",
                            "ориентация бланка", "подгонка угла поворота бланка", "выбор слов",
                            "выбор букв", "вывод результата"]
+        self.action_steps = [[] for i in range(7)]
 
     def __getstate__(self) -> dict:
         state = {}
@@ -72,6 +73,7 @@ class Project:
         state["file_project_name"] = self.file_project_name
         state["current_step"] = self.current_step
         state["rotates"] = self.rotates
+        state["action_steps"] = self.action_steps
         return state
 
     def __setstate__(self, state: dict):
@@ -79,6 +81,7 @@ class Project:
         self.file_project_name = state["file_project_name"]
         self.current_step = state["current_step"]
         self.rotates = state["rotates"]
+        self.action_steps = state["action_steps"]
 
     def load_project(self):
         file_name = self.get_possible_project_name()
@@ -102,6 +105,10 @@ class Project:
 
     def get_possible_project_name(self):
         return self.work_dir + '/processing/' + os.path.basename(self.work_dir) + ".blr"
+
+    def set_action(self, current_action):
+        self.action_steps[self.current_step] = current_action
+
 
     def new_project(self, window):
         self.work_dir = ""
