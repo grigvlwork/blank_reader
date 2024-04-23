@@ -112,13 +112,13 @@ class Project:
             if reply == QMessageBox.Yes:
                 self.load_project(possible_project_name)
                 return True
+        else:
+            if self.make_structure():
+                self.file_project_name = possible_project_name
+                self.save_project()
+                return True
             else:
-                if self.make_structure():
-                    self.file_project_name = possible_project_name
-                    self.save_project()
-                    return True
-                else:
-                    return False
+                return False
 
     def make_structure(self):
         try:
@@ -156,7 +156,8 @@ class Project:
         for file in self.get_current_files():
             image = Image.open(file)
             image.thumbnail((400, 400))
-            new_name = self.work_dir + '/thumbnails/' + os.path.basename(file)
+            new_name = self.work_dir + '/processing/' + self.steps[self.current_step] + \
+                '/thumbnails/' + os.path.basename(file)
             image.save(new_name)
             thumbnails.append(new_name)
         return thumbnails
