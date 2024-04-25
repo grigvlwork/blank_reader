@@ -65,7 +65,7 @@ class Project:
         self.text_steps = ["выбор ориентации листа", "вертикальный разрез", "горизонтальный разрез",
                            "ориентация бланка", "подгонка угла поворота бланка", "выбор слов",
                            "выбор букв", "вывод результата"]
-        self.action_steps = [[] for i in range(7)]
+        self.action_steps = [0 for i in range(7)]
 
     def __getstate__(self) -> dict:
         state = {}
@@ -75,6 +75,21 @@ class Project:
         state["rotates"] = self.rotates
         state["action_steps"] = self.action_steps
         return state
+
+    def set_current_action_steps(self, files, action, check_list):
+        self.action_steps[self.current_step] = zip(files, action, check_list)
+
+    def get_current_action(self):
+        _, action, __ = zip(*self.action_steps)
+        return action
+
+    def get_current_files(self):
+        files, _, __ = zip(*self.action_steps)
+        return files
+
+    def get_current_check_list(self):
+        _, __, check_list = zip(*self.action_steps)
+        return check_list
 
     def __setstate__(self, state: dict):
         self.work_dir = state["work_dir"]
@@ -109,7 +124,6 @@ class Project:
     def set_action(self, current_action):
         self.action_steps[self.current_step] = current_action
 
-
     def new_project(self, window):
         self.work_dir = ""
         self.work_dir = QFileDialog.getExistingDirectory(window, 'Select Folder')
@@ -131,8 +145,7 @@ class Project:
                 self.file_project_name = possible_project_name
                 self.save_project()
                 return True
-            else:
-                return False
+        return False
 
     def make_structure(self):
         try:
@@ -171,7 +184,7 @@ class Project:
             image = Image.open(file)
             image.thumbnail((400, 400))
             new_name = self.work_dir + '/processing/' + self.steps[self.current_step] + \
-                '/thumbnails/' + os.path.basename(file)
+                       '/thumbnails/' + os.path.basename(file)
             image.save(new_name)
             thumbnails.append(new_name)
         return thumbnails
