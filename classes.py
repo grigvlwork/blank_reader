@@ -117,7 +117,7 @@ class Project:
                                          QMessageBox.No)
 
             if reply == QMessageBox.Yes:
-                self.load_project(possible_project_name)
+                self.load_project()
                 return True
         else:
             if self.make_structure():
