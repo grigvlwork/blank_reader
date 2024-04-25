@@ -76,16 +76,13 @@ class Project:
         state["action_steps"] = self.action_steps
         return state
 
-    def set_current_action_steps(self, files, action, check_list):
-        self.action_steps[self.current_step] = zip(files, action, check_list)
+    def set_current_action_steps(self, action, check_list):
+        self.action_steps[self.current_step] = zip(self.load_current_files(), action, check_list)
 
     def get_current_action(self):
         _, action, __ = zip(*self.action_steps)
         return action
 
-    def get_current_files(self):
-        files, _, __ = zip(*self.action_steps)
-        return files
 
     def get_current_check_list(self):
         _, __, check_list = zip(*self.action_steps)
@@ -169,7 +166,7 @@ class Project:
         else:
             return False
 
-    def get_current_files(self):
+    def load_current_files(self):
         if self.work_dir is None:
             return ''
         else:
@@ -180,7 +177,7 @@ class Project:
 
     def generate_thumbnails(self):
         thumbnails = []
-        for file in self.get_current_files():
+        for file in self.load_current_files():
             image = Image.open(file)
             image.thumbnail((400, 400))
             new_name = self.work_dir + '/processing/' + self.steps[self.current_step] + \

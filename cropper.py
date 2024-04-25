@@ -117,7 +117,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         if not self.project.new_project(self):
             return
         self.work_dir = self.project.work_dir + '/processing/' + self.project.steps[self.project.current_step]
-        self.files = self.project.get_current_files()
+        self.files = self.project.load_current_files()
         self.thumbnails = self.project.get_current_thumbnails()
         self.show_thumbnails()
         self.rotates = [0] * len(self.files)
@@ -144,7 +144,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.project = Project(directory_name=temp_dir)
         if not self.project.load_project():
             return False
-        self.files = self.project.get_current_files()
+        self.files = self.project.load_current_files()
         self.thumbnails = self.project.get_current_thumbnails()
         self.show_thumbnails()
         self.rotates = [0] * len(self.files)
