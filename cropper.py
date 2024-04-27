@@ -146,14 +146,19 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             return False
         self.files = self.project.load_current_files()
         self.thumbnails = self.project.get_current_thumbnails()
-        self.show_thumbnails()
+        checked = self.project.get_current_check_list()
+        actions = self.project.get_current_action()
+        if self.project.current_step == 0:
+            self.rotates = actions
+        self.show_thumbnails(checked)
         self.rotates = [0] * len(self.files)
         self.v_cut_x = [0] * len(self.files)
         self.setWindowTitle('Обработка изображений - выбор ориентации')
         self.show_buttons()
 
-
-    def show_thumbnails(self):
+    def show_thumbnails(self, checked=None):
+        if checked is None:
+            checked = []
         if len(self.thumbnails) > 0:
             v_layout = QVBoxLayout()
             group_box = QGroupBox()
@@ -162,6 +167,8 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 mini_v_layout = QVBoxLayout()
                 label_num = QLabel(f'{num}:')
                 check_box = QCheckBox()
+                if len(checked) > num - 1:
+                    check_box.setChecked(checked[num - 1])
                 self.check_list.append(check_box)
                 num += 1
                 label = myLabel(self)
@@ -269,6 +276,13 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             pic.setFlags(QGraphicsItem.ItemIsSelectable | QGraphicsItem.ItemIsMovable)
 
     def save_project(self):
+        checked = []
+        actions = []
+        for cb in self.check_list:
+            checked.append(cb.isChecked())
+        if self.project.current_step == 0:
+            actions = self.rotates
+        self.project.set_current_action_steps(actions, checked)
         self.project.save_project()
 
 

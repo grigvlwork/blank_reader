@@ -65,7 +65,10 @@ class Project:
         self.text_steps = ["выбор ориентации листа", "вертикальный разрез", "горизонтальный разрез",
                            "ориентация бланка", "подгонка угла поворота бланка", "выбор слов",
                            "выбор букв", "вывод результата"]
-        self.action_steps = [0 for i in range(7)]
+        if directory_name is not None:
+            self.load_project()
+        else:
+            self.action_steps = [0 for i in range(7)]
 
     def __getstate__(self) -> dict:
         state = {}
@@ -77,15 +80,18 @@ class Project:
         return state
 
     def set_current_action_steps(self, action, check_list):
-        self.action_steps[self.current_step] = zip(self.load_current_files(), action, check_list)
+        self.action_steps[self.current_step] = list(zip(self.load_current_files(), action, check_list))
+
+    def get_current_files(self):
+        files, _, __ = zip(*self.action_steps[self.current_step])
+        return files
 
     def get_current_action(self):
-        _, action, __ = zip(*self.action_steps)
+        _, action, __ = zip(*self.action_steps[self.current_step])
         return action
 
-
     def get_current_check_list(self):
-        _, __, check_list = zip(*self.action_steps)
+        _, __, check_list = zip(*self.action_steps[self.current_step])
         return check_list
 
     def __setstate__(self, state: dict):
@@ -101,6 +107,10 @@ class Project:
             with open(file_name, "rb") as fp:
                 temp = pickle.load(fp)
                 self.work_dir = temp.work_dir
+                self.file_project_name = temp.file_project_name
+                self.current_step = temp.current_step
+                self.rotates = temp.rotates
+                self.action_steps = temp.action_steps
                 return True
         except OSError as e:
             print("OS error({0}): {1}".format(e.errno, e.strerror))
