@@ -94,6 +94,18 @@ class Project:
         _, __, check_list = zip(*self.action_steps[self.current_step])
         return check_list
 
+    def rotate(self, source, destination, angle):
+        try:
+            file = source
+            new_file = destination
+            im = Image.open(file)
+            im_rotate = im.rotate(-angle, expand=True)
+            im_rotate.save(new_file, quality=100)
+            im.close()
+            return True
+        except OSError:
+            return False
+
     def __setstate__(self, state: dict):
         self.work_dir = state["work_dir"]
         self.file_project_name = state["file_project_name"]
