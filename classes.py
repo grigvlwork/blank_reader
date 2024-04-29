@@ -182,11 +182,34 @@ class Project:
             return False
 
     def next_step(self):
-        if self.current_step < 7:
+        if self.current_step == 0:
+            try:
+                for filename in os.listdir(self.work_dir + '/processing/vertical_cut'):
+                    file_path = os.path.join(self.work_dir + '/processing/vertical_cut', filename)
+                    os.remove(file_path)
+                if os.path.isdir(self.work_dir + '/processing/vertical_cut/thumbnails'):
+                    shutil.rmtree(self.work_dir + '/processing/vertical_cut/thumbnails')
+            except OSError:
+                return False
+            check_list = self.get_current_check_list()
+            files = self.get_current_files()
+            angles = self.get_current_action()
+            for i in range(len(files)):
+                if check_list[i]:
+                    if angles[i] != 0:
+                        dest = self.work_dir + '/processing/vertical_cut/' + os.path.basename(files[i])
+                        if not self.rotate(files[i], dest, angles[i]):
+                            return -1
+                    else:
+                        shutil.copy2(files[i], self.work_dir + '/processing/vertical_cut')
             self.current_step += 1
-            return self.steps[self.current_step]
-        else:
-            return False
+            self.save_project()
+            return self.current_step
+        # if self.current_step < 7:
+        #     self.current_step += 1
+        #     return self.steps[self.current_step]
+        # else:
+        #     return False
 
     def load_current_files(self):
         if self.work_dir is None:
