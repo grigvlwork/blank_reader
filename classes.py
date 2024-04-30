@@ -80,7 +80,8 @@ class Project:
         return state
 
     def set_current_action_steps(self, action, check_list):
-        self.action_steps[self.current_step] = list(zip(self.load_current_files(), action, check_list))
+        files = self.load_current_files()
+        self.action_steps[self.current_step] = list(zip(files, action, check_list))
 
     def get_current_files(self):
         files, _, __ = zip(*self.action_steps[self.current_step])
@@ -206,8 +207,8 @@ class Project:
                         shutil.copy2(files[i], self.work_dir + '/processing/vertical_cut')
             action = [0 for _ in range(t)]
             check_list = [False for _ in range(t)]
-            self.set_current_action_steps(action, check_list)
             self.current_step += 1
+            self.set_current_action_steps(action, check_list)
             self.save_project()
             return self.current_step
         # if self.current_step < 7:

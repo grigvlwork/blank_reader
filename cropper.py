@@ -156,7 +156,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             self.rotates = actions
         self.show_thumbnails(checked)
         self.rotates = [0] * len(self.files)
-        self.v_cut_x = [0] * len(self.files)
+        self.v_cut = None
         self.setWindowTitle('Обработка изображений - выбор ориентации')
         self.show_buttons()
 
@@ -206,8 +206,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         if self.project.next_step():
             self.thumbnails = []
             self.files = self.project.get_current_files()
-            self.check_list = self.project.get_current_check_list()
-            self.load_thumbnails()
+            self.generate_thumbnails()
             self.show_thumbnails()
 
 
