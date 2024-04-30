@@ -38,6 +38,7 @@ def rotate_item(position):
 
 
 DraggableRectItem = make_GraphicsItem_draggable(QtWidgets.QGraphicsRectItem)
+DraggableCircleItem = make_GraphicsItem_draggable(QtWidgets.QGraphicsEllipseItem)
 
 app = QtWidgets.QApplication([])
 
@@ -47,7 +48,7 @@ item.setRect(0, 0, 100, 100)
 item.setTransformOriginPoint(50, 50)
 scene.addItem(item)
 
-handle_item = DraggableRectItem()
+handle_item = DraggableCircleItem()
 handle_item.signaller.positionChanged.connect(rotate_item)
 handle_item.setRect(-40, -40, 20, 20)
 scene.addItem(handle_item)
