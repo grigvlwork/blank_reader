@@ -204,6 +204,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
     def next_step(self):
         self.save_project()
         if self.project.next_step():
+            self.work_dir = self.project.get_current_step_dir()
             self.thumbnails = []
             self.files = self.project.get_current_files()
             self.generate_thumbnails()

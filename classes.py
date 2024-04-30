@@ -95,6 +95,9 @@ class Project:
         _, __, check_list = zip(*self.action_steps[self.current_step])
         return check_list
 
+    def get_current_step_dir(self):
+        return self.work_dir + '/procesing/' + self.steps[self.current_step]
+
     def rotate(self, source, destination, angle):
         try:
             file = source
