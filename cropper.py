@@ -243,6 +243,11 @@ class MyWidget(QMainWindow, Ui_MainWindow):
 
     def generate_thumbnails(self):
         self.thumbnails = []
+        try:
+            if not os.path.isdir(self.work_dir + '/thumbnails'):
+                os.mkdir(self.work_dir + '/thumbnails')
+        except OSError:
+            return False
         for file in self.files:
             image = Image.open(file)
             image.thumbnail((400, 400))
