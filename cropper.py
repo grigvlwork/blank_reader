@@ -51,14 +51,14 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.check_list = []
         self.buttons = [self.new_project_btn, self.open_btn, self.save_btn, self.check_all_btn,
                         self.rotate_clock_btn, self.rotate_counter_clock_btn,
-                        self.sciss_btn, self.zoom_out_btn, self.zoom_in_btn, self.execute_btn]
+                        self.sciss_btn, self.zoom_out_btn, self.zoom_in_btn, self.next_btn]
         self.theme_btn.clicked.connect(self.change_theme)
         self.open_btn.clicked.connect(self.open_folder)
         self.rotate_clock_btn.clicked.connect(self.rotate_right)
         self.rotate_counter_clock_btn.clicked.connect(self.rotate_left)
         self.save_btn.clicked.connect(self.save_project)
         self.check_all_btn.clicked.connect(self.check_all)
-        self.execute_btn.clicked.connect(self.execute)
+        self.next_btn.clicked.connect(self.next_step)
         # self.horiz_btn.clicked.connect(self.horizontal_cut)
         # self.vert_btn.clicked.connect(self.vertical_cut)
         self.new_project_btn.clicked.connect(self.create_new_project)
@@ -79,6 +79,10 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 self.buttons[i].setVisible(button_state[i])
         elif self.project.current_step == 0:
             button_state = [1, 1, 1, 1, 1, 1, 0, 0, 0, 1]
+            for i in range(10):
+                self.buttons[i].setVisible(button_state[i])
+        elif self.project.current_step == 1:
+            button_state = [1, 1, 1, 1, 1, 0, 0, 0, 0, 1]
             for i in range(10):
                 self.buttons[i].setVisible(button_state[i])
 
@@ -197,15 +201,16 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 self.image_sa.setWidget(self.image_viewer)
                 self.image_sa.show()
 
-    def execute(self):
-        if any(x != 0 for x in self.rotates):
-            for i in range(len(self.rotates)):
-                file = self.files[i]
-                new_file = self.work_dir + '/output/' + os.path.basename(file)
-                im = Image.open(file)
-                im_rotate = im.rotate(-self.rotates[i], expand=True)
-                im_rotate.save(new_file, quality=100)
-                im.close()
+    def next_step(self):
+        self.save_project()
+        if self.project.next_step():
+            self.thumbnails = []
+            self.files = self.project.get_current_files()
+            self.check_list = self.project.get_current_check_list()
+            self.load_thumbnails()
+            self.show_thumbnails()
+
+
 
     def rotate_right(self):
         self.rotates[self.current_image_index] += 90

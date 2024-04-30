@@ -194,14 +194,19 @@ class Project:
             check_list = self.get_current_check_list()
             files = self.get_current_files()
             angles = self.get_current_action()
+            t = 0
             for i in range(len(files)):
                 if check_list[i]:
+                    t += 1
                     if angles[i] != 0:
                         dest = self.work_dir + '/processing/vertical_cut/' + os.path.basename(files[i])
                         if not self.rotate(files[i], dest, angles[i]):
                             return -1
                     else:
                         shutil.copy2(files[i], self.work_dir + '/processing/vertical_cut')
+            action = [0 for _ in range(t)]
+            check_list = [False for _ in range(t)]
+            self.set_current_action_steps(action, check_list)
             self.current_step += 1
             self.save_project()
             return self.current_step
