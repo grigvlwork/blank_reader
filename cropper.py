@@ -1,7 +1,7 @@
 # Нужно сделать обработку в виде проекта(папки) processing с
 # подкаталогами для шагов обработки
 # 1) rotates
-# 2) vertical_cut (к именам файлов добавим _vcl(vertical cut left) и _vcr
+# 2) vertical_cut (к именам файлов добавим _vcl(vertical cut left) и _vcr)
 # 3) horizontal_cut (к именам файлов добавим _hcu(horizontal cut up) и _hcd)
 # 4) orientation
 # 5) angle_adjust
