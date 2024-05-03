@@ -11,14 +11,18 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Обрезка изображений</string>
+   <string>Обработка изображений</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>images/character.svg</normaloff>images/character.svg</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QPushButton" name="save_btn">
+       <widget class="QPushButton" name="new_project_btn">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -26,14 +30,14 @@
          </sizepolicy>
         </property>
         <property name="toolTip">
-         <string>Сохранить проект</string>
+         <string>Новый проект</string>
         </property>
         <property name="text">
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="icons.qrc">
-          <normaloff>:/images/images/save.svg</normaloff>:/images/images/save.svg</iconset>
+         <iconset>
+          <normaloff>images/newfile.svg</normaloff>images/newfile.svg</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -70,7 +74,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="new_project_btn">
+       <widget class="QPushButton" name="save_btn">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -78,40 +82,14 @@
          </sizepolicy>
         </property>
         <property name="toolTip">
-         <string>Новый проект</string>
+         <string>Сохранить проект</string>
         </property>
         <property name="text">
          <string/>
         </property>
         <property name="icon">
-         <iconset>
-          <normaloff>images/newfile.svg</normaloff>images/newfile.svg</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>32</width>
-          <height>32</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="check_btn">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="toolTip">
-         <string>Пометить готовым</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset>
-          <normaloff>images/check.svg</normaloff>images/check.svg</iconset>
+         <iconset resource="icons.qrc">
+          <normaloff>:/images/images/save.svg</normaloff>:/images/images/save.svg</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -137,111 +115,7 @@
         </property>
         <property name="icon">
          <iconset>
-          <normaloff>images/check_all.svg</normaloff>images/check_all.svg</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>32</width>
-          <height>32</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="vert_btn">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="toolTip">
-         <string>Вертикальный разрез</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="icons.qrc">
-          <normaloff>:/images/images/vert.svg</normaloff>:/images/images/vert.svg</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>32</width>
-          <height>32</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="horiz_btn">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="toolTip">
-         <string>Горизонатльный разрез</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="icons.qrc">
-          <normaloff>:/images/images/horiz.svg</normaloff>:/images/images/horiz.svg</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>32</width>
-          <height>32</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="crop_btn">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="toolTip">
-         <string>Обрезка</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="icons.qrc">
-          <normaloff>:/images/images/crop.svg</normaloff>:/images/images/crop.svg</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>32</width>
-          <height>32</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="angle_btn">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="toolTip">
-         <string>Поворот на угол</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="icons.qrc">
-          <normaloff>:/images/images/angle.svg</normaloff>:/images/images/angle.svg</iconset>
+          <normaloff>images/checklist.svg</normaloff>images/checklist.svg</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -382,7 +256,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="execute_btn">
+       <widget class="QPushButton" name="next_btn">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -500,7 +374,7 @@
                <property name="widgetResizable">
                 <bool>true</bool>
                </property>
-               <widget class="QWidget" name="scroll_view_sa">
+               <widget class="QWidget" name="scrollAreaWidgetContents_2">
                 <property name="geometry">
                  <rect>
                   <x>0</x>
@@ -511,26 +385,16 @@
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_3">
                  <item>
-                  <widget class="QWidget" name="scroll_w" native="true">
-                   <widget class="QLabel" name="source_lb">
-                    <property name="geometry">
-                     <rect>
-                      <x>336</x>
-                      <y>329</y>
-                      <width>47</width>
-                      <height>16</height>
-                     </rect>
-                    </property>
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
-                    <property name="text">
-                     <string>TextLabel</string>
-                    </property>
-                   </widget>
+                  <widget class="QLabel" name="source_lb">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string>TextLabel</string>
+                   </property>
                   </widget>
                  </item>
                 </layout>

@@ -1,32 +1,45 @@
-import cv2
-import numpy as np
+import sys
+from PyQt5.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem, QGraphicsLineItem
+from PyQt5.QtCore import Qt, QPointF
+from PyQt5.QtGui import QPixmap
 
-my_scan = cv2.imread(r'.\image_to_process\photo_2023-12-14_13-55-59.jpg')
-#зададим порог
-thresh = 150
-image = my_scan
 
-# конвертировать входное изображение в Цветовое пространство в оттенках серого
-operatedImage = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+class ImageViewer(QGraphicsView):
+    def __init__(self, image_path):
+        super().__init__()
 
-# изменить тип данных
-# установка 32-битной плавающей запятой
-operatedImage = np.float32(operatedImage)
+        scene = QGraphicsScene(self)
+        self.setScene(scene)
 
-# применить метод cv2.cornerHarris
-# для определения углов с соответствующими
-# значения в качестве входных параметров
-dest = cv2.cornerHarris(operatedImage, 2, 5, 0.07)
+        pixmap = QGraphicsPixmapItem(QPixmap(image_path))
+        scene.addItem(pixmap)
 
-# Результаты отмечены через расширенные углы
-dest = cv2.dilate(dest, None)
+        self.line = QGraphicsLineItem(0, 0, 100, 0)
+        self.line.setPen(Qt.red)
+        scene.addItem(self.line)
 
-# Возвращаясь к исходному изображению,
-# с оптимальным пороговым значением
-image[dest > 0.01 * dest.max()] = [0, 0, 255]
+        self.mouse_press_pos = None
 
-# окно с выводимым изображением с углами
-cv2.imshow('Image with Borders', image)
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.mouse_press_pos = event.pos()
 
-if cv2.waitKey(0) & 0xff == 27:
-    cv2.destroyAllWindows()
+    def mouseMoveEvent(self, event):
+        if self.mouse_press_pos is not None:
+            delta = event.pos() - self.mouse_press_pos
+            new_pos = self.line.pos() + delta
+            self.line.setPos(new_pos)
+            self.mouse_press_pos = event.pos()
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.mouse_press_pos = None
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+
+    image_viewer = ImageViewer('image.jpg')
+    image_viewer.show()
+
+    sys.exit(app.exec_())
