@@ -178,3 +178,66 @@ The layout ensures the buttons are aligned with the image displayed in the image
 
 Show controls (Ctrl+S)
 ☰
+
+
+/// Pulse GPT
+import sys
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout, QPushButton, QFileDialog
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtCore import Qt
+from PIL import Image
+
+class ImageRotateApp(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.image_path = None
+        self.angle = 0
+
+        self.initUI()
+
+    def initUI(self):
+        self.setWindowTitle('Image Rotation App')
+        layout = QVBoxLayout()
+
+        self.image_label = QLabel()
+        layout.addWidget(self.image_label)
+
+        open_button = QPushButton('Open Image')
+        open_button.clicked.connect(self.openImage)
+        layout.addWidget(open_button)
+
+        rotate_button = QPushButton('Rotate Image')
+        rotate_button.clicked.connect(self.rotateImage)
+        layout.addWidget(rotate_button)
+
+        save_button = QPushButton('Save Image')
+        save_button.clicked.connect(self.saveImage)
+        layout.addWidget(save_button)
+
+        self.setLayout(layout)
+
+    def openImage(self):
+        file_dialog = QFileDialog()
+        self.image_path, _ = file_dialog.getOpenFileName(self, 'Open Image', '', 'Image files (*.jpg *.png)')
+
+        pixmap = QPixmap(self.image_path)
+        self.image_label.setPixmap(pixmap)
+        self.image_label.setAlignment(Qt.AlignCenter)
+
+    def rotateImage(self):
+        if self.image_path:
+            image = Image.open(self.image_path)
+            self.angle += 90
+            rotated_image = image.rotate(self.angle, expand=True)
+            rotated_image.show()
+
+    def saveImage(self):
+        if self.image_path:
+            image = Image.open(self.image_path)
+            image.save('rotated_image.jpg')
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    window = ImageRotateApp()
+    window.show()
+    sys.exit(app.exec_())
