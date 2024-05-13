@@ -239,12 +239,11 @@ class ImageRotateApp(QWidget):
     def mouseMoveEvent(self, event):
         if event.buttons() == Qt.LeftButton:
             dx = event.pos().x() - self.last_pos.x()
-            dy = event.pos().y() - self.last_pos.y()
-            self.angle -= dx // 2
+            # dy = event.pos().y() - self.last_pos.y()
+            self.angle -= dx / 20
             if self.image_path:
                 image = Image.open(self.image_path)
                 rotated_image = image.rotate(self.angle, expand=True)
-                # rotated_image.show()
                 self.image_label.setPixmap(pil2pixmap(rotated_image))
                 self.image_label.show()
 
