@@ -183,6 +183,22 @@ from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtCore import Qt, QPoint
 from PIL import Image
 
+
+def pil2pixmap(image):
+    if image.mode == "RGB":
+        r, g, b = image.split()
+        im = Image.merge("RGB", (b, g, r))
+    elif image.mode == "RGBA":
+        r, g, b, a = image.split()
+        im = Image.merge("RGBA", (b, g, r, a))
+    elif image.mode == "L":
+        im = image.convert("RGBA")
+    im2 = im.convert("RGBA")
+    data = im2.tobytes("raw", "RGBA")
+    qim = QImage(data, im.size[0], im.size[1], QImage.Format_ARGB32)
+    pixmap = QPixmap.fromImage(qim)
+    return pixmap
+
 # Вроде работает но непонятно как
 class ImageRotateApp(QWidget):
     def __init__(self):
@@ -224,11 +240,13 @@ class ImageRotateApp(QWidget):
         if event.buttons() == Qt.LeftButton:
             dx = event.pos().x() - self.last_pos.x()
             dy = event.pos().y() - self.last_pos.y()
-            self.angle += dx
+            self.angle -= dx // 2
             if self.image_path:
                 image = Image.open(self.image_path)
                 rotated_image = image.rotate(self.angle, expand=True)
-                rotated_image.show()
+                # rotated_image.show()
+                self.image_label.setPixmap(pil2pixmap(rotated_image))
+                self.image_label.show()
 
         self.last_pos = event.pos()
 
