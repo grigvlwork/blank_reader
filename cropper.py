@@ -2,7 +2,7 @@
 # подкаталогами для шагов обработки
 # 1) rotates
 # 2) vertical_cut (к именам файлов добавим _vcN(0, 1, 2, ...))
-# 3) horizontal_cut (к именам файлов добавим _hcu(horizontal cut up) и _hcd)
+# 3) horizontal_cut (к именам файлов добавим _hcN(0, 1, 2, ...))
 # 4) orientation
 # 5) angle_adjust
 # 6) word_select (к именам файлов добавим _wsN(00, 01, 02, ...))
@@ -51,7 +51,8 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.check_list = []
         self.buttons = [self.new_project_btn, self.open_btn, self.save_btn, self.check_all_btn,
                         self.rotate_clock_btn, self.rotate_counter_clock_btn,
-                        self.sciss_btn, self.zoom_out_btn, self.zoom_in_btn, self.next_btn]
+                        self.sciss_btn, self.zoom_out_btn, self.zoom_in_btn, self.add_vertical_cut_btn,
+                        self.add_horizontal_cut_btn, self.delete_cut_btn, self.previous_btn, self.next_btn]
         self.theme_btn.clicked.connect(self.change_theme)
         self.open_btn.clicked.connect(self.open_folder)
         self.rotate_clock_btn.clicked.connect(self.rotate_right)
@@ -74,16 +75,16 @@ class MyWidget(QMainWindow, Ui_MainWindow):
 
     def show_buttons(self):
         if self.project is None:
-            button_state = [1, 1, 0, 0, 0, 0, 0, 0, 0, 0]
-            for i in range(10):
+            button_state = [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            for i in range(len(self.buttons)):
                 self.buttons[i].setVisible(button_state[i])
         elif self.project.current_step == 0:
-            button_state = [1, 1, 1, 1, 1, 1, 0, 0, 0, 1]
-            for i in range(10):
+            button_state = [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1]
+            for i in range(len(self.buttons)):
                 self.buttons[i].setVisible(button_state[i])
         elif self.project.current_step == 1:
-            button_state = [1, 1, 1, 1, 1, 0, 0, 0, 0, 1]
-            for i in range(10):
+            button_state = [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1]
+            for i in range(len(self.buttons)):
                 self.buttons[i].setVisible(button_state[i])
 
     def check_all(self):
