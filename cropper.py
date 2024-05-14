@@ -33,6 +33,7 @@ from PIL import Image, ImageFont, ImageDraw
 
 from cropper_ui import Ui_MainWindow
 from classes import *
+from functions import *
 
 
 class MyWidget(QMainWindow, Ui_MainWindow):
@@ -83,28 +84,13 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             for i in range(len(self.buttons)):
                 self.buttons[i].setVisible(button_state[i])
         elif self.project.current_step == 1:
-            button_state = [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1]
+            button_state = [1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1]
             for i in range(len(self.buttons)):
                 self.buttons[i].setVisible(button_state[i])
 
     def check_all(self):
         for check_box in self.check_list:
             check_box.setChecked(True)
-
-    def pil2pixmap(self, image):
-        if image.mode == "RGB":
-            r, g, b = image.split()
-            im = Image.merge("RGB", (b, g, r))
-        elif image.mode == "RGBA":
-            r, g, b, a = image.split()
-            im = Image.merge("RGBA", (b, g, r, a))
-        elif image.mode == "L":
-            im = image.convert("RGBA")
-        im2 = im.convert("RGBA")
-        data = im2.tobytes("raw", "RGBA")
-        qim = QtGui.QImage(data, im.size[0], im.size[1], QtGui.QImage.Format_ARGB32)
-        pixmap = QtGui.QPixmap.fromImage(qim)
-        return pixmap
 
     def vertical_cut(self):
         self.v_cut = True
@@ -168,6 +154,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             v_layout = QVBoxLayout()
             group_box = QGroupBox()
             num = 1
+            self.labels.clear()
             for file in self.thumbnails:
                 mini_v_layout = QVBoxLayout()
                 label_num = QLabel(f'{num}:')
@@ -210,8 +197,8 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             self.files = self.project.get_current_files()
             self.generate_thumbnails()
             self.show_thumbnails()
-
-
+            self.setWindowTitle('Обработка изображений - ' + self.project.get_current_text_step())
+            self.show_buttons()
 
     def rotate_right(self):
         self.rotates[self.current_image_index] += 90
@@ -239,14 +226,15 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             font=font,
             fill=('#FF0000')
         )
-        pix = self.pil2pixmap(im)
+        pix = pil2pixmap(im)
         self.labels[self.current_image_index].setPixmap(pix.scaled(200, 400, QtCore.Qt.KeepAspectRatio))
 
     def generate_thumbnails(self):
         self.thumbnails = []
+        thumb_dir = self.work_dir + '/thumbnails'
         try:
-            if not os.path.isdir(self.work_dir + '/thumbnails'):
-                os.mkdir(self.work_dir + '/thumbnails')
+            if not os.path.isdir(thumb_dir):
+                os.mkdir(thumb_dir)
         except OSError:
             return False
         for file in self.files:

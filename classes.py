@@ -91,12 +91,15 @@ class Project:
         _, action, __ = zip(*self.action_steps[self.current_step])
         return action
 
+    def get_current_text_step(self):
+        return self.text_steps[self.current_step]
+
     def get_current_check_list(self):
         _, __, check_list = zip(*self.action_steps[self.current_step])
         return check_list
 
     def get_current_step_dir(self):
-        return self.work_dir + '/procesing/' + self.steps[self.current_step]
+        return self.work_dir + '/processing/' + self.steps[self.current_step]
 
     def rotate(self, source, destination, angle):
         try:
