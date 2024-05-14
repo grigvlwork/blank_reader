@@ -206,6 +206,7 @@ class ImageRotateApp(QWidget):
         self.image_path = None
         self.angle = 0
         self.last_pos = QPoint()
+        self.image = None
 
         self.initUI()
 
@@ -231,10 +232,11 @@ class ImageRotateApp(QWidget):
     def openImage(self):
         file_dialog = QFileDialog()
         self.image_path, _ = file_dialog.getOpenFileName(self, 'Open Image', '', 'Image files (*.jpg *.png)')
-
-        pixmap = QPixmap(self.image_path)
-        self.image_label.setPixmap(pixmap)
-        self.image_label.setAlignment(Qt.AlignCenter)
+        if self.image_path:
+            self.image = Image.open(self.image_path)
+            pixmap = QPixmap(self.image_path)
+            self.image_label.setPixmap(pixmap)
+            self.image_label.setAlignment(Qt.AlignCenter)
 
     def mouseMoveEvent(self, event):
         if event.buttons() == Qt.LeftButton:
@@ -242,8 +244,7 @@ class ImageRotateApp(QWidget):
             # dy = event.pos().y() - self.last_pos.y()
             self.angle -= dx / 20
             if self.image_path:
-                image = Image.open(self.image_path)
-                rotated_image = image.rotate(self.angle, expand=True)
+                rotated_image = self.image.rotate(self.angle, expand=True)
                 self.image_label.setPixmap(pil2pixmap(rotated_image))
                 self.image_label.show()
 
@@ -251,8 +252,8 @@ class ImageRotateApp(QWidget):
 
     def saveImage(self):
         if self.image_path:
-            image = Image.open(self.image_path)
-            image.save('rotated_image.jpg')
+            rotated_image = self.image.rotate(self.angle, expand=True)
+            rotated_image.save('rotated_image.jpg')
 
 
 if __name__ == '__main__':
