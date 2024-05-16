@@ -64,6 +64,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.next_btn.clicked.connect(self.next_step)
         # self.horiz_btn.clicked.connect(self.horizontal_cut)
         # self.vert_btn.clicked.connect(self.vertical_cut)
+        self.add_vertical_cut_btn.clicked.connect(self.add_vertical)
         self.new_project_btn.clicked.connect(self.create_new_project)
         self.source_lb.setText('')
         # self.source_lb.setFixedWidth(1000)
@@ -72,6 +73,9 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.source_lb.mousePressEvent = self.mousePressEvent
         self.v_cut = False
         self.h_cut = False
+        self.image_viewer = None
+        self.scene = None
+        self.pixmap = None
         self.project = None
         self.show_buttons()
 
@@ -99,6 +103,17 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         if self.image_viewer is not None:
             self.image_viewer.add_line(self.h_cut, self.h_cut)
             self.image_sa.show()
+
+    def add_vertical(self):
+        self.v_cut = True
+        self.h_cut = False
+        if self.image_viewer is not None:
+            if len(self.lines[self.current_image_index]) == 0:
+                x = self.pixmap.boundingRect().width() // 2
+                y = self.pixmap.boundingRect().height()
+                line = QGraphicsLineItem(x, 0, x, y)
+                line.setPen(Qt.red)
+                self.scene.addItem(line)
 
     def horizontal_cut(self):
         self.h_cut = True
@@ -200,16 +215,11 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             if self.labels[i] == self.sender():
                 file = self.files[i]
                 self.current_image_index = i
-                scene = QGraphicsScene(self)
-                pixmap = QGraphicsPixmapItem(QPixmap(file))
-                x = pixmap.boundingRect().width() // 2
-                y = pixmap.boundingRect().height()
-                scene.addItem(pixmap)
-                line = QGraphicsLineItem(x, 0, x, y)
-                line.setPen(Qt.red)
-                scene.addItem(line)
-                view = QGraphicsView(scene)
-                self.image_sa.setWidget(view)
+                self.scene = QGraphicsScene(self)
+                self.pixmap = QGraphicsPixmapItem(QPixmap(file))
+                self.scene.addItem(self.pixmap)
+                self.image_viewer = QGraphicsView(self.scene)
+                self.image_sa.setWidget(self.image_viewer)
 
                 # self.lines[i].
                 # self.line.setPen(Qt.red)
@@ -219,8 +229,6 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 # self.image_viewer = ImageViewer(file)
                 # self.image_sa.setWidget(self.image_viewer)
                 self.image_sa.show()
-
-
 
     def next_step(self):
         self.save_project()
