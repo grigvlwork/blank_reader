@@ -201,9 +201,10 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 file = self.files[i]
                 self.current_image_index = i
                 scene = QGraphicsScene(self)
-                self.image_sa.setWidget(scene)
                 pixmap = QGraphicsPixmapItem(QPixmap(file))
                 scene.addItem(pixmap)
+                view = QGraphicsView(scene)
+                self.image_sa.setWidget(view)
                 # line = QGraphicsLineItem(0, 0, 100, 0)
                 # self.lines[i].
                 # self.line.setPen(Qt.red)
