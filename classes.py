@@ -286,6 +286,7 @@ class ImageViewer(QGraphicsView):
     def mouseMoveEvent(self, event):
         if self.mouse_press_pos is not None and (self.v_cut or self.h_cut):
             delta = event.pos() - self.mouse_press_pos
+            delta.setY(0)
             new_pos = self.lines[self.current_line].pos() + delta
             self.lines[self.current_line].setPos(new_pos)
             self.mouse_press_pos = event.pos()
