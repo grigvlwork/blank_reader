@@ -332,30 +332,6 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.project.set_current_action_steps(actions, checked)
         self.project.save_project()
 
-    def mousePressEvent(self, event):
-        if not self.v_cut:
-            return
-        if event.button() == Qt.LeftButton:
-            self.mouse_press_pos = event.pos()
-
-    def mouseMoveEvent(self, event):
-        print('in')
-        if not self.v_cut:
-            return
-        if self.mouse_press_pos is not None:
-            delta = event.pos() - self.mouse_press_pos
-            print(delta)
-            new_pos = self.lines[self.current_image_index][self.current_line].pos() + delta
-            self.lines[self.current_image_index][self.current_line].setPos(new_pos)
-            # self.image_sa.show()
-            self.mouse_press_pos = event.pos()
-
-    def mouseReleaseEvent(self, event):
-        if not self.v_cut:
-            return
-        if event.button() == Qt.LeftButton:
-            self.mouse_press_pos = None
-
 
 def excepthook(exc_type, exc_value, exc_tb):
     tb = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
