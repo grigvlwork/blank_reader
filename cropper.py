@@ -55,8 +55,9 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.check_list = []
         self.buttons = [self.new_project_btn, self.open_btn, self.save_btn, self.check_all_btn,
                         self.rotate_clock_btn, self.rotate_counter_clock_btn,
-                        self.sciss_btn, self.zoom_out_btn, self.zoom_in_btn, self.add_vertical_cut_btn,
-                        self.add_horizontal_cut_btn, self.delete_cut_btn, self.previous_btn, self.next_btn]
+                        self.zoom_out_btn, self.zoom_in_btn, self.add_vertical_cut_btn,
+                        self.add_horizontal_cut_btn, self.delete_cut_btn, self.sciss_btn,
+                        self.previous_btn, self.next_btn]
         self.theme_btn.clicked.connect(self.change_theme)
         self.open_btn.clicked.connect(self.open_folder)
         self.rotate_clock_btn.clicked.connect(self.rotate_right)
@@ -64,13 +65,9 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.save_btn.clicked.connect(self.save_project)
         self.check_all_btn.clicked.connect(self.check_all)
         self.next_btn.clicked.connect(self.next_step)
-        # self.horiz_btn.clicked.connect(self.horizontal_cut)
-        # self.vert_btn.clicked.connect(self.vertical_cut)
         self.add_vertical_cut_btn.clicked.connect(self.add_vertical)
         self.new_project_btn.clicked.connect(self.create_new_project)
         self.source_lb.setText('')
-        # self.source_lb.setFixedWidth(1000)
-        # self.source_lb.setFixedHeight(1000)
         self.source_lb.setGeometry(0, 0, 1000, 1000)
         self.source_lb.mousePressEvent = self.mousePressEvent
         self.v_cut = False
@@ -91,9 +88,10 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             for i in range(len(self.buttons)):
                 self.buttons[i].setVisible(button_state[i])
         elif self.project.current_step == 1:
-            button_state = [1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1]
+            button_state = [1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1]
             for i in range(len(self.buttons)):
                 self.buttons[i].setVisible(button_state[i])
+            self.sciss_btn.setEnabled(False)
 
     def check_all(self):
         for check_box in self.check_list:
@@ -104,22 +102,15 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.h_cut = False
         if self.image_viewer is not None:
             self.image_viewer.add_line(self.h_cut, self.h_cut)
-            # self.image_sa.repaint()
 
     def add_vertical(self):
         self.v_cut = True
         self.h_cut = False
         if self.image_viewer is not None:
             if len(self.lines[self.current_image_index]) == 0:
-                # x = self.pixmap.boundingRect().width() // 2
-                # y = self.pixmap.boundingRect().height()
-                # line = QGraphicsLineItem(x, 0, x, y)
-                # line.setPen(Qt.red)
-                # self.lines[self.current_image_index].append(line)
-                # self.current_line = 0
-                # self.scene.addItem(line)
                 self.image_viewer.add_line(self.v_cut, self.h_cut)
                 self.image_sa.show()
+                self.sciss_btn.setEnabled(True)
 
     def horizontal_cut(self):
         self.h_cut = True
@@ -221,20 +212,8 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             if self.labels[i] == self.sender():
                 file = self.files[i]
                 self.current_image_index = i
-                # self.scene = QGraphicsScene(self)
-                # self.pixmap = QGraphicsPixmapItem(QPixmap(file))
-                # self.scene.addItem(self.pixmap)
-                # self.image_viewer = QGraphicsView(self.scene)
                 self.image_viewer = ImageViewer(file, self.v_cut, self.h_cut)
                 self.image_sa.setWidget(self.image_viewer)
-
-                # self.lines[i].
-                # self.line.setPen(Qt.red)
-                # scene.addItem(self.line)
-                # self.mouse_press_pos = None
-                #
-                # self.image_viewer = ImageViewer(file)
-                # self.image_sa.setWidget(self.image_viewer)
                 self.image_sa.show()
 
     def next_step(self):
