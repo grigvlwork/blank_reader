@@ -265,15 +265,19 @@ class ImageViewer(QGraphicsView):
                                                                      aspectRatioMode=2))
         self.scene.addItem(self.pixmap)
         self.mouse_press_pos = None
+        self.lines = []
+        self.current_line = None
 
     def add_line(self, v_cut=False, h_cut=False):
         self.v_cut = v_cut
         self.h_cut = h_cut
         if self.v_cut:
-            self.line = QGraphicsLineItem(self.pixmap.pixmap().width() // 2, 0,
-                                          self.pixmap.pixmap().width() // 2, self.pixmap.pixmap().height())
-            self.line.setPen(Qt.red)
-            self.scene.addItem(self.line)
+            line = QGraphicsLineItem(self.pixmap.pixmap().width() // 2, 0,
+                                     self.pixmap.pixmap().width() // 2, self.pixmap.pixmap().height())
+            line.setPen(Qt.red)
+            self.scene.addItem(line)
+            self.lines.append(line)
+            self.current_line = len(self.lines) - 1
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton and (self.v_cut or self.h_cut):
@@ -282,8 +286,8 @@ class ImageViewer(QGraphicsView):
     def mouseMoveEvent(self, event):
         if self.mouse_press_pos is not None and (self.v_cut or self.h_cut):
             delta = event.pos() - self.mouse_press_pos
-            new_pos = self.line.pos() + delta
-            self.line.setPos(new_pos)
+            new_pos = self.lines[self.current_line].pos() + delta
+            self.lines[self.current_line].setPos(new_pos)
             self.mouse_press_pos = event.pos()
 
     def mouseReleaseEvent(self, event):

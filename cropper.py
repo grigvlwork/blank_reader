@@ -39,6 +39,7 @@ from functions import *
 class MyWidget(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
+        self.mouse_press_pos = None
         self.setupUi(self)
         self.theme = 'Dark'
         self.work_dir = None
@@ -50,6 +51,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.rotates = []
         self.v_cut_x = []
         self.lines = []
+        self.current_line = None
         self.check_list = []
         self.buttons = [self.new_project_btn, self.open_btn, self.save_btn, self.check_all_btn,
                         self.rotate_clock_btn, self.rotate_counter_clock_btn,
@@ -102,18 +104,22 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.h_cut = False
         if self.image_viewer is not None:
             self.image_viewer.add_line(self.h_cut, self.h_cut)
-            self.image_sa.show()
+            # self.image_sa.repaint()
 
     def add_vertical(self):
         self.v_cut = True
         self.h_cut = False
         if self.image_viewer is not None:
             if len(self.lines[self.current_image_index]) == 0:
-                x = self.pixmap.boundingRect().width() // 2
-                y = self.pixmap.boundingRect().height()
-                line = QGraphicsLineItem(x, 0, x, y)
-                line.setPen(Qt.red)
-                self.scene.addItem(line)
+                # x = self.pixmap.boundingRect().width() // 2
+                # y = self.pixmap.boundingRect().height()
+                # line = QGraphicsLineItem(x, 0, x, y)
+                # line.setPen(Qt.red)
+                # self.lines[self.current_image_index].append(line)
+                # self.current_line = 0
+                # self.scene.addItem(line)
+                self.image_viewer.add_line(self.v_cut, self.h_cut)
+                self.image_sa.show()
 
     def horizontal_cut(self):
         self.h_cut = True
@@ -215,10 +221,11 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             if self.labels[i] == self.sender():
                 file = self.files[i]
                 self.current_image_index = i
-                self.scene = QGraphicsScene(self)
-                self.pixmap = QGraphicsPixmapItem(QPixmap(file))
-                self.scene.addItem(self.pixmap)
-                self.image_viewer = QGraphicsView(self.scene)
+                # self.scene = QGraphicsScene(self)
+                # self.pixmap = QGraphicsPixmapItem(QPixmap(file))
+                # self.scene.addItem(self.pixmap)
+                # self.image_viewer = QGraphicsView(self.scene)
+                self.image_viewer = ImageViewer(file, self.v_cut, self.h_cut)
                 self.image_sa.setWidget(self.image_viewer)
 
                 # self.lines[i].
@@ -324,6 +331,30 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             actions = self.rotates
         self.project.set_current_action_steps(actions, checked)
         self.project.save_project()
+
+    def mousePressEvent(self, event):
+        if not self.v_cut:
+            return
+        if event.button() == Qt.LeftButton:
+            self.mouse_press_pos = event.pos()
+
+    def mouseMoveEvent(self, event):
+        print('in')
+        if not self.v_cut:
+            return
+        if self.mouse_press_pos is not None:
+            delta = event.pos() - self.mouse_press_pos
+            print(delta)
+            new_pos = self.lines[self.current_image_index][self.current_line].pos() + delta
+            self.lines[self.current_image_index][self.current_line].setPos(new_pos)
+            # self.image_sa.show()
+            self.mouse_press_pos = event.pos()
+
+    def mouseReleaseEvent(self, event):
+        if not self.v_cut:
+            return
+        if event.button() == Qt.LeftButton:
+            self.mouse_press_pos = None
 
 
 def excepthook(exc_type, exc_value, exc_tb):
