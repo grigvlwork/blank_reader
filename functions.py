@@ -4,6 +4,24 @@
 # найденных квадратов и сохраняет их координаты в списке.
 import cv2
 import numpy as np
+from PIL import Image
+from PyQt5.QtGui import QImage, QPixmap
+
+
+def pil2pixmap(image):
+    if image.mode == "RGB":
+        r, g, b = image.split()
+        im = Image.merge("RGB", (b, g, r))
+    elif image.mode == "RGBA":
+        r, g, b, a = image.split()
+        im = Image.merge("RGBA", (b, g, r, a))
+    elif image.mode == "L":
+        im = image.convert("RGBA")
+    im2 = im.convert("RGBA")
+    data = im2.tobytes("raw", "RGBA")
+    qim = QImage(data, im.size[0], im.size[1], QImage.Format_ARGB32)
+    pixmap = QPixmap.fromImage(qim)
+    return pixmap
 
 
 def squares_coord(file_name, min_size=10, max_size=100):
@@ -23,7 +41,8 @@ def squares_coord(file_name, min_size=10, max_size=100):
     return result
 
 
-coordinates = squares_coord("image.jpg")
-print("Координаты чёрных квадратов:")
-for coordinate in coordinates:
-    print(coordinate)
+if __name__ == '__main__':
+    coordinates = squares_coord("image.jpg")
+    print("Координаты чёрных квадратов:")
+    for coordinate in coordinates:
+        print(coordinate)

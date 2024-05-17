@@ -1,12 +1,12 @@
 # Нужно сделать обработку в виде проекта(папки) processing с
 # подкаталогами для шагов обработки
 # 1) rotates
-# 2) vertical_cut (к именам файлов добавим _vcl(vertical cut left) и _vcr)
-# 3) horizontal_cut (к именам файлов добавим _hcu(horizontal cut up) и _hcd)
+# 2) vertical_cut (к именам файлов добавим _vcN(0, 1, 2, ...))
+# 3) horizontal_cut (к именам файлов добавим _hcN(0, 1, 2, ...))
 # 4) orientation
 # 5) angle_adjust
-# 6) word_select (к именам файлов добавим _wsN(01, 02, ...))
-# 7) letter_select(к именам файлов добавим _lsN(01, 02, ...))
+# 6) word_select (к именам файлов добавим _wsN(00, 01, 02, ...))
+# 7) letter_select(к именам файлов добавим _lsN(00, 01, 02, ...))
 # Нажатие на кнопку действия создаёт(перезаписывает) файл(ы) в папке следующего этапа.
 # К следующему этапу можно перейти если обработаны или подтверждены файлы текущего этапа
 
@@ -33,6 +33,7 @@ from PIL import Image, ImageFont, ImageDraw
 
 from cropper_ui import Ui_MainWindow
 from classes import *
+from functions import *
 
 
 class MyWidget(QMainWindow, Ui_MainWindow):
@@ -48,10 +49,12 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.current_image_index = None
         self.rotates = []
         self.v_cut_x = []
+        self.lines = []
         self.check_list = []
         self.buttons = [self.new_project_btn, self.open_btn, self.save_btn, self.check_all_btn,
                         self.rotate_clock_btn, self.rotate_counter_clock_btn,
-                        self.sciss_btn, self.zoom_out_btn, self.zoom_in_btn, self.next_btn]
+                        self.sciss_btn, self.zoom_out_btn, self.zoom_in_btn, self.add_vertical_cut_btn,
+                        self.add_horizontal_cut_btn, self.delete_cut_btn, self.previous_btn, self.next_btn]
         self.theme_btn.clicked.connect(self.change_theme)
         self.open_btn.clicked.connect(self.open_folder)
         self.rotate_clock_btn.clicked.connect(self.rotate_right)
@@ -61,6 +64,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.next_btn.clicked.connect(self.next_step)
         # self.horiz_btn.clicked.connect(self.horizontal_cut)
         # self.vert_btn.clicked.connect(self.vertical_cut)
+        self.add_vertical_cut_btn.clicked.connect(self.add_vertical)
         self.new_project_btn.clicked.connect(self.create_new_project)
         self.source_lb.setText('')
         # self.source_lb.setFixedWidth(1000)
@@ -69,41 +73,29 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.source_lb.mousePressEvent = self.mousePressEvent
         self.v_cut = False
         self.h_cut = False
+        self.image_viewer = None
+        self.scene = None
+        self.pixmap = None
         self.project = None
         self.show_buttons()
 
     def show_buttons(self):
         if self.project is None:
-            button_state = [1, 1, 0, 0, 0, 0, 0, 0, 0, 0]
-            for i in range(10):
+            button_state = [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            for i in range(len(self.buttons)):
                 self.buttons[i].setVisible(button_state[i])
         elif self.project.current_step == 0:
-            button_state = [1, 1, 1, 1, 1, 1, 0, 0, 0, 1]
-            for i in range(10):
+            button_state = [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1]
+            for i in range(len(self.buttons)):
                 self.buttons[i].setVisible(button_state[i])
         elif self.project.current_step == 1:
-            button_state = [1, 1, 1, 1, 1, 0, 0, 0, 0, 1]
-            for i in range(10):
+            button_state = [1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1]
+            for i in range(len(self.buttons)):
                 self.buttons[i].setVisible(button_state[i])
 
     def check_all(self):
         for check_box in self.check_list:
             check_box.setChecked(True)
-
-    def pil2pixmap(self, image):
-        if image.mode == "RGB":
-            r, g, b = image.split()
-            im = Image.merge("RGB", (b, g, r))
-        elif image.mode == "RGBA":
-            r, g, b, a = image.split()
-            im = Image.merge("RGBA", (b, g, r, a))
-        elif image.mode == "L":
-            im = image.convert("RGBA")
-        im2 = im.convert("RGBA")
-        data = im2.tobytes("raw", "RGBA")
-        qim = QtGui.QImage(data, im.size[0], im.size[1], QtGui.QImage.Format_ARGB32)
-        pixmap = QtGui.QPixmap.fromImage(qim)
-        return pixmap
 
     def vertical_cut(self):
         self.v_cut = True
@@ -111,6 +103,17 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         if self.image_viewer is not None:
             self.image_viewer.add_line(self.h_cut, self.h_cut)
             self.image_sa.show()
+
+    def add_vertical(self):
+        self.v_cut = True
+        self.h_cut = False
+        if self.image_viewer is not None:
+            if len(self.lines[self.current_image_index]) == 0:
+                x = self.pixmap.boundingRect().width() // 2
+                y = self.pixmap.boundingRect().height()
+                line = QGraphicsLineItem(x, 0, x, y)
+                line.setPen(Qt.red)
+                self.scene.addItem(line)
 
     def horizontal_cut(self):
         self.h_cut = True
@@ -167,6 +170,9 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             v_layout = QVBoxLayout()
             group_box = QGroupBox()
             num = 1
+            self.labels.clear()
+            if self.project.current_step == 1:
+                self.lines = [[] for _ in range(len(self.thumbnails))]
             for file in self.thumbnails:
                 mini_v_layout = QVBoxLayout()
                 label_num = QLabel(f'{num}:')
@@ -187,7 +193,10 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 h_layout.addWidget(label)
                 # v_layout.addRow(mini_v_layout, label)
                 v_layout.addLayout(h_layout)
-                label.clicked.connect(self.thumbnail_click)
+                if self.project.current_step == 0:
+                    label.clicked.connect(self.thumbnail_click)
+                elif self.project.current_step == 1:
+                    label.clicked.connect(self.thumbnail_click_v_cut)
             group_box.setLayout(v_layout)
             self.thumbnails_sa.setWidget(group_box)
             self.thumbnails_sa.show()
@@ -201,6 +210,26 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 self.image_sa.setWidget(self.image_viewer)
                 self.image_sa.show()
 
+    def thumbnail_click_v_cut(self):
+        for i in range(len(self.labels)):
+            if self.labels[i] == self.sender():
+                file = self.files[i]
+                self.current_image_index = i
+                self.scene = QGraphicsScene(self)
+                self.pixmap = QGraphicsPixmapItem(QPixmap(file))
+                self.scene.addItem(self.pixmap)
+                self.image_viewer = QGraphicsView(self.scene)
+                self.image_sa.setWidget(self.image_viewer)
+
+                # self.lines[i].
+                # self.line.setPen(Qt.red)
+                # scene.addItem(self.line)
+                # self.mouse_press_pos = None
+                #
+                # self.image_viewer = ImageViewer(file)
+                # self.image_sa.setWidget(self.image_viewer)
+                self.image_sa.show()
+
     def next_step(self):
         self.save_project()
         if self.project.next_step():
@@ -209,8 +238,8 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             self.files = self.project.get_current_files()
             self.generate_thumbnails()
             self.show_thumbnails()
-
-
+            self.setWindowTitle('Обработка изображений - ' + self.project.get_current_text_step())
+            self.show_buttons()
 
     def rotate_right(self):
         self.rotates[self.current_image_index] += 90
@@ -238,14 +267,15 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             font=font,
             fill=('#FF0000')
         )
-        pix = self.pil2pixmap(im)
+        pix = pil2pixmap(im)
         self.labels[self.current_image_index].setPixmap(pix.scaled(200, 400, QtCore.Qt.KeepAspectRatio))
 
     def generate_thumbnails(self):
         self.thumbnails = []
+        thumb_dir = self.work_dir + '/thumbnails'
         try:
-            if not os.path.isdir(self.work_dir + '/thumbnails'):
-                os.mkdir(self.work_dir + '/thumbnails')
+            if not os.path.isdir(thumb_dir):
+                os.mkdir(thumb_dir)
         except OSError:
             return False
         for file in self.files:

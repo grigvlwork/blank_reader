@@ -178,18 +178,35 @@
 
 
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout, QPushButton, QFileDialog
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout, QPushButton, QFileDialog, QGraphicsPixmapItem
 from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtCore import Qt, QPoint
 from PIL import Image
 
 
+def pil2pixmap(image):
+    if image.mode == "RGB":
+        r, g, b = image.split()
+        im = Image.merge("RGB", (b, g, r))
+    elif image.mode == "RGBA":
+        r, g, b, a = image.split()
+        im = Image.merge("RGBA", (b, g, r, a))
+    elif image.mode == "L":
+        im = image.convert("RGBA")
+    im2 = im.convert("RGBA")
+    data = im2.tobytes("raw", "RGBA")
+    qim = QImage(data, im.size[0], im.size[1], QImage.Format_ARGB32)
+    pixmap = QPixmap.fromImage(qim)
+    return pixmap
+
+# Вроде работает но непонятно как
 class ImageRotateApp(QWidget):
     def __init__(self):
         super().__init__()
         self.image_path = None
         self.angle = 0
         self.last_pos = QPoint()
+        self.image = None
 
         self.initUI()
 
@@ -215,27 +232,28 @@ class ImageRotateApp(QWidget):
     def openImage(self):
         file_dialog = QFileDialog()
         self.image_path, _ = file_dialog.getOpenFileName(self, 'Open Image', '', 'Image files (*.jpg *.png)')
-
-        pixmap = QPixmap(self.image_path)
-        self.image_label.setPixmap(pixmap)
-        self.image_label.setAlignment(Qt.AlignCenter)
+        if self.image_path:
+            self.image = Image.open(self.image_path)
+            pixmap = QPixmap(self.image_path)
+            self.image_label.setPixmap(pixmap)
+            self.image_label.setAlignment(Qt.AlignCenter)
 
     def mouseMoveEvent(self, event):
         if event.buttons() == Qt.LeftButton:
             dx = event.pos().x() - self.last_pos.x()
-            dy = event.pos().y() - self.last_pos.y()
-            self.angle += dx
+            # dy = event.pos().y() - self.last_pos.y()
+            self.angle -= dx / 20
             if self.image_path:
-                image = Image.open(self.image_path)
-                rotated_image = image.rotate(self.angle, expand=True)
-                rotated_image.show()
+                rotated_image = self.image.rotate(self.angle, expand=True)
+                self.image_label.setPixmap(pil2pixmap(rotated_image))
+                self.image_label.show()
 
         self.last_pos = event.pos()
 
     def saveImage(self):
         if self.image_path:
-            image = Image.open(self.image_path)
-            image.save('rotated_image.jpg')
+            rotated_image = self.image.rotate(self.angle, expand=True)
+            rotated_image.save('rotated_image.jpg')
 
 
 if __name__ == '__main__':
@@ -243,3 +261,131 @@ if __name__ == '__main__':
     window = ImageRotateApp()
     window.show()
     sys.exit(app.exec_())
+
+
+# Запускается, но не работает
+# import sys
+# from PyQt5.QtWidgets import QApplication, QWidget, QLabel
+# from PyQt5.QtGui import QPixmap, QPainter, QTransform
+# from PyQt5.QtCore import Qt
+#
+# class ImageRotator(QWidget):
+#     def __init__(self):
+#         super().__init__()
+#         self.initUI()
+#
+#     def initUI(self):
+#         self.setWindowTitle('Image Rotator')
+#         self.setGeometry(100, 100, 400, 400)
+#
+#         self.image_label = QLabel(self)
+#         self.image_label.setGeometry(50, 50, 300, 300)
+#
+#         self.image = QPixmap('image.jpg')
+#         self.angle = 0
+#
+#         self.show()
+#
+#     def paintEvent(self, event):
+#         painter = QPainter(self)
+#         painter.setRenderHint(QPainter.Antialiasing)
+#
+#         transform = QTransform()
+#         transform.translate(self.width() / 2, self.height() / 2)
+#         transform.rotate(self.angle)
+#         transform.translate(-self.image.width() / 2, -self.image.height() / 2)
+#
+#         painter.setTransform(transform)
+#         painter.drawPixmap(0, 0, self.image)
+#
+#     def mouseMoveEvent(self, event):
+#         if event.buttons() == Qt.LeftButton:
+#             diff = event.pos() - event.lastPos()
+#             self.angle += diff.x()
+#             self.update()
+#
+# if __name__ == '__main__':
+#     app = QApplication(sys.argv)
+#     rotator = ImageRotator()
+#     sys.exit(app.exec_())
+
+
+# Не запускается
+# import sys
+# from PyQt5.QtWidgets import QApplication, QMainWindow
+# from PyQt5.QtCore import Qt, QPointF
+# from PyQt5.QtGui import QPixmap, QImage, QPainter, QTransform
+# from PyQt5.QtWidgets import QGraphicsView, QGraphicsScene
+#
+# class ImageRotator(QMainWindow):
+#     def __init__(self):
+#         super().__init__()
+#
+#         self.scene = QGraphicsScene()
+#         self.view = QGraphicsView(self.scene)
+#         self.setCentralWidget(self.view)
+#
+#         self.image = None
+#         self.is_rotating = False
+#         self.last_pos = None
+#
+#         self.view.setDragMode(QGraphicsView.ScrollHandDrag)
+#         self.view.setRenderHint(QPainter.Antialiasing)
+#         self.view.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
+#         self.view.setResizeAnchor(QGraphicsView.AnchorUnderMouse)
+#         self.view.setViewportUpdateMode(QGraphicsView.BoundingRectViewportUpdate)
+#
+#         self.rotate_image(0)
+#
+#     def load_image(self, filepath):
+#         if not filepath:
+#             return
+#
+#         pixmap = QPixmap.load(filepath)
+#         if pixmap.isNull():
+#             return
+#
+#         self.image_item = QGraphicsPixmapItem(pixmap)
+#         self.scene.clear()
+#         self.scene.addItem(self.image_item)
+#         self.scene.setSceneRect(self.image_item.boundingRect())
+#
+#         self.center_on_item(self.image_item)
+#
+#     def center_on_item(self, item):
+#         rect = item.boundingRect()
+#         center_pos = rect.center()
+#         self.view.centerOn(center_pos)
+#
+#     def mousePressEvent(self, event):
+#         if event.button() == Qt.LeftButton:
+#             self.is_rotating = True
+#             self.last_pos = event.pos()
+#
+#     def mouseMoveEvent(self, event):
+#         if self.is_rotating:
+#             delta = event.pos() - self.last_pos
+#             angle = -delta.y() * 0.15
+#             self.rotate_image(angle)
+#             self.last_pos = event.pos()
+#
+#     def mouseReleaseEvent(self, event):
+#         if event.button() == Qt.LeftButton:
+#             self.is_rotating = False
+#             self.last_pos = None
+#
+#     def rotate_image(self, angle):
+#         if self.image_item:
+#             transform = QTransform()
+#             transform.rotate(angle)
+#             self.image_item.setTransform(transform)
+#
+# if __name__ == '__main__':
+#     app = QApplication(sys.argv)
+#     window = ImageRotator()
+#     window.show()
+#
+#     filepath = 'image.jpg'  # Replace with the path to your image
+#     window.load_image(filepath)
+#
+#     sys.exit(app.exec_())
