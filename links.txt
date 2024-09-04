@@ -42,6 +42,8 @@ https://habr.com/ru/articles/708928/
 https://github.com/pytorch/examples/blob/main/mnist/main.py
 https://keras.io/examples/vision/mnist_convnet/
   https://colab.research.google.com/github/keras-team/keras-io/blob/master/examples/vision/ipynb/mnist_convnet.ipynb
+https://habr.com/ru/articles/505616/ распознавание на Comnist
+
 
 
 
