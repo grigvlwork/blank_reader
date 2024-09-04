@@ -37,5 +37,13 @@ https://www.tutorialspoint.com/how-to-detect-a-rectangle-and-square-in-an-image-
 Сериализация объекта
 https://ru.stackoverflow.com/questions/1097641/Как-сохранить-экземпляр-класса-в-файл
 
+Обучение нейросети
+https://habr.com/ru/articles/708928/
+https://github.com/pytorch/examples/blob/main/mnist/main.py
+https://keras.io/examples/vision/mnist_convnet/
+  https://colab.research.google.com/github/keras-team/keras-io/blob/master/examples/vision/ipynb/mnist_convnet.ipynb
+
+
+
 
 
