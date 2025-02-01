@@ -6,6 +6,33 @@ import cv2
 import numpy as np
 from PIL import Image
 from PyQt5.QtGui import QImage, QPixmap
+import os
+import sqlite3
+
+
+def create_project_database(path:str)->bool:
+    last_directory_name = os.path.basename(os.path.normpath(path))
+    db_name = f"{path}/{last_directory_name}.db"
+    conn = sqlite3.connect(db_name)
+    try:
+        cursor = conn.cursor()
+        create_table_query = f"""
+        CREATE TABLE IF NOT EXISTS project_info (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            age INTEGER,
+            email TEXT
+        );
+        """
+        cursor.execute(create_table_query)
+        conn.commit()
+        return True
+
+    except sqlite3.Error as e:
+        return False
+
+    finally:
+        conn.close()
 
 
 def pil2pixmap(image):
