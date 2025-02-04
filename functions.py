@@ -19,9 +19,33 @@ def create_project_database(path:str)->bool:
         create_table_query = f"""
         CREATE TABLE IF NOT EXISTS project_info (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            age INTEGER,
-            email TEXT
+            path TEXT NOT NULL,
+            curr_step INTEGER
+        );
+        """
+        cursor.execute(create_table_query)
+        create_table_query = f"""
+        CREATE TABLE IF NOT EXISTS source_files (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            full_path TEXT,
+            base_name TEXT
+        );
+        """
+        cursor.execute(create_table_query)
+        create_table_query = f"""
+        CREATE TABLE IF NOT EXISTS step_info (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            step INTEGER,
+            file_id INTEGER,
+            oper_str TEXT
+        );
+        """
+        cursor.execute(create_table_query)
+        create_table_query = f"""
+        CREATE TABLE IF NOT EXISTS res_files (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            source_file INTEGER,
+            res_file INTEGER
         );
         """
         cursor.execute(create_table_query)
