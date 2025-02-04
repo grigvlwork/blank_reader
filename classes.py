@@ -279,6 +279,9 @@ class ImageViewer(QGraphicsView):
             self.lines.append(line)
             self.current_line = len(self.lines) - 1
 
+    def get_lines(self):
+        return self.lines
+
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton and (self.v_cut or self.h_cut):
             self.mouse_press_pos = event.pos()
