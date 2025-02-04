@@ -252,9 +252,6 @@ if __name__ == '__main__':
 
 Пример кода:
 
-python
-Копировать
-Редактировать
 class ImageViewer:
     def __init__(self, image_index, on_cut_added=None):
         self.image_index = image_index  # Индекс изображения в Project
@@ -267,9 +264,6 @@ class ImageViewer:
             self.on_cut_added(self.image_index, cut)  # Сообщаем Project
 В Project передаем callback:
 
-python
-Копировать
-Редактировать
 class Project:
     def __init__(self):
         self.actions = {}  # {индекс_изображения: [список разрезов]}
