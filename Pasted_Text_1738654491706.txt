@@ -1,0 +1,645 @@
+# Файл 1: cropper.py
+'''Модуль для обработки изображений и вырезания отдельных символов из них'''
+
+# Нужно сделать базу данных проекта(создается при создании проекта) - структура:
+# файлы -> ID(hash) -> Этапы -> каждый этап берет определенный ID на вход и
+# применяет к нему операцию(кортеж) и на выходе 1,2... новых ID(На каждом этапе генерятся (только иконки?)
+# или полностью изображения (тк ID уникальные можно хранить в одной папке) раскладывать в разные
+#
+# Нужно сделать обработку в виде проекта(папки) processing с
+# подкаталогами для шагов обработки
+# 1) rotates
+# 2) vertical_cut (к именам файлов добавим _vcN(0, 1, 2, ...))
+# 3) horizontal_cut (к именам файлов добавим _hcN(0, 1, 2, ...))
+# 4) orientation
+# 5) angle_adjust
+# 6) word_select (к именам файлов добавим _wsN(00, 01, 02, ...))
+# 7) letter_select(к именам файлов добавим _lsN(00, 01, 02, ...))
+# 8) Формирование папки output в которой вырезанные буквы и цифры разложены по папкам 0 1 2 3 а б в ...
+# Нажатие на кнопку действия создаёт(перезаписывает) файл(ы) в папке следующего этапа.
+# К следующему этапу можно перейти если обработаны или подтверждены файлы текущего этапа
+# Возможно отслеживать только изменения по действиям текущего этапа?
+# Что делает возврат на предыдущий этап(ы)? при каких-то изменениях выделять цветом на следующих этапах?
+
+
+import os
+from os import listdir
+from os.path import isfile, join
+import sys
+import qdarkstyle
+import traceback
+import os
+
+from PyQt5 import uic, QtCore, QtGui
+from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox, QMenu, QGraphicsPixmapItem, \
+    QGraphicsItem, QLabel, QGroupBox, QVBoxLayout, QFormLayout, QWidget, QGraphicsView, QGraphicsScene, \
+    QGraphicsPixmapItem, QGraphicsLineItem
+from PyQt5.QtGui import QStandardItem, QStandardItemModel
+from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox
+from PyQt5.Qt import QClipboard
+from PyQt5.QtCore import QModelIndex
+import icons_rc
+from PyQt5.QtGui import QPixmap
+from PIL import Image, ImageFont, ImageDraw
+
+from cropper_ui import Ui_MainWindow
+from classes import *
+from functions import *
+
+
+class MyWidget(QMainWindow, Ui_MainWindow):
+    def __init__(self):
+        super().__init__()
+        self.mouse_press_pos = None
+        self.setupUi(self)
+        self.theme = 'Dark'
+        self.work_dir = None
+        self.source_dir = None
+        self.files = []
+        self.thumbnails = []
+        self.labels = []
+        self.current_image_index = None
+        self.rotates = []
+        self.v_cut_x = []
+        self.lines = []
+        self.current_line = None
+        self.check_list = []
+        self.buttons = [self.new_project_btn, self.open_btn, self.save_btn, self.check_all_btn,
+                        self.rotate_clock_btn, self.rotate_counter_clock_btn,
+                        self.zoom_out_btn, self.zoom_in_btn, self.add_vertical_cut_btn,
+                        self.add_horizontal_cut_btn, self.delete_cut_btn, self.sciss_btn,
+                        self.previous_btn, self.next_btn]
+        self.theme_btn.clicked.connect(self.change_theme)
+        self.open_btn.clicked.connect(self.open_folder)
+        self.rotate_clock_btn.clicked.connect(self.rotate_right)
+        self.rotate_counter_clock_btn.clicked.connect(self.rotate_left)
+        self.save_btn.clicked.connect(self.save_project)
+        self.check_all_btn.clicked.connect(self.check_all)
+        self.next_btn.clicked.connect(self.next_step)
+        self.add_vertical_cut_btn.clicked.connect(self.add_vertical)
+        self.new_project_btn.clicked.connect(self.create_new_project)
+        self.source_lb.setText('')
+        self.source_lb.setGeometry(0, 0, 1000, 1000)
+        self.source_lb.mousePressEvent = self.mousePressEvent
+        self.v_cut = False
+        self.h_cut = False
+        self.image_viewer = None
+        self.scene = None
+        self.pixmap = None
+        self.project = None
+        self.show_buttons()
+
+    def show_buttons(self):
+        if self.project is None:
+            button_state = [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            for i in range(len(self.buttons)):
+                self.buttons[i].setVisible(button_state[i])
+        elif self.project.current_step == 0:
+            button_state = [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1]
+            for i in range(len(self.buttons)):
+                self.buttons[i].setVisible(button_state[i])
+        elif self.project.current_step == 1:
+            button_state = [1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1]
+            for i in range(len(self.buttons)):
+                self.buttons[i].setVisible(button_state[i])
+            self.sciss_btn.setEnabled(False)
+
+    def check_all(self):
+        for check_box in self.check_list:
+            check_box.setChecked(True)
+
+    def vertical_cut(self):
+        self.v_cut = True
+        self.h_cut = False
+        if self.image_viewer is not None:
+            self.image_viewer.add_line(self.h_cut, self.h_cut)
+
+    def add_vertical(self):
+        self.v_cut = True
+        self.h_cut = False
+        if self.image_viewer is not None:
+            if len(self.lines[self.current_image_index]) == 0:
+                self.image_viewer.add_line(self.v_cut, self.h_cut)
+                self.image_sa.show()
+                self.sciss_btn.setEnabled(True)
+
+    def horizontal_cut(self):
+        self.h_cut = True
+        self.v_cut = False
+
+    def create_new_project(self):
+        self.project = Project()
+        if not self.project.new_project(self):
+            return
+        self.work_dir = self.project.work_dir + '/processing/' + self.project.steps[self.project.current_step]
+        self.files = self.project.load_current_files()
+        self.thumbnails = self.project.get_current_thumbnails()
+        self.show_thumbnails()
+        self.rotates = [0] * len(self.files)
+        self.v_cut_x = [0] * len(self.files)
+        self.setWindowTitle('Обработка изображений - выбор ориентации')
+        self.show_buttons()
+
+    def change_theme(self):
+        if self.theme == 'Dark':
+            icon = QtGui.QIcon("images/light.svg")
+            self.theme = 'Light'
+            self.theme_btn.setIcon(icon)
+            app.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5', palette=qdarkstyle.LightPalette))
+        else:
+            icon = QtGui.QIcon("images/night.svg")
+            self.theme = 'Dark'
+            self.theme_btn.setIcon(icon)
+            app.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5', palette=qdarkstyle.DarkPalette))
+
+    def open_folder(self):
+        temp_dir = QFileDialog.getExistingDirectory(self, 'Select Folder')
+        if temp_dir == '':
+            return False
+        self.project = Project(directory_name=temp_dir)
+        if not self.project.load_project():
+            return False
+        self.files = self.project.load_current_files()
+        self.thumbnails = self.project.get_current_thumbnails()
+        checked = self.project.get_current_check_list()
+        actions = self.project.get_current_action()
+        if self.project.current_step == 0:
+            self.rotates = actions
+        self.show_thumbnails(checked)
+        self.rotates = [0] * len(self.files)
+        self.v_cut = None
+        self.setWindowTitle('Обработка изображений - выбор ориентации')
+        self.show_buttons()
+
+    def show_thumbnails(self, checked=None):
+        if checked is None:
+            checked = []
+        if len(self.thumbnails) > 0:
+            v_layout = QVBoxLayout()
+            group_box = QGroupBox()
+            num = 1
+            self.labels.clear()
+            if self.project.current_step == 1:
+                self.lines = [[] for _ in range(len(self.thumbnails))]
+            for file in self.thumbnails:
+                mini_v_layout = QVBoxLayout()
+                label_num = QLabel(f'{num}:')
+                check_box = QCheckBox()
+                if len(checked) > num - 1:
+                    check_box.setChecked(checked[num - 1])
+                self.check_list.append(check_box)
+                num += 1
+                label = myLabel(self)
+                label.setPixmap(QPixmap(file).scaled(200, 400, QtCore.Qt.KeepAspectRatio))
+                self.labels.append(label)
+                v_sp = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+                mini_v_layout.addWidget(label_num)
+                mini_v_layout.addWidget(check_box)
+                mini_v_layout.addItem(v_sp)
+                h_layout = QHBoxLayout()
+                h_layout.addLayout(mini_v_layout)
+                h_layout.addWidget(label)
+                # v_layout.addRow(mini_v_layout, label)
+                v_layout.addLayout(h_layout)
+                if self.project.current_step == 0:
+                    label.clicked.connect(self.thumbnail_click)
+                elif self.project.current_step == 1:
+                    label.clicked.connect(self.thumbnail_click_v_cut)
+            group_box.setLayout(v_layout)
+            self.thumbnails_sa.setWidget(group_box)
+            self.thumbnails_sa.show()
+
+    def thumbnail_click(self):
+        for i in range(len(self.labels)):
+            if self.labels[i] == self.sender():
+                file = self.files[i]
+                self.current_image_index = i
+                self.image_viewer = ImageViewer(file)
+                self.image_sa.setWidget(self.image_viewer)
+                self.image_sa.show()
+
+    def thumbnail_click_v_cut(self):
+        for i in range(len(self.labels)):
+            if self.labels[i] == self.sender():
+                file = self.files[i]
+                self.current_image_index = i
+                self.image_viewer = ImageViewer(file, self.v_cut, self.h_cut)
+                self.image_sa.setWidget(self.image_viewer)
+                self.image_sa.show()
+
+    def next_step(self):
+        self.save_project()
+        if self.project.next_step():
+            self.work_dir = self.project.get_current_step_dir()
+            self.thumbnails = []
+            self.files = self.project.get_current_files()
+            self.generate_thumbnails()
+            self.show_thumbnails()
+            self.setWindowTitle('Обработка изображений - ' + self.project.get_current_text_step())
+            self.show_buttons()
+
+    def rotate_right(self):
+        self.rotates[self.current_image_index] += 90
+        # self.rotates[self.current_image_index] %= 360
+        if self.rotates[self.current_image_index] >= 0:
+            self.write_on_thumbnails(f'Right {self.rotates[self.current_image_index]}')
+        else:
+            self.write_on_thumbnails(f'Left {-self.rotates[self.current_image_index]}')
+
+    def rotate_left(self):
+        self.rotates[self.current_image_index] -= 90
+        # self.rotates[self.current_image_index] %= 360
+        if self.rotates[self.current_image_index] >= 0:
+            self.write_on_thumbnails(f'Right {self.rotates[self.current_image_index]}')
+        else:
+            self.write_on_thumbnails(f'Left {-self.rotates[self.current_image_index]}')
+
+    def write_on_thumbnails(self, text):
+        im = Image.open(self.thumbnails[self.current_image_index])
+        font = ImageFont.truetype('./data/consolas.ttf', size=42)
+        draw_text = ImageDraw.Draw(im)
+        draw_text.text(
+            (5, 5),
+            text,
+            font=font,
+            fill=('#FF0000')
+        )
+        pix = pil2pixmap(im)
+        self.labels[self.current_image_index].setPixmap(pix.scaled(200, 400, QtCore.Qt.KeepAspectRatio))
+
+    def generate_thumbnails(self):
+        self.thumbnails = []
+        thumb_dir = self.work_dir + '/thumbnails'
+        try:
+            if not os.path.isdir(thumb_dir):
+                os.mkdir(thumb_dir)
+        except OSError:
+            return False
+        for file in self.files:
+            image = Image.open(file)
+            image.thumbnail((400, 400))
+            new_name = self.work_dir + '/thumbnails/' + os.path.basename(file)
+            image.save(new_name)
+            self.thumbnails.append(new_name)
+
+    def load_thumbnails(self):
+        td = self.work_dir + '/thumbnails'
+        self.thumbnails = [os.path.join(td, f) for f in os.listdir(td) if
+                           os.path.isfile(os.path.join(td, f))]
+
+    def rotate_image(self, angle):
+        pass
+
+    # https://python-scripts.com/draw-circle-rectangle-line
+
+    def check_thumbnails(self):
+        source = []
+        thumbs = []
+        for file in self.files:
+            source.append(os.path.basename(file))
+        for file in self.thumbnails:
+            thumbs.append(os.path.basename(file))
+        if source != thumbs:
+            return False
+        return True
+
+    def open_image(self):
+        # https://ru.stackoverflow.com/questions/1263508/Как-добавить-изображение-на-qgraphicsview
+        fname, _ = QFileDialog.getOpenFileName(
+            self, 'Open file', '.', 'Image Files (*.png *.jpg *.bmp)')
+        if fname:
+            pic = QGraphicsPixmapItem()
+            pic.setPixmap(QPixmap(fname).scaled(160, 160))
+            pic.setFlags(QGraphicsItem.ItemIsSelectable | QGraphicsItem.ItemIsMovable)
+
+    def save_project(self):
+        checked = []
+        actions = []
+        for cb in self.check_list:
+            checked.append(cb.isChecked())
+        if self.project.current_step == 0:
+            actions = self.rotates
+        self.project.set_current_action_steps(actions, checked)
+        self.project.save_project()
+
+
+def excepthook(exc_type, exc_value, exc_tb):
+    tb = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
+    print(tb)
+    msg = QMessageBox.critical(
+        None,
+        "Error catched!:",
+        tb
+    )
+    QApplication.quit()
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    ex = MyWidget()
+    sys.excepthook = excepthook
+    app.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5', palette=qdarkstyle.DarkPalette))
+    ex.show()
+    sys.exit(app.exec_())
+
+
+# Файл 2: classes.py
+from PyQt5 import QtCore
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import QPixmap
+import pickle
+import os
+import shutil
+from PIL import Image
+
+
+class Point:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def __eq__(self, other):
+        return self.x == other.x and self.y == other.y
+
+    def __hash__(self):
+        return hash((self.x, self.y))
+
+
+class Area:
+    def __init__(self, points=None):
+        if points is None:
+            points = set()
+        self.points = points
+
+    def get_width(self):
+        if len(self.points) == 0:
+            return 0
+        return max(p.x for p in self.points) - min(p.x for p in self.points)
+
+    def get_height(self):
+        if len(self.points) == 0:
+            return 0
+        return max(p.y for p in self.points) - min(p.y for p in self.points)
+
+    def add_point(self, x, y):
+        self.points.add(Point(x, y))
+
+    def near(self, x, y):
+        for p in self.points:
+            if abs(p.x - x) == 1 or abs(p.y - y) == 1:
+                return True
+        return False
+
+
+class myLabel(QLabel):
+    clicked = pyqtSignal()
+
+    def mouseReleaseEvent(self, QMouseEvent):
+        if QMouseEvent.button() == Qt.LeftButton:
+            self.clicked.emit()
+
+
+class Project:
+    def __init__(self, directory_name=None, file_project_name=None):
+        self.work_dir = directory_name
+        self.file_project_name = file_project_name
+        self.current_step = 0
+        self.rotates = None
+        self.steps = ["rotates", "vertical_cut", "horizontal_cut", "orientation", "angle_adjust", "word_select",
+                      "letter_select", "output"]
+        self.text_steps = ["выбор ориентации листа", "вертикальный разрез", "горизонтальный разрез",
+                           "ориентация бланка", "подгонка угла поворота бланка", "выбор слов",
+                           "выбор букв", "вывод результата"]
+        if directory_name is not None:
+            self.load_project()
+        else:
+            self.action_steps = [0 for i in range(7)]
+
+    def __getstate__(self) -> dict:
+        state = {}
+        state["work_dir"] = self.work_dir
+        state["file_project_name"] = self.file_project_name
+        state["current_step"] = self.current_step
+        state["rotates"] = self.rotates
+        state["action_steps"] = self.action_steps
+        return state
+
+    def set_current_action_steps(self, action, check_list):
+        files = self.load_current_files()
+        self.action_steps[self.current_step] = list(zip(files, action, check_list))
+
+    def get_current_files(self):
+        files, _, __ = zip(*self.action_steps[self.current_step])
+        return files
+
+    def get_current_action(self):
+        _, action, __ = zip(*self.action_steps[self.current_step])
+        return action
+
+    def get_current_text_step(self):
+        return self.text_steps[self.current_step]
+
+    def get_current_check_list(self):
+        _, __, check_list = zip(*self.action_steps[self.current_step])
+        return check_list
+
+    def get_current_step_dir(self):
+        return self.work_dir + '/processing/' + self.steps[self.current_step]
+
+    def rotate(self, source, destination, angle):
+        try:
+            file = source
+            new_file = destination
+            im = Image.open(file)
+            im_rotate = im.rotate(-angle, expand=True)
+            im_rotate.save(new_file, quality=100)
+            im.close()
+            return True
+        except OSError:
+            return False
+
+    def __setstate__(self, state: dict):
+        self.work_dir = state["work_dir"]
+        self.file_project_name = state["file_project_name"]
+        self.current_step = state["current_step"]
+        self.rotates = state["rotates"]
+        self.action_steps = state["action_steps"]
+
+    def load_project(self):
+        file_name = self.get_possible_project_name()
+        try:
+            with open(file_name, "rb") as fp:
+                temp = pickle.load(fp)
+                self.work_dir = temp.work_dir
+                self.file_project_name = temp.file_project_name
+                self.current_step = temp.current_step
+                self.rotates = temp.rotates
+                self.action_steps = temp.action_steps
+                return True
+        except OSError as e:
+            print("OS error({0}): {1}".format(e.errno, e.strerror))
+            return False
+
+    def save_project(self):
+        try:
+            with open(self.file_project_name, "wb") as fp:
+                pickle.dump(self, fp)
+                return True
+        except OSError as e:
+            print("OS error({0}): {1}".format(e.errno, e.strerror))
+            return False
+
+    def get_possible_project_name(self):
+        return self.work_dir + '/processing/' + os.path.basename(self.work_dir) + ".blr"
+
+    def set_action(self, current_action):
+        self.action_steps[self.current_step] = current_action
+
+    def new_project(self, window):
+        self.work_dir = ""
+        self.work_dir = QFileDialog.getExistingDirectory(window, 'Select Folder')
+        # Проверить что в папке нет уже существующего проекта, если есть то либо загружаем старый либо создаем новый
+        if self.work_dir == "":
+            return False
+        possible_project_name = self.get_possible_project_name()
+        if os.path.isfile(possible_project_name):
+            reply = QMessageBox.question(None, 'Проект существует',
+                                         'В папке имеется проект, загрузить его?',
+                                         QMessageBox.Yes | QMessageBox.No,
+                                         QMessageBox.No)
+
+            if reply == QMessageBox.Yes:
+                self.load_project()
+                return True
+        else:
+            if self.make_structure():
+                self.file_project_name = possible_project_name
+                self.save_project()
+                return True
+        return False
+
+    def make_structure(self):
+        try:
+            if not os.path.isdir(self.work_dir + '/processing'):
+                os.mkdir(self.work_dir + '/processing')
+            for step in self.steps:
+                if not os.path.isdir(self.work_dir + '/processing/' + step):
+                    os.mkdir(self.work_dir + '/processing/' + step)
+            files = os.listdir(self.work_dir)
+            for fname in files:
+                if os.path.isfile(os.path.join(self.work_dir, fname)):
+                    shutil.copy2(os.path.join(self.work_dir, fname), self.work_dir + '/processing/rotates')
+            return True
+        except OSError:
+            return False
+
+    def next_step(self):
+        if self.current_step == 0:
+            try:
+                for filename in os.listdir(self.work_dir + '/processing/vertical_cut'):
+                    file_path = os.path.join(self.work_dir + '/processing/vertical_cut', filename)
+                    os.remove(file_path)
+                if os.path.isdir(self.work_dir + '/processing/vertical_cut/thumbnails'):
+                    shutil.rmtree(self.work_dir + '/processing/vertical_cut/thumbnails')
+            except OSError:
+                return False
+            check_list = self.get_current_check_list()
+            files = self.get_current_files()
+            angles = self.get_current_action()
+            t = 0
+            for i in range(len(files)):
+                if check_list[i]:
+                    t += 1
+                    if angles[i] != 0:
+                        dest = self.work_dir + '/processing/vertical_cut/' + os.path.basename(files[i])
+                        if not self.rotate(files[i], dest, angles[i]):
+                            return -1
+                    else:
+                        shutil.copy2(files[i], self.work_dir + '/processing/vertical_cut')
+            action = [0 for _ in range(t)]
+            check_list = [False for _ in range(t)]
+            self.current_step += 1
+            self.set_current_action_steps(action, check_list)
+            self.save_project()
+            return self.current_step
+        # if self.current_step < 7:
+        #     self.current_step += 1
+        #     return self.steps[self.current_step]
+        # else:
+        #     return False
+
+    def load_current_files(self):
+        if self.work_dir is None:
+            return ''
+        else:
+            current_step_dir = self.work_dir + '/processing/' + self.steps[self.current_step]
+            files = [os.path.join(current_step_dir, f) for f in os.listdir(current_step_dir) if
+                     os.path.isfile(os.path.join(self.work_dir, f))]
+            return files
+
+    def generate_thumbnails(self):
+        thumbnails = []
+        for file in self.load_current_files():
+            image = Image.open(file)
+            image.thumbnail((400, 400))
+            new_name = self.work_dir + '/processing/' + self.steps[self.current_step] + \
+                       '/thumbnails/' + os.path.basename(file)
+            image.save(new_name)
+            thumbnails.append(new_name)
+        return thumbnails
+
+    def get_current_thumbnails(self):
+        if os.path.isdir(self.work_dir + '/processing/' + self.steps[self.current_step] + '/thumbnails'):
+            td = self.work_dir + '/processing/' + self.steps[self.current_step] + '/thumbnails'
+            thumbnails = [os.path.join(td, f) for f in os.listdir(td) if
+                          os.path.isfile(os.path.join(td, f))]
+            return thumbnails
+        else:
+            os.mkdir(self.work_dir + '/processing/' + self.steps[self.current_step] + '/thumbnails')
+            return self.generate_thumbnails()
+
+
+class ImageViewer(QGraphicsView):
+    def __init__(self, image_path, v_cut=False, h_cut=False):
+        super().__init__()
+        self.v_cut = v_cut
+        self.h_cut = h_cut
+        self.scene = QGraphicsScene(self)
+        self.setScene(self.scene)
+        self.pixmap = QGraphicsPixmapItem(QPixmap(image_path).scaled(2000, 1000,
+                                                                     aspectRatioMode=2))
+        self.scene.addItem(self.pixmap)
+        self.mouse_press_pos = None
+        self.lines = []
+        self.current_line = None
+
+    def add_line(self, v_cut=False, h_cut=False):
+        self.v_cut = v_cut
+        self.h_cut = h_cut
+        if self.v_cut:
+            line = QGraphicsLineItem(self.pixmap.pixmap().width() // 2, 0,
+                                     self.pixmap.pixmap().width() // 2, self.pixmap.pixmap().height())
+            line.setPen(Qt.red)
+            self.scene.addItem(line)
+            self.lines.append(line)
+            self.current_line = len(self.lines) - 1
+
+    def get_lines(self):
+        return self.lines
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton and (self.v_cut or self.h_cut):
+            self.mouse_press_pos = event.pos()
+
+    def mouseMoveEvent(self, event):
+        if self.mouse_press_pos is not None and (self.v_cut or self.h_cut):
+            delta = event.pos() - self.mouse_press_pos
+            delta.setY(0)
+            new_pos = self.lines[self.current_line].pos() + delta
+            self.lines[self.current_line].setPos(new_pos)
+            self.mouse_press_pos = event.pos()
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton and (self.v_cut or self.h_cut):
+            self.mouse_press_pos = None
