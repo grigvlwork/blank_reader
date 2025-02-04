@@ -245,3 +245,146 @@ if __name__ == '__main__':
 
 
 Такой вопрос в объекте imageviewer происходит добавление на изображение линий разреза, в классе проект нужно записать эти линии в список actions по индексу который соответствует этому изображению. Как это сделать если Imageviewer является вызываемым по отношению к проекту, или подскажи как улучшить логику хранения позиций разреза для нескольких изображений.
+
+
+1. Использование Observer (наблюдатель)
+Можно сделать так, чтобы ImageViewer уведомлял Project о новых линиях разреза через callback-функцию.
+
+Пример кода:
+
+python
+Копировать
+Редактировать
+class ImageViewer:
+    def __init__(self, image_index, on_cut_added=None):
+        self.image_index = image_index  # Индекс изображения в Project
+        self.on_cut_added = on_cut_added  # Callback-функция
+        self.cuts = []  # Список линий разреза
+
+    def add_cut(self, cut):
+        self.cuts.append(cut)
+        if self.on_cut_added:
+            self.on_cut_added(self.image_index, cut)  # Сообщаем Project
+В Project передаем callback:
+
+python
+Копировать
+Редактировать
+class Project:
+    def __init__(self):
+        self.actions = {}  # {индекс_изображения: [список разрезов]}
+
+    def add_cut_to_image(self, image_index, cut):
+        if image_index not in self.actions:
+            self.actions[image_index] = []
+        self.actions[image_index].append(cut)
+
+    def create_viewer(self, image_index):
+        return ImageViewer(image_index, self.add_cut_to_image)
+Теперь ImageViewer просто вызывает on_cut_added(image_index, cut), и разрез сохраняется в Project.
+Как это работает?
+
+ImageViewer получает on_cut_added (ссылку на Project.add_cut_to_image).
+Когда в ImageViewer добавляется линия разреза, вызывается self.on_cut_added(self.image_index, cut).
+Project.add_cut_to_image обновляет actions.
+
+Если передаешь callback в метод, указывай его тип:
+
+
+from typing import Callable
+
+class ImageViewer:
+    def __init__(self, image_index: int, on_cut_added: Callable[[int, str], None]):
+        self.image_index = image_index
+        self.on_cut_added = on_cut_added  # Callback
+
+    def add_cut(self, cut: str):
+        if self.on_cut_added:
+            self.on_cut_added(self.image_index, cut)
+Это делает код читаемым и понятным для разработчиков.
+
+Вариант 2: Используем NamedTuple (более строгий вариант)
+Если хочешь строгую типизацию, лучше использовать NamedTuple.
+
+from typing import NamedTuple, Union
+
+class Action(NamedTuple):
+    type: str  # "cut", "crop", "rotate"
+    value: Union[int, tuple]  # Число или кортеж
+
+class ImageViewer:
+    def __init__(self, image_index, on_action_added):
+        self.image_index = image_index
+        self.on_action_added = on_action_added  # Callback
+
+    def add_cut(self, position: int):
+        action = Action(type="cut", value=position)
+        self.on_action_added(self.image_index, action)
+
+    def crop_image(self, coords: tuple):
+        action = Action(type="crop", value=coords)
+        self.on_action_added(self.image_index, action)
+
+class Project:
+    def __init__(self):
+        self.actions = {}
+
+    def add_action_to_image(self, image_index, action: Action):
+        if image_index not in self.actions:
+            self.actions[image_index] = []
+        self.actions[image_index].append(action)
+        print(f"Добавлена операция: {action} для изображения {image_index}")
+
+    def create_viewer(self, image_index):
+        return ImageViewer(image_index, self.add_action_to_image)
+
+# ✅ Тестируем
+project = Project()
+viewer = project.create_viewer(0)
+
+viewer.add_cut(120)
+viewer.crop_image((50, 50, 400, 400))
+
+print(project.actions)
+# {0: [Action(type='cut', value=120), Action(type='crop', value=(50, 50, 400, 400))]}
+🔹 Плюсы этого подхода
+✅ Типизация – Python проверяет, что передаются правильные данные.
+✅ Более читаемый код (можно делать action.type, action.value).
+
+Вот финальная реализация для твоего случая:
+
+from typing import NamedTuple, Union
+
+class Action(NamedTuple):
+    type: str  # Тип операции: "cut", "crop" и т. д.
+    value: Union[int, tuple]  # Число (разрез) или кортеж (обрезка)
+
+# ✅ Используем
+action1 = Action("cut", 150)
+action2 = Action("crop", (10, 20, 200, 300))
+
+print(action1)  # Action(type='cut', value=150)
+print(action2)  # Action(type='crop', value=(10, 20, 200, 300))
+🔹 Как интегрировать в твой код?
+Теперь в классе Project можно хранить действия в виде списка NamedTuple:
+
+python
+Копировать
+Редактировать
+class Project:
+    def __init__(self):
+        self.actions = {}  # {индекс_изображения: [список операций]}
+
+    def add_action_to_image(self, image_index: int, action: Action):
+        if image_index not in self.actions:
+            self.actions[image_index] = []
+        self.actions[image_index].append(action)
+        print(f"Добавлена операция: {action} для изображения {image_index}")
+
+# ✅ Используем
+project = Project()
+project.add_action_to_image(0, Action("cut", 150))
+project.add_action_to_image(0, Action("crop", (10, 20, 200, 300)))
+
+print(project.actions)
+# {0: [Action(type='cut', value=150), Action(type='crop', value=(10, 20, 200, 300))]}
