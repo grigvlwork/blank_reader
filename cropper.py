@@ -21,27 +21,13 @@
 # Что делает возврат на предыдущий этап(ы)? при каких-то изменениях выделять цветом на следующих этапах?
 
 
-# import os
-# from os import listdir
-# from os.path import isfile, join
 import sys
 import qdarkstyle
 import traceback
-from classes import STEPS
-# import os
-
-from PyQt5 import uic, QtCore, QtGui
-from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox, QMenu, QGraphicsPixmapItem, \
-    QGraphicsItem, QLabel, QGroupBox, QVBoxLayout, QFormLayout, QWidget, QGraphicsView, QGraphicsScene, \
-    QGraphicsPixmapItem, QGraphicsLineItem
-# from PyQt5.QtGui import QStandardItem, QStandardItemModel
-from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox
-# from PyQt5.Qt import QClipboard
-# from PyQt5.QtCore import QModelIndex
-# import icons_rc
-# from PyQt5.QtGui import QPixmap
-from PIL import Image, ImageFont, ImageDraw
-
+from PyQt5 import QtGui
+from PyQt5.QtWidgets import QGraphicsItem, QLabel, QGroupBox, QVBoxLayout, QGraphicsPixmapItem
+from PyQt5.QtWidgets import QApplication, QFileDialog, QMessageBox
+from PIL import ImageFont, ImageDraw
 from cropper_ui import Ui_MainWindow
 from classes import *
 from functions import *
@@ -60,10 +46,6 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.thumbnails = []
         self.labels = []
         self.current_image_index = None
-        # self.rotates = []
-        # self.v_cut_x = []
-        # self.lines = []
-        # self.current_line = None
         self.check_list = []
         self.buttons = {
             "new_project": self.new_project_btn,
@@ -90,14 +72,9 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                                "zoom_in", "zoom_out", "add_horizontal_cut",
                                "delete_cut", "sciss_btn", "previous", "next"],
             "orientation": ["new_project", "open", "save", "check_all",
-                               "zoom_in", "zoom_out", "rotate_clock",
-                               "rotate_counter_clock", "previous", "next"]
+                            "zoom_in", "zoom_out", "rotate_clock",
+                            "rotate_counter_clock", "previous", "next"]
         }
-        # self.buttons = [self.new_project_btn, self.open_btn, self.save_btn, self.check_all_btn,
-        #                 self.rotate_clock_btn, self.rotate_counter_clock_btn,
-        #                 self.zoom_out_btn, self.zoom_in_btn, self.add_vertical_cut_btn,
-        #                 self.add_horizontal_cut_btn, self.delete_cut_btn, self.sciss_btn,
-        #                 self.previous_btn, self.next_btn]
         self.theme_btn.clicked.connect(self.change_theme)
         self.open_btn.clicked.connect(self.open_folder)
         self.rotate_clock_btn.clicked.connect(self.rotate_right)
@@ -110,21 +87,15 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.source_lb.setText('')
         self.source_lb.setGeometry(0, 0, 1000, 1000)
         self.source_lb.mousePressEvent = self.mousePressEvent
-        # self.v_cut = False
-        # self.h_cut = False
         self.image_viewer = None
         self.scene = None
         self.pixmap = None
         self.project = None
         self.show_buttons()
 
-
     def show_buttons(self):
         if self.project is None:
             step_name = 'start'
-            # button_state = [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-            # for i in range(len(self.buttons)):
-            #     self.buttons[i].setVisible(button_state[i])
         else:
             step_name = STEPS[self.project.current_step]
         for name, button in self.buttons.items():
@@ -132,39 +103,17 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 button.show()  # Показываем кнопку
             else:
                 button.hide()  # Скрываем кнопку
-        # elif self.project.current_step == 0:  # Вертикальный разрез
-        #     step_name = 'vertical_cut'
-        #     # button_state = [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1]
-        #     # for i in range(len(self.buttons)):
-        #     #     self.buttons[i].setVisible(button_state[i])
-        # elif self.project.current_step == 1:  # Горизонтальный разрез
-        #     button_state = [1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1]
-        #     for i in range(len(self.buttons)):
-        #         self.buttons[i].setVisible(button_state[i])
-        #     self.sciss_btn.setEnabled(False)
 
     def check_all(self):
         for check_box in self.check_list:
             check_box.setChecked(True)
 
-    # def vertical_cut(self):
-    #     # self.v_cut = True
-    #     # self.h_cut = False
-    #     if self.image_viewer is not None:
-    #         self.image_viewer.add_line()
-
     def add_vertical(self):
-        # self.v_cut = True
-        # self.h_cut = False
         if self.image_viewer is not None:
             if len(self.lines[self.current_image_index]) == 0:
                 self.image_viewer.add_line()
                 self.image_sa.show()
                 self.sciss_btn.setEnabled(True)
-
-    # def horizontal_cut(self):
-    #     self.h_cut = True
-    #     self.v_cut = False
 
     def create_new_project(self):
         self.project = Project()
@@ -174,8 +123,6 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.files = self.project.load_current_files()
         self.thumbnails = self.project.get_current_thumbnails()
         self.show_thumbnails()
-        # self.rotates = [0] * len(self.files)
-        # self.v_cut_x = [0] * len(self.files)
         self.setWindowTitle('Обработка изображений - вертикальный разрез')
         self.show_buttons()
 
@@ -201,12 +148,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.files = self.project.load_current_files()
         self.thumbnails = self.project.get_current_thumbnails()
         self.checked = self.project.get_current_check_list()
-        # self.actions = self.project.get_current_action()
-        # if self.project.current_step == 0:
-        #     self.rotates = actions
         self.show_thumbnails(self.checked)
-        # self.rotates = [0] * len(self.files)
-        # self.v_cut = None
         self.setWindowTitle('Обработка изображений - вертикальный разрез')
         self.show_buttons()
 
@@ -218,8 +160,6 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             group_box = QGroupBox()
             num = 1
             self.labels.clear()
-            # if self.project.current_step == 1:
-            #     self.lines = [[] for _ in range(len(self.thumbnails))]
             for file in self.thumbnails:
                 mini_v_layout = QVBoxLayout()
                 label_num = QLabel(f'{num}:')
@@ -238,7 +178,6 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 h_layout = QHBoxLayout()
                 h_layout.addLayout(mini_v_layout)
                 h_layout.addWidget(label)
-                # v_layout.addRow(mini_v_layout, label)
                 v_layout.addLayout(h_layout)
                 if self.project.current_step == 0:
                     label.clicked.connect(self.thumbnail_click)
@@ -253,20 +192,9 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             if self.labels[i] == self.sender():
                 file = self.files[i]
                 self.current_image_index = i
-                # self.image_viewer = ImageViewer(file)
                 self.image_viewer = self.project.create_viewer(file, i)
                 self.image_sa.setWidget(self.image_viewer)
                 self.image_sa.show()
-
-    # def thumbnail_click_v_cut(self):
-    #     for i in range(len(self.labels)):
-    #         if self.labels[i] == self.sender():
-    #             file = self.files[i]
-    #             self.current_image_index = i
-    #             self.image_viewer = self.project.create_viewer(file, self.current_image_index)
-    #             self.image_sa.setWidget(self.image_viewer)
-    #             self.image_sa.show()
-    #             break
 
     def next_step(self):
         self.save_project()
@@ -280,20 +208,21 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             self.show_buttons()
 
     def rotate_right(self):
-        self.rotates[self.current_image_index] += 90
-        # self.rotates[self.current_image_index] %= 360
-        if self.rotates[self.current_image_index] >= 0:
-            self.write_on_thumbnails(f'Right {self.rotates[self.current_image_index]}')
-        else:
-            self.write_on_thumbnails(f'Left {-self.rotates[self.current_image_index]}')
+        pass
+        # self.rotates[self.current_image_index] += 90
+        # if self.rotates[self.current_image_index] >= 0:
+        #     self.write_on_thumbnails(f'Right {self.rotates[self.current_image_index]}')
+        # else:
+        #     self.write_on_thumbnails(f'Left {-self.rotates[self.current_image_index]}')
 
     def rotate_left(self):
-        self.rotates[self.current_image_index] -= 90
-        # self.rotates[self.current_image_index] %= 360
-        if self.rotates[self.current_image_index] >= 0:
-            self.write_on_thumbnails(f'Right {self.rotates[self.current_image_index]}')
-        else:
-            self.write_on_thumbnails(f'Left {-self.rotates[self.current_image_index]}')
+        pass
+        # self.rotates[self.current_image_index] -= 90
+        # # self.rotates[self.current_image_index] %= 360
+        # if self.rotates[self.current_image_index] >= 0:
+        #     self.write_on_thumbnails(f'Right {self.rotates[self.current_image_index]}')
+        # else:
+        #     self.write_on_thumbnails(f'Left {-self.rotates[self.current_image_index]}')
 
     def write_on_thumbnails(self, text):
         im = Image.open(self.thumbnails[self.current_image_index])
@@ -354,12 +283,12 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             pic.setFlags(QGraphicsItem.ItemIsSelectable | QGraphicsItem.ItemIsMovable)
 
     def save_project(self):
-        checked = []
+        # checked = []
         # actions = []
-        for cb in self.check_list:
-            checked.append(cb.isChecked())
-        if self.project.current_step == 0:
-            actions = self.rotates
+        # for cb in self.check_list:
+        #     checked.append(cb.isChecked())
+        # if self.project.current_step == 0:
+        #     actions = self.actions
         # self.project.set_current_action_steps(actions, checked)
         self.project.save_project()
 
