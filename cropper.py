@@ -7,13 +7,13 @@
 #
 # Нужно сделать обработку в виде проекта(папки) processing с
 # подкаталогами для шагов обработки
-# 1) rotates
-# 2) vertical_cut (к именам файлов добавим _vcN(0, 1, 2, ...))
-# 3) horizontal_cut (к именам файлов добавим _hcN(0, 1, 2, ...))
+# 1) rotates Пропускаем
+# 2) vertical_cut (к именам файлов добавим vN(0, 1))
+# 3) horizontal_cut (к именам файлов добавим hN(0, 1))
 # 4) orientation
 # 5) angle_adjust
-# 6) word_select (к именам файлов добавим _wsN(00, 01, 02, ...))
-# 7) letter_select(к именам файлов добавим _lsN(00, 01, 02, ...))
+# 6) word_select (к именам файлов добавим wN(00, 01, 02, ...))
+# 7) letter_select(к именам файлов добавим lN(00, 01, 02, ...))
 # 8) Формирование папки output в которой вырезанные буквы и цифры разложены по папкам 0 1 2 3 а б в ...
 # Нажатие на кнопку действия создаёт(перезаписывает) файл(ы) в папке следующего этапа.
 # К следующему этапу можно перейти если обработаны или подтверждены файлы текущего этапа
@@ -58,10 +58,10 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.thumbnails = []
         self.labels = []
         self.current_image_index = None
-        self.rotates = []
-        self.v_cut_x = []
-        self.lines = []
-        self.current_line = None
+        # self.rotates = []
+        # self.v_cut_x = []
+        # self.lines = []
+        # self.current_line = None
         self.check_list = []
         self.buttons = [self.new_project_btn, self.open_btn, self.save_btn, self.check_all_btn,
                         self.rotate_clock_btn, self.rotate_counter_clock_btn,
@@ -80,8 +80,8 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.source_lb.setText('')
         self.source_lb.setGeometry(0, 0, 1000, 1000)
         self.source_lb.mousePressEvent = self.mousePressEvent
-        self.v_cut = False
-        self.h_cut = False
+        # self.v_cut = False
+        # self.h_cut = False
         self.image_viewer = None
         self.scene = None
         self.pixmap = None
@@ -93,11 +93,11 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             button_state = [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
             for i in range(len(self.buttons)):
                 self.buttons[i].setVisible(button_state[i])
-        elif self.project.current_step == 0:
+        elif self.project.current_step == 0: # Вертикальный разрез
             button_state = [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1]
             for i in range(len(self.buttons)):
                 self.buttons[i].setVisible(button_state[i])
-        elif self.project.current_step == 1:
+        elif self.project.current_step == 1: # Горизонтальный разрез
             button_state = [1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1]
             for i in range(len(self.buttons)):
                 self.buttons[i].setVisible(button_state[i])
@@ -107,24 +107,24 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         for check_box in self.check_list:
             check_box.setChecked(True)
 
-    def vertical_cut(self):
-        self.v_cut = True
-        self.h_cut = False
-        if self.image_viewer is not None:
-            self.image_viewer.add_line(self.h_cut, self.h_cut)
+    # def vertical_cut(self):
+    #     # self.v_cut = True
+    #     # self.h_cut = False
+    #     if self.image_viewer is not None:
+    #         self.image_viewer.add_line()
 
     def add_vertical(self):
-        self.v_cut = True
-        self.h_cut = False
+        # self.v_cut = True
+        # self.h_cut = False
         if self.image_viewer is not None:
             if len(self.lines[self.current_image_index]) == 0:
-                self.image_viewer.add_line(self.v_cut, self.h_cut)
+                self.image_viewer.add_line()
                 self.image_sa.show()
                 self.sciss_btn.setEnabled(True)
 
-    def horizontal_cut(self):
-        self.h_cut = True
-        self.v_cut = False
+    # def horizontal_cut(self):
+    #     self.h_cut = True
+    #     self.v_cut = False
 
     def create_new_project(self):
         self.project = Project()
@@ -134,9 +134,9 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.files = self.project.load_current_files()
         self.thumbnails = self.project.get_current_thumbnails()
         self.show_thumbnails()
-        self.rotates = [0] * len(self.files)
-        self.v_cut_x = [0] * len(self.files)
-        self.setWindowTitle('Обработка изображений - выбор ориентации')
+        # self.rotates = [0] * len(self.files)
+        # self.v_cut_x = [0] * len(self.files)
+        self.setWindowTitle('Обработка изображений - вертикальный разрез')
         self.show_buttons()
 
     def change_theme(self):
@@ -167,7 +167,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.show_thumbnails(checked)
         self.rotates = [0] * len(self.files)
         self.v_cut = None
-        self.setWindowTitle('Обработка изображений - выбор ориентации')
+        self.setWindowTitle('Обработка изображений - вертикальный разрез')
         self.show_buttons()
 
     def show_thumbnails(self, checked=None):
@@ -218,14 +218,15 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 self.image_sa.setWidget(self.image_viewer)
                 self.image_sa.show()
 
-    def thumbnail_click_v_cut(self):
-        for i in range(len(self.labels)):
-            if self.labels[i] == self.sender():
-                file = self.files[i]
-                self.current_image_index = i
-                self.image_viewer = ImageViewer(file, self.v_cut, self.h_cut)
-                self.image_sa.setWidget(self.image_viewer)
-                self.image_sa.show()
+    # def thumbnail_click_v_cut(self):
+    #     for i in range(len(self.labels)):
+    #         if self.labels[i] == self.sender():
+    #             file = self.files[i]
+    #             self.current_image_index = i
+    #             self.image_viewer = self.project.create_viewer(file, self.current_image_index)
+    #             self.image_sa.setWidget(self.image_viewer)
+    #             self.image_sa.show()
+    #             break
 
     def next_step(self):
         self.save_project()
@@ -314,12 +315,12 @@ class MyWidget(QMainWindow, Ui_MainWindow):
 
     def save_project(self):
         checked = []
-        actions = []
+        # actions = []
         for cb in self.check_list:
             checked.append(cb.isChecked())
         if self.project.current_step == 0:
             actions = self.rotates
-        self.project.set_current_action_steps(actions, checked)
+        # self.project.set_current_action_steps(actions, checked)
         self.project.save_project()
 
 

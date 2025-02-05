@@ -8,7 +8,6 @@ import shutil
 from PIL import Image
 from typing import Callable, NamedTuple, Union
 
-from sympy.physics.units import action
 
 STEPS = ["rotates", "vertical_cut", "horizontal_cut", "orientation", "angle_adjust", "word_select",
          "letter_select", "output"]
@@ -73,14 +72,16 @@ class Project:
         self.work_dir = directory_name
         self.file_project_name = file_project_name
         self.current_step = 0
-        self.rotates = None
+        # self.rotates = None
+        self.files = None
+        self.check_list = None
         self.steps = STEPS
         self.text_steps = TEXT_STEPS
         if directory_name is not None:
             self.load_project()
         else:
-            self.action_steps = [0 for i in range(7)]
-        self.actions = {}  # {индекс_изображения: действие}
+            # self.action_steps = [0 for i in range(7)]
+            self.actions = dict()  # {индекс_изображения: действие}
 
     def add_action_to_image(self, image_index, action: Action):
         # if image_index not in self.actions:
@@ -91,34 +92,35 @@ class Project:
         return ImageViewer(path, image_index, self.add_action_to_image, self.current_step)
 
     def __getstate__(self) -> dict:
-        state = {}
+        state = dict()
         state["work_dir"] = self.work_dir
         state["file_project_name"] = self.file_project_name
         state["current_step"] = self.current_step
-        state["rotates"] = self.rotates
-        state["action_steps"] = self.action_steps
+        state["files"] = self.files
+        # state["rotates"] = self.rotates
+        # state["action_steps"] = self.action_steps
         state["actions"] = self.actions
-
+        state["check_list"] = self.check_list
         return state
 
-    def set_current_action_steps(self, action, check_list):
-        files = self.load_current_files()
-        self.action_steps[self.current_step] = list(zip(files, action, check_list))
+    # def set_current_action_steps(self, action, check_list):
+    #     files = self.load_current_files()
+    #     self.action_steps[self.current_step] = list(zip(files, action, check_list))
 
     def get_current_files(self):
-        files, _, __ = zip(*self.action_steps[self.current_step])
-        return files
+        # files, _, __ = zip(*self.action_steps[self.current_step])
+        return self.files
 
     def get_current_action(self):
-        _, action, __ = zip(*self.action_steps[self.current_step])
-        return action
+        # _, action, __ = zip(*self.action_steps[self.current_step])
+        return self.actions
 
     def get_current_text_step(self):
         return self.text_steps[self.current_step]
 
     def get_current_check_list(self):
-        _, __, check_list = zip(*self.action_steps[self.current_step])
-        return check_list
+        # _, __, check_list = zip(*self.action_steps[self.current_step])
+        return self.check_list
 
     def get_current_step_dir(self):
         return self.work_dir + '/processing/' + self.steps[self.current_step]
@@ -140,7 +142,7 @@ class Project:
         self.file_project_name = state["file_project_name"]
         self.current_step = state["current_step"]
         self.rotates = state["rotates"]
-        self.action_steps = state["action_steps"]
+        # self.action_steps = state["action_steps"]
         self.actions = state["actions"]
 
     def load_project(self):
@@ -151,8 +153,11 @@ class Project:
                 self.work_dir = temp.work_dir
                 self.file_project_name = temp.file_project_name
                 self.current_step = temp.current_step
-                self.rotates = temp.rotates
-                self.action_steps = temp.action_steps
+                # self.rotates = temp.rotates
+                # self.action_steps = temp.action_steps
+                self.actions = temp.actions
+                self.files = temp.files
+                self.check_list = temp.check_list
                 return True
         except OSError as e:
             print("OS error({0}): {1}".format(e.errno, e.strerror))
@@ -170,8 +175,8 @@ class Project:
     def get_possible_project_name(self):
         return self.work_dir + '/processing/' + os.path.basename(self.work_dir) + ".blr"
 
-    def set_action(self, current_action):
-        self.action_steps[self.current_step] = current_action
+    # def set_action(self, current_action):
+    #     self.action_steps[self.current_step] = current_action
 
     def new_project(self, window):
         self.work_dir = ""
@@ -212,7 +217,7 @@ class Project:
             return False
 
     def next_step(self):
-        if self.current_step == 0:
+        if self.current_step == 0: # Переделать на вертикальный разрез
             try:
                 for filename in os.listdir(self.work_dir + '/processing/vertical_cut'):
                     file_path = os.path.join(self.work_dir + '/processing/vertical_cut', filename)
@@ -237,7 +242,7 @@ class Project:
             action = [0 for _ in range(t)]
             check_list = [False for _ in range(t)]
             self.current_step += 1
-            self.set_current_action_steps(action, check_list)
+            # self.set_current_action_steps(action, check_list)
             self.save_project()
             return self.current_step
         # if self.current_step < 7:
@@ -321,7 +326,10 @@ class ImageViewer(QGraphicsView):
         if self.on_action_added:
             self.on_action_added(self.image_index, action)  # Сообщаем Project
 
-    def add_line(self, v_cut=False, h_cut=False):
+    def set_current_step(self, current_step):
+        self.current_step = current_step
+
+    def add_line(self):
         # self.v_cut = v_cut
         # self.h_cut = h_cut
         if self.current_step == 0:  # Вертикальный разрез
