@@ -213,7 +213,8 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             if self.labels[i] == self.sender():
                 file = self.files[i]
                 self.current_image_index = i
-                self.image_viewer = ImageViewer(file)
+                # self.image_viewer = ImageViewer(file)
+                self.image_viewer = self.project.create_viewer(file, i)
                 self.image_sa.setWidget(self.image_viewer)
                 self.image_sa.show()
 

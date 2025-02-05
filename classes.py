@@ -6,6 +6,20 @@ import pickle
 import os
 import shutil
 from PIL import Image
+from typing import Callable, NamedTuple, Union
+
+from sympy.physics.units import action
+
+STEPS = ["rotates", "vertical_cut", "horizontal_cut", "orientation", "angle_adjust", "word_select",
+         "letter_select", "output"]
+TEXT_STEPS = ["выбор ориентации листа", "вертикальный разрез", "горизонтальный разрез",
+              "ориентация бланка", "подгонка угла поворота бланка", "выбор слов",
+              "выбор букв", "вывод результата"]
+
+
+class Action(NamedTuple):
+    type: str  # "cut", "crop", "rotate"
+    value: Union[int, tuple]  # Число или кортеж
 
 
 class Point:
@@ -60,15 +74,21 @@ class Project:
         self.file_project_name = file_project_name
         self.current_step = 0
         self.rotates = None
-        self.steps = ["rotates", "vertical_cut", "horizontal_cut", "orientation", "angle_adjust", "word_select",
-                      "letter_select", "output"]
-        self.text_steps = ["выбор ориентации листа", "вертикальный разрез", "горизонтальный разрез",
-                           "ориентация бланка", "подгонка угла поворота бланка", "выбор слов",
-                           "выбор букв", "вывод результата"]
+        self.steps = STEPS
+        self.text_steps = TEXT_STEPS
         if directory_name is not None:
             self.load_project()
         else:
             self.action_steps = [0 for i in range(7)]
+        self.actions = {}  # {индекс_изображения: действие}
+
+    def add_action_to_image(self, image_index, action: Action):
+        # if image_index not in self.actions:
+        #     self.actions[image_index] = None
+        self.actions[image_index] = action
+
+    def create_viewer(self, path, image_index):
+        return ImageViewer(path, image_index, self.add_action_to_image, self.current_step)
 
     def __getstate__(self) -> dict:
         state = {}
@@ -77,6 +97,8 @@ class Project:
         state["current_step"] = self.current_step
         state["rotates"] = self.rotates
         state["action_steps"] = self.action_steps
+        state["actions"] = self.actions
+
         return state
 
     def set_current_action_steps(self, action, check_list):
@@ -119,6 +141,7 @@ class Project:
         self.current_step = state["current_step"]
         self.rotates = state["rotates"]
         self.action_steps = state["action_steps"]
+        self.actions = state["actions"]
 
     def load_project(self):
         file_name = self.get_possible_project_name()
@@ -255,10 +278,15 @@ class Project:
 
 
 class ImageViewer(QGraphicsView):
-    def __init__(self, image_path, v_cut=False, h_cut=False):
+    def __init__(self, image_path, image_index,
+                 on_action_added: Callable[[int, str], None],
+                 current_step):
         super().__init__()
-        self.v_cut = v_cut
-        self.h_cut = h_cut
+        # self.v_cut = v_cut
+        # self.h_cut = h_cut
+        self.current_step = current_step
+        self.image_index = image_index
+        self.on_action_added = on_action_added
         self.scene = QGraphicsScene(self)
         self.setScene(self.scene)
         self.pixmap = QGraphicsPixmapItem(QPixmap(image_path).scaled(2000, 1000,
@@ -268,10 +296,23 @@ class ImageViewer(QGraphicsView):
         self.lines = []
         self.current_line = None
 
+    def add_vertical_cut(self, position: int):
+        action = Action(type="vertical_cut", value=position)
+        self.on_action_added(self.image_index, action)
+
+    def add_horizontal_cut(self, position: int):
+        action = Action(type="horizontal_cut", value=position)
+        self.on_action_added(self.image_index, action)
+
+    def add_action(self, action):
+        # self.actions.append(action)
+        if self.on_action_added:
+            self.on_action_added(self.image_index, action)  # Сообщаем Project
+
     def add_line(self, v_cut=False, h_cut=False):
-        self.v_cut = v_cut
-        self.h_cut = h_cut
-        if self.v_cut:
+        # self.v_cut = v_cut
+        # self.h_cut = h_cut
+        if self.current_step == 0:  # Вертикальный разрез
             line = QGraphicsLineItem(self.pixmap.pixmap().width() // 2, 0,
                                      self.pixmap.pixmap().width() // 2, self.pixmap.pixmap().height())
             line.setPen(Qt.red)
@@ -295,5 +336,7 @@ class ImageViewer(QGraphicsView):
             self.mouse_press_pos = event.pos()
 
     def mouseReleaseEvent(self, event):
-        if event.button() == Qt.LeftButton and (self.v_cut or self.h_cut):
+        if event.button() == Qt.LeftButton and (self.current_step in (0, 1)):
             self.mouse_press_pos = None
+            action = Action(type=STEPS[self.current_step], value=event.pos())
+            self.add_action(action)
