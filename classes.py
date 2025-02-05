@@ -289,8 +289,20 @@ class ImageViewer(QGraphicsView):
         self.on_action_added = on_action_added
         self.scene = QGraphicsScene(self)
         self.setScene(self.scene)
-        self.pixmap = QGraphicsPixmapItem(QPixmap(image_path).scaled(2000, 1000,
-                                                                     aspectRatioMode=2))
+        # self.pixmap = QGraphicsPixmapItem(QPixmap(image_path).scaled(2000, 1000,
+        #                                                              aspectRatioMode=2))
+        # Загрузка изображения и сохранение его оригинальных размеров
+        pixmap = QPixmap(image_path)
+        original_width = pixmap.width()
+        original_height = pixmap.height()
+        # Масштабирование изображения
+        scaled_pixmap = pixmap.scaled(2000, 1000, transformMode=Qt.SmoothTransformation)
+        self.pixmap_item = QGraphicsPixmapItem(scaled_pixmap)
+        self.scene.addItem(self.pixmap_item)
+
+        # Коэффициенты масштабирования
+        self.scale_x = original_width / scaled_pixmap.width()
+        self.scale_y = original_height / scaled_pixmap.height()
         self.scene.addItem(self.pixmap)
         self.mouse_press_pos = None
         self.lines = []
@@ -337,6 +349,14 @@ class ImageViewer(QGraphicsView):
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton and (self.current_step in (0, 1)):
-            self.mouse_press_pos = None
-            action = Action(type=STEPS[self.current_step], value=event.pos())
+            # self.mouse_press_pos = None
+            # action = Action(type=STEPS[self.current_step], value=event.pos())
+            # self.add_action(action)
+            # Преобразуем координаты мышиного события в координаты исходного изображения
+            pos_in_original_image = QPointF(event.pos()) * QPointF(self.scale_x, self.scale_y)
+            if self.current_step == 0:  # Вертикальный разрез
+                action = Action(type='vertical_cut', value=int(pos_in_original_image.x()))
+            elif self.current_step == 1:  # Горизонтальный разрез
+                action = Action(type='horizontal_cut', value=int(pos_in_original_image.y()))
             self.add_action(action)
+            self.mouse_press_pos = None
