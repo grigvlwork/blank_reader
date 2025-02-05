@@ -21,24 +21,24 @@
 # Что делает возврат на предыдущий этап(ы)? при каких-то изменениях выделять цветом на следующих этапах?
 
 
-import os
-from os import listdir
-from os.path import isfile, join
+# import os
+# from os import listdir
+# from os.path import isfile, join
 import sys
 import qdarkstyle
 import traceback
-import os
+# import os
 
 from PyQt5 import uic, QtCore, QtGui
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox, QMenu, QGraphicsPixmapItem, \
     QGraphicsItem, QLabel, QGroupBox, QVBoxLayout, QFormLayout, QWidget, QGraphicsView, QGraphicsScene, \
     QGraphicsPixmapItem, QGraphicsLineItem
-from PyQt5.QtGui import QStandardItem, QStandardItemModel
+# from PyQt5.QtGui import QStandardItem, QStandardItemModel
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox
-from PyQt5.Qt import QClipboard
-from PyQt5.QtCore import QModelIndex
-import icons_rc
-from PyQt5.QtGui import QPixmap
+# from PyQt5.Qt import QClipboard
+# from PyQt5.QtCore import QModelIndex
+# import icons_rc
+# from PyQt5.QtGui import QPixmap
 from PIL import Image, ImageFont, ImageDraw
 
 from cropper_ui import Ui_MainWindow
@@ -49,6 +49,7 @@ from functions import *
 class MyWidget(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
+        self.checked = None
         self.mouse_press_pos = None
         self.setupUi(self)
         self.theme = 'Dark'
@@ -160,13 +161,13 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             return False
         self.files = self.project.load_current_files()
         self.thumbnails = self.project.get_current_thumbnails()
-        checked = self.project.get_current_check_list()
-        actions = self.project.get_current_action()
-        if self.project.current_step == 0:
-            self.rotates = actions
-        self.show_thumbnails(checked)
-        self.rotates = [0] * len(self.files)
-        self.v_cut = None
+        self.checked = self.project.get_current_check_list()
+        # self.actions = self.project.get_current_action()
+        # if self.project.current_step == 0:
+        #     self.rotates = actions
+        self.show_thumbnails(self.checked)
+        # self.rotates = [0] * len(self.files)
+        # self.v_cut = None
         self.setWindowTitle('Обработка изображений - вертикальный разрез')
         self.show_buttons()
 
@@ -178,8 +179,8 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             group_box = QGroupBox()
             num = 1
             self.labels.clear()
-            if self.project.current_step == 1:
-                self.lines = [[] for _ in range(len(self.thumbnails))]
+            # if self.project.current_step == 1:
+            #     self.lines = [[] for _ in range(len(self.thumbnails))]
             for file in self.thumbnails:
                 mini_v_layout = QVBoxLayout()
                 label_num = QLabel(f'{num}:')
@@ -263,7 +264,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             (5, 5),
             text,
             font=font,
-            fill=('#FF0000')
+            fill='#FF0000'
         )
         pix = pil2pixmap(im)
         self.labels[self.current_image_index].setPixmap(pix.scaled(200, 400, QtCore.Qt.KeepAspectRatio))

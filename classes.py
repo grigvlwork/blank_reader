@@ -9,9 +9,9 @@ from PIL import Image
 from typing import Callable, NamedTuple, Union
 
 
-STEPS = ["rotates", "vertical_cut", "horizontal_cut", "orientation", "angle_adjust", "word_select",
+STEPS = ["vertical_cut", "horizontal_cut", "orientation", "angle_adjust", "word_select",
          "letter_select", "output"]
-TEXT_STEPS = ["выбор ориентации листа", "вертикальный разрез", "горизонтальный разрез",
+TEXT_STEPS = ["вертикальный разрез", "горизонтальный разрез",
               "ориентация бланка", "подгонка угла поворота бланка", "выбор слов",
               "выбор букв", "вывод результата"]
 
@@ -239,8 +239,8 @@ class Project:
                             return -1
                     else:
                         shutil.copy2(files[i], self.work_dir + '/processing/vertical_cut')
-            action = [0 for _ in range(t)]
-            check_list = [False for _ in range(t)]
+            self.actions = dict()
+            self.check_list = [False for _ in range(t)]
             self.current_step += 1
             # self.set_current_action_steps(action, check_list)
             self.save_project()
