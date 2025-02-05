@@ -357,6 +357,7 @@ class ImageViewer(QGraphicsView):
             # self.add_action(action)
             # Преобразуем координаты мышиного события в координаты исходного изображения
             pos_in_original_image = QPointF(event.pos()) * QPointF(self.scale_x, self.scale_y)
+            action = None
             if self.current_step == 0:  # Вертикальный разрез
                 action = Action(type='vertical_cut', value=int(pos_in_original_image.x()))
             elif self.current_step == 1:  # Горизонтальный разрез
