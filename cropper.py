@@ -24,7 +24,7 @@
 import sys
 import qdarkstyle
 import traceback
-from PyQt5 import QtGui
+from PyQt5 import QtGui, QtCore
 from PyQt5.QtWidgets import QGraphicsItem, QLabel, QGroupBox, QVBoxLayout, QGraphicsPixmapItem
 from PyQt5.QtWidgets import QApplication, QFileDialog, QMessageBox
 from PIL import ImageFont, ImageDraw
@@ -168,7 +168,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                     check_box.setChecked(checked[num - 1])
                 self.check_list.append(check_box)
                 num += 1
-                label = myLabel(self)
+                label = Mylabel(self)
                 label.setPixmap(QPixmap(file).scaled(200, 400, QtCore.Qt.KeepAspectRatio))
                 self.labels.append(label)
                 v_sp = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)

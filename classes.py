@@ -1,4 +1,3 @@
-from PyQt5 import QtCore
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QPixmap
@@ -21,45 +20,45 @@ class Action(NamedTuple):
     value: Union[int, tuple]  # Число или кортеж
 
 
-class Point:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
+# class Point:
+#     def __init__(self, x, y):
+#         self.x = x
+#         self.y = y
+#
+#     def __eq__(self, other):
+#         return self.x == other.x and self.y == other.y
+#
+#     def __hash__(self):
+#         return hash((self.x, self.y))
+#
+#
+# class Area:
+#     def __init__(self, points=None):
+#         if points is None:
+#             points = set()
+#         self.points = points
+#
+#     def get_width(self):
+#         if len(self.points) == 0:
+#             return 0
+#         return max(p.x for p in self.points) - min(p.x for p in self.points)
+#
+#     def get_height(self):
+#         if len(self.points) == 0:
+#             return 0
+#         return max(p.y for p in self.points) - min(p.y for p in self.points)
+#
+#     def add_point(self, x, y):
+#         self.points.add(Point(x, y))
+#
+#     def near(self, x, y):
+#         for p in self.points:
+#             if abs(p.x - x) == 1 or abs(p.y - y) == 1:
+#                 return True
+#         return False
 
-    def __eq__(self, other):
-        return self.x == other.x and self.y == other.y
 
-    def __hash__(self):
-        return hash((self.x, self.y))
-
-
-class Area:
-    def __init__(self, points=None):
-        if points is None:
-            points = set()
-        self.points = points
-
-    def get_width(self):
-        if len(self.points) == 0:
-            return 0
-        return max(p.x for p in self.points) - min(p.x for p in self.points)
-
-    def get_height(self):
-        if len(self.points) == 0:
-            return 0
-        return max(p.y for p in self.points) - min(p.y for p in self.points)
-
-    def add_point(self, x, y):
-        self.points.add(Point(x, y))
-
-    def near(self, x, y):
-        for p in self.points:
-            if abs(p.x - x) == 1 or abs(p.y - y) == 1:
-                return True
-        return False
-
-
-class myLabel(QLabel):
+class Mylabel(QLabel):
     clicked = pyqtSignal()
 
     def mouseReleaseEvent(self, QMouseEvent):
@@ -72,7 +71,6 @@ class Project:
         self.work_dir = directory_name
         self.file_project_name = file_project_name
         self.current_step = 0
-        # self.rotates = None
         self.files = None
         self.check_list = None
         self.steps = STEPS
@@ -80,12 +78,9 @@ class Project:
         if directory_name is not None:
             self.load_project()
         else:
-            # self.action_steps = [0 for i in range(7)]
             self.actions = dict()  # {индекс_изображения: действие}
 
     def add_action_to_image(self, image_index, action: Action):
-        # if image_index not in self.actions:
-        #     self.actions[image_index] = None
         self.actions[image_index] = action
 
     def create_viewer(self, path, image_index):
