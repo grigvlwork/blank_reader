@@ -64,11 +64,27 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         # self.lines = []
         # self.current_line = None
         self.check_list = []
-        self.buttons = [self.new_project_btn, self.open_btn, self.save_btn, self.check_all_btn,
-                        self.rotate_clock_btn, self.rotate_counter_clock_btn,
-                        self.zoom_out_btn, self.zoom_in_btn, self.add_vertical_cut_btn,
-                        self.add_horizontal_cut_btn, self.delete_cut_btn, self.sciss_btn,
-                        self.previous_btn, self.next_btn]
+        self.buttons = {
+            "new_project": self.new_project_btn,
+            "open": self.open_btn,
+            "save": self.save_btn,
+            "check_all": self.check_all_btn,
+            "rotate_clock": self.rotate_clock_btn,
+            "rotate_counter_clock": self.rotate_counter_clock_btn,
+            "zoom_out": self.zoom_out_btn,
+            "zoom_in": self.zoom_in_btn,
+            "add_vertical_cut": self.add_vertical_cut_btn,
+            "add_horizontal_cut": self.add_horizontal_cut_btn,
+            "delete_cut": self.delete_cut_btn,
+            "sciss_btn": self.sciss_btn,
+            "previous": self.previous_btn,
+            "next": self.next_btn
+        }
+        # self.buttons = [self.new_project_btn, self.open_btn, self.save_btn, self.check_all_btn,
+        #                 self.rotate_clock_btn, self.rotate_counter_clock_btn,
+        #                 self.zoom_out_btn, self.zoom_in_btn, self.add_vertical_cut_btn,
+        #                 self.add_horizontal_cut_btn, self.delete_cut_btn, self.sciss_btn,
+        #                 self.previous_btn, self.next_btn]
         self.theme_btn.clicked.connect(self.change_theme)
         self.open_btn.clicked.connect(self.open_folder)
         self.rotate_clock_btn.clicked.connect(self.rotate_right)
@@ -94,11 +110,11 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             button_state = [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
             for i in range(len(self.buttons)):
                 self.buttons[i].setVisible(button_state[i])
-        elif self.project.current_step == 0: # Вертикальный разрез
+        elif self.project.current_step == 0:  # Вертикальный разрез
             button_state = [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1]
             for i in range(len(self.buttons)):
                 self.buttons[i].setVisible(button_state[i])
-        elif self.project.current_step == 1: # Горизонтальный разрез
+        elif self.project.current_step == 1:  # Горизонтальный разрез
             button_state = [1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1]
             for i in range(len(self.buttons)):
                 self.buttons[i].setVisible(button_state[i])
