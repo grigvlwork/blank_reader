@@ -27,6 +27,7 @@
 import sys
 import qdarkstyle
 import traceback
+from classes import STEPS
 # import os
 
 from PyQt5 import uic, QtCore, QtGui
@@ -80,6 +81,18 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             "previous": self.previous_btn,
             "next": self.next_btn
         }
+        self.step_buttons = {
+            "start": ["new_project", "open"],
+            "vertical_cut": ["new_project", "open", "save", "check_all",
+                             "zoom_in", "zoom_out", "add_vertical_cut",
+                             "delete_cut", "sciss_btn", "next"],
+            "horizontal_cut": ["new_project", "open", "save", "check_all",
+                               "zoom_in", "zoom_out", "add_horizontal_cut",
+                               "delete_cut", "sciss_btn", "previous", "next"],
+            "orientation": ["new_project", "open", "save", "check_all",
+                               "zoom_in", "zoom_out", "rotate_clock",
+                               "rotate_counter_clock", "previous", "next"]
+        }
         # self.buttons = [self.new_project_btn, self.open_btn, self.save_btn, self.check_all_btn,
         #                 self.rotate_clock_btn, self.rotate_counter_clock_btn,
         #                 self.zoom_out_btn, self.zoom_in_btn, self.add_vertical_cut_btn,
@@ -105,20 +118,30 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.project = None
         self.show_buttons()
 
+
     def show_buttons(self):
         if self.project is None:
-            button_state = [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-            for i in range(len(self.buttons)):
-                self.buttons[i].setVisible(button_state[i])
-        elif self.project.current_step == 0:  # Вертикальный разрез
-            button_state = [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1]
-            for i in range(len(self.buttons)):
-                self.buttons[i].setVisible(button_state[i])
-        elif self.project.current_step == 1:  # Горизонтальный разрез
-            button_state = [1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1]
-            for i in range(len(self.buttons)):
-                self.buttons[i].setVisible(button_state[i])
-            self.sciss_btn.setEnabled(False)
+            step_name = 'start'
+            # button_state = [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            # for i in range(len(self.buttons)):
+            #     self.buttons[i].setVisible(button_state[i])
+        else:
+            step_name = STEPS[self.project.current_step]
+        for name, button in self.buttons.items():
+            if name in self.step_buttons.get(step_name, []):
+                button.show()  # Показываем кнопку
+            else:
+                button.hide()  # Скрываем кнопку
+        # elif self.project.current_step == 0:  # Вертикальный разрез
+        #     step_name = 'vertical_cut'
+        #     # button_state = [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1]
+        #     # for i in range(len(self.buttons)):
+        #     #     self.buttons[i].setVisible(button_state[i])
+        # elif self.project.current_step == 1:  # Горизонтальный разрез
+        #     button_state = [1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1]
+        #     for i in range(len(self.buttons)):
+        #         self.buttons[i].setVisible(button_state[i])
+        #     self.sciss_btn.setEnabled(False)
 
     def check_all(self):
         for check_box in self.check_list:
