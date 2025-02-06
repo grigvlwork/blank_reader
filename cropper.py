@@ -206,9 +206,9 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 self.image_sa.show()
 
     def apply_action_to_image(self, action: Action, image):
-        updated_image = image
         """Применяет операцию к изображению."""
-        if action.type == 'cut':
+        updated_image = image
+        if action.type == 'vertical_cut':
             # Логика обрезки изображения
             pass
         elif action.type == 'crop':
@@ -223,10 +223,26 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         # Возвращаем обновленное изображение
         return updated_image
 
-    def update_thumbnail(self, index, new_image):
+    def update_thumbnail(self, index):
         """Обновляет иконку по индексу."""
+        file = self.files[index]
+        image = Image.open(file)
+        original_width = image.width
+        original_height = image.height
+        image.thumbnail((400, 400))
+        if index in self.project.actions:
+            action = self.project.actions[index]
+            if action.type == 'vertical_cut':
+                scale_x = original_width / image.width
+                x = action.value / scale_x
+                draw = ImageDraw.Draw(image)
+                draw.line((x, 0, x, image.height), fill=(255, 0, 0), width=1)
+
+        new_name = self.work_dir + '/thumbnails/' + os.path.basename(file)
+        image.save(new_name)
+        self.thumbnails.append(new_name)
         thumbnail = self.thumbnails[index]
-        thumbnail.setPixmap(new_image.scaled(200, 400, QtCore.Qt.KeepAspectRatio))
+        thumbnail.setPixmap(image)
 
     def next_step(self):
         self.save_project()
