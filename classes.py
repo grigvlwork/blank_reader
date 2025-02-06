@@ -43,7 +43,6 @@ class Project:
 
     def add_action_to_image(self, image_index, action: Action):
         self.actions[image_index] = action
-        # print(self.actions)
 
     def create_viewer(self, path, image_index):
         if image_index in self.actions.keys():
@@ -257,10 +256,8 @@ class ImageViewer(QGraphicsView):
             self.current_line = None
 
     def apply_action(self):
-        print(self.current_action)
         if self.current_action.type == 'vertical_cut':
             x = self.current_action.value / self.scale_x
-            print(x, self.scale_x)
             self.line = QGraphicsLineItem(x, 0, x, self.pixmap_item.pixmap().height())
             self.line.setPen(Qt.red)
             self.scene.addItem(self.line)
@@ -292,8 +289,6 @@ class ImageViewer(QGraphicsView):
             pos_in_original_image = QPointF(
                 self.pixmap_item.pixmap().width() // 2 * self.scale_x,
                 0
-                # event.pos().x() * self.scale_x,
-                # event.pos().y() * self.scale_y
             )
             action = Action(type='vertical_cut', value=int(pos_in_original_image.x()))
             self.add_action(action)
@@ -318,18 +313,10 @@ class ImageViewer(QGraphicsView):
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton and (self.current_step in (0, 1)):
-            # self.mouse_press_pos = None
-            # action = Action(type=STEPS[self.current_step], value=event.pos())
-            # self.add_action(action)
-            # Преобразуем координаты мышиного события в координаты исходного изображения
-            # pos_in_original_image = QPointF(event.pos()) * QPointF(self.scale_x, self.scale_y)
             pos_in_original_image = QPointF(
                 (1000 + self.line.pos().x()) * self.scale_x,
                 (0 + self.line.pos().y()) * self.scale_y
-                # event.pos().x() * self.scale_x,
-                # event.pos().y() * self.scale_y
             )
-            print(pos_in_original_image)
             action = None
             if self.current_step == 0:  # Вертикальный разрез
                 action = Action(type='vertical_cut', value=int(pos_in_original_image.x()))
