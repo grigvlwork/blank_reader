@@ -205,6 +205,29 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 self.image_sa.setWidget(self.image_viewer)
                 self.image_sa.show()
 
+    def apply_action_to_image(self, action: Action, image):
+        updated_image = image
+        """Применяет операцию к изображению."""
+        if action.type == 'cut':
+            # Логика обрезки изображения
+            pass
+        elif action.type == 'crop':
+            # Логика кадрирования изображения
+            pass
+        elif action.type == 'rotate':
+            # Логика поворота изображения
+            pass
+        else:
+            raise ValueError(f'Неизвестный тип операции: {action.type}')
+
+        # Возвращаем обновленное изображение
+        return updated_image
+
+    def update_thumbnail(self, index, new_image):
+        """Обновляет иконку по индексу."""
+        thumbnail = self.thumbnails[index]
+        thumbnail.setPixmap(new_image.scaled(200, 400, QtCore.Qt.KeepAspectRatio))
+
     def next_step(self):
         self.save_project()
         if self.project.next_step():
