@@ -110,10 +110,9 @@ class MyWidget(QMainWindow, Ui_MainWindow):
 
     def add_vertical(self):
         if self.image_viewer is not None:
-            if len(self.lines[self.current_image_index]) == 0:
-                self.image_viewer.add_line()
-                self.image_sa.show()
-                self.sciss_btn.setEnabled(True)
+            self.image_viewer.add_line()
+            self.image_sa.show()
+            self.sciss_btn.setEnabled(True)
 
     def create_new_project(self):
         self.project = Project()
