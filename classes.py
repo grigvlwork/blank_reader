@@ -253,11 +253,14 @@ class ImageViewer(QGraphicsView):
         self.current_action = current_action
         if current_action is not None:
             self.apply_action()
-        self.current_line = None
+        else:
+            self.current_line = None
 
     def apply_action(self):
-        if self.current_action["type"] == 'vertical cut':
-            x = self.current_action["value"] / self.scale_x
+        print(self.current_action)
+        if self.current_action.type == 'vertical_cut':
+            x = self.current_action.value / self.scale_x
+            print(x, self.scale_x)
             self.line = QGraphicsLineItem(x, 0, x, self.pixmap_item.pixmap().height())
             self.line.setPen(Qt.red)
             self.scene.addItem(self.line)
@@ -286,6 +289,17 @@ class ImageViewer(QGraphicsView):
                                           self.pixmap_item.pixmap().width() // 2, self.pixmap_item.pixmap().height())
             self.line.setPen(Qt.red)
             self.scene.addItem(self.line)
+            pos_in_original_image = QPointF(
+                self.pixmap_item.pixmap().width() // 2 * self.scale_x,
+                0
+                # event.pos().x() * self.scale_x,
+                # event.pos().y() * self.scale_y
+            )
+            action = Action(type='vertical_cut', value=int(pos_in_original_image.x()))
+            self.add_action(action)
+        elif self.current_step == 1:  # Горизонтальный разрез
+            # action = Action(type='horizontal_cut', value=int(pos_in_original_image.y()))
+            pass
 
     def get_lines(self):
         return self.lines
@@ -310,9 +324,12 @@ class ImageViewer(QGraphicsView):
             # Преобразуем координаты мышиного события в координаты исходного изображения
             # pos_in_original_image = QPointF(event.pos()) * QPointF(self.scale_x, self.scale_y)
             pos_in_original_image = QPointF(
-                event.pos().x() * self.scale_x,
-                event.pos().y() * self.scale_y
+                (1000 + self.line.pos().x()) * self.scale_x,
+                (0 + self.line.pos().y()) * self.scale_y
+                # event.pos().x() * self.scale_x,
+                # event.pos().y() * self.scale_y
             )
+            print(pos_in_original_image)
             action = None
             if self.current_step == 0:  # Вертикальный разрез
                 action = Action(type='vertical_cut', value=int(pos_in_original_image.x()))
