@@ -151,6 +151,15 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.setWindowTitle('Обработка изображений - вертикальный разрез')
         self.show_buttons()
 
+    def highlight_thumbnail(self, index):
+        # Убираем выделение у всех остальных thumbnails
+        for label in self.labels:
+            label.setStyleSheet("border: none;")
+
+        # Выделяем текущий thumbnail
+        if index >= 0 and index < len(self.labels):
+            self.labels[index].setStyleSheet("border: 2px solid green;")  # Рамка красного цвета
+
     def show_thumbnails(self, checked=None):
         if checked is None:
             checked = []
@@ -191,6 +200,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             if self.labels[i] == self.sender():
                 file = self.files[i]
                 self.current_image_index = i
+                self.highlight_thumbnail(i)
                 self.image_viewer = self.project.create_viewer(file, i)
                 self.image_sa.setWidget(self.image_viewer)
                 self.image_sa.show()
