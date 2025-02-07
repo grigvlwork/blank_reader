@@ -113,6 +113,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             self.image_viewer.add_line()
             self.image_sa.show()
             self.sciss_btn.setEnabled(True)
+            self.update_thumbnail(self.image_viewer.get_index())
 
     def create_new_project(self):
         self.project = Project()
@@ -148,7 +149,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.thumbnails = self.project.get_current_thumbnails()
         self.checked = self.project.get_current_check_list()
         self.show_thumbnails(self.checked)
-        self.setWindowTitle('Обработка изображений - вертикальный разрез')
+        self.setWindowTitle('Обработка изображений - ' + TEXT_STEPS[self.project.current_step])
         self.show_buttons()
 
     def highlight_thumbnail(self, index):
@@ -225,7 +226,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
 
     def update_thumbnail(self, index):
         """Обновляет иконку по индексу."""
-        file = self.files[index]
+        file = self.project.files[index]
         image = Image.open(file)
         original_width = image.width
         original_height = image.height
@@ -236,13 +237,14 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 scale_x = original_width / image.width
                 x = action.value / scale_x
                 draw = ImageDraw.Draw(image)
-                draw.line((x, 0, x, image.height), fill=(255, 0, 0), width=1)
-
-        new_name = self.work_dir + '/thumbnails/' + os.path.basename(file)
-        image.save(new_name)
-        self.thumbnails.append(new_name)
-        thumbnail = self.thumbnails[index]
-        thumbnail.setPixmap(image)
+                draw.line((x, 0, x, image.height), fill=Qt.red, width=2)
+        file = (self.project.work_dir + '/processing/' +
+                    STEPS[self.project.current_step] + '/' +
+                    '/thumbnails/' + os.path.basename(file))
+        image.save(file)
+        # self.thumbnails.append(new_name)
+        thumbnail = self.labels[index]
+        thumbnail.setPixmap(QPixmap(file).scaled(200, 400, QtCore.Qt.KeepAspectRatio))
 
     def next_step(self):
         self.save_project()

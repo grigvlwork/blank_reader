@@ -17,6 +17,7 @@ TEXT_STEPS = ["вертикальный разрез", "горизонтальн
 class Action(NamedTuple):
     type: str  # "cut", "crop", "rotate"
     value: Union[int, tuple]  # Число или кортеж
+    final: bool
 
 
 class Mylabel(QLabel):
@@ -296,8 +297,11 @@ class ImageViewer(QGraphicsView):
             # action = Action(type='horizontal_cut', value=int(pos_in_original_image.y()))
             pass
 
-    def get_lines(self):
-        return self.lines
+    # def get_lines(self):
+    #     return self.lines
+
+    def get_index(self):
+        return self.image_index
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton and (self.current_step in (0, 1)):
