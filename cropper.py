@@ -274,7 +274,18 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         thumbnail.setPixmap(pix.scaled(200, 400, QtCore.Qt.KeepAspectRatio))
 
     def next_step(self):
+        check_list = [x.is_checked() for x in self.check_list]
+        if not all(check_list):
+            reply = QMessageBox.question(None, 'Переход на следующий этап',
+                                         'Будут обработаны только отмеченные файлы, пометить все файлы перед переходом?',
+                                         QMessageBox.Yes | QMessageBox.No,
+                                         QMessageBox.Yes)
+
+            if reply == QMessageBox.Yes:
+                self.check_all()
+                check_list = [x.is_checked() for x in self.check_list]
         self.save_project()
+        self.project.set_check_list(check_list)
         if self.project.next_step():
             self.work_dir = self.project.get_current_step_dir()
             self.thumbnails = []

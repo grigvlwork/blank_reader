@@ -37,8 +37,8 @@ class Project:
         self.check_list = None
         self.steps = STEPS
         self.text_steps = TEXT_STEPS
-        self.actions = None # действия на текущем этапе
-        self.history = None # словарь {этап: actions}
+        self.actions = None  # действия на текущем этапе
+        self.history = None  # словарь {этап: actions}
         if directory_name is not None:
             self.load_project()
         else:
@@ -184,29 +184,52 @@ class Project:
         except OSError:
             return False
 
+    def apply_action(self, file, action):
+        if action.type == 'vertical_cut':
+            left_name = self.work_dir + '/processing/' + self.steps[self.current_step + 1] + \
+                        '/thumbnails/' + os.path.splitext(os.path.basename(file))[0] + 'v0'
+            right_name = self.work_dir + '/processing/' + self.steps[self.current_step + 1] + \
+                         '/thumbnails/' + os.path.splitext(os.path.basename(file))[0] + 'v1'
+            # Открываем исходное изображение
+            image = Image.open(file)
+            width, height = image.size
+            # Координата X для вертикального разреза
+            cut_position = action.value  # Например, разрез посередине
+
+            # Создаем две новые области для кропа
+            left_half = image.crop((0, 0, cut_position, height))
+            right_half = image.crop((cut_position, 0, width, height))
+
+            # Сохраняем левую половину
+            left_half.save(left_name)
+
+            # Сохраняем правую половину
+            right_half.save(right_name)
+
     def next_step(self):
+        try:
+            for filename in os.listdir(self.work_dir + '/processing/' + STEPS[self.current_step + 1]):
+                file_path = os.path.join(self.work_dir + '/processing/' + STEPS[self.current_step + 1], filename)
+                os.remove(file_path)
+            if os.path.isdir(self.work_dir + '/processing/' + STEPS[self.current_step + 1] + '/thumbnails'):
+                shutil.rmtree(self.work_dir + '/processing/' + STEPS[self.current_step + 1] + '/thumbnails')
+        except OSError:
+            return False
         if self.current_step == 0:  # Переделать на вертикальный разрез
-            try:
-                for filename in os.listdir(self.work_dir + '/processing/vertical_cut'):
-                    file_path = os.path.join(self.work_dir + '/processing/vertical_cut', filename)
-                    os.remove(file_path)
-                if os.path.isdir(self.work_dir + '/processing/vertical_cut/thumbnails'):
-                    shutil.rmtree(self.work_dir + '/processing/vertical_cut/thumbnails')
-            except OSError:
-                return False
             check_list = self.get_current_check_list()
             files = self.get_current_files()
-            angles = self.get_current_action()
+            actions = self.get_current_action()
             t = 0
             for i in range(len(files)):
                 if check_list[i]:
-                    t += 1
-                    if angles[i] != 0:
-                        dest = self.work_dir + '/processing/vertical_cut/' + os.path.basename(files[i])
-                        if not self.rotate(files[i], dest, angles[i]):
-                            return -1
-                    else:
-                        shutil.copy2(files[i], self.work_dir + '/processing/vertical_cut')
+                    self.apply_action(files[i], actions[i])
+                    # t += 1
+                    # if angles[i] != 0:
+                    #     dest = self.work_dir + '/processing/vertical_cut/' + os.path.basename(files[i])
+                    #     if not self.rotate(files[i], dest, angles[i]):
+                    #         return -1
+                    # else:
+                    #     shutil.copy2(files[i], self.work_dir + '/processing/vertical_cut')
             self.actions = dict()
             self.check_list = [False for _ in range(t)]
             self.current_step += 1
@@ -304,7 +327,6 @@ class ImageViewer(QGraphicsView):
         if self.on_action_added:
             self.on_action_added(self.image_index, self.current_action)  # Сообщаем Project
 
-
     def remove_action(self):
         if self.on_action_removed:
             self.on_action_removed(self.image_index)  # Сообщаем Project
@@ -399,11 +421,11 @@ class ImageViewer(QGraphicsView):
             self.current_action = None
             if self.current_step == 0:  # Вертикальный разрез
                 self.current_action = Action(type='vertical_cut',
-                                value=int(pos_in_original_image.x()),
-                                final=False)
+                                             value=int(pos_in_original_image.x()),
+                                             final=False)
             elif self.current_step == 1:  # Горизонтальный разрез
                 self.current_action = Action(type='horizontal_cut',
-                                value=int(pos_in_original_image.y()),
-                                final=False)
+                                             value=int(pos_in_original_image.y()),
+                                             final=False)
             self.add_action()
             self.mouse_press_pos = None
