@@ -257,18 +257,22 @@ class ImageViewer(QGraphicsView):
             self.current_line = None
 
     def apply_action(self):
+        if self.current_action.final:
+            color = Qt.green
+        else:
+            color = Qt.red
         if self.current_action.type == 'vertical_cut':
             x = self.current_action.value / self.scale_x
             self.line = QGraphicsLineItem(x, 0, x, self.pixmap_item.pixmap().height())
-            self.line.setPen(Qt.red)
+            self.line.setPen(color)
             self.scene.addItem(self.line)
 
     def add_vertical_cut(self, position: int):
-        action = Action(type="vertical_cut", value=position)
+        action = Action(type="vertical_cut", value=position, final=False)
         self.on_action_added(self.image_index, action)
 
     def add_horizontal_cut(self, position: int):
-        action = Action(type="horizontal_cut", value=position)
+        action = Action(type="horizontal_cut", value=position, final=False)
         self.on_action_added(self.image_index, action)
 
     def add_action(self, action):
@@ -278,6 +282,12 @@ class ImageViewer(QGraphicsView):
 
     def set_current_step(self, current_step):
         self.current_step = current_step
+
+    def remove_line(self):
+        if self.line is not None:
+            self.scene.removeItem(self.line)
+            self.line = None
+            self.actions().remove(self.image_index)
 
     def add_line(self):
         if self.line is not None:
@@ -291,11 +301,34 @@ class ImageViewer(QGraphicsView):
                 self.pixmap_item.pixmap().width() // 2 * self.scale_x,
                 0
             )
-            action = Action(type='vertical_cut', value=int(pos_in_original_image.x()))
+            action = Action(type='vertical_cut', value=int(pos_in_original_image.x()), final=False)
             self.add_action(action)
         elif self.current_step == 1:  # Горизонтальный разрез
             # action = Action(type='horizontal_cut', value=int(pos_in_original_image.y()))
             pass
+
+    def add_final_line(self):
+        if self.line is not None:
+            self.scene.removeItem(self.line)
+            if self.current_action.type == 'vertical_cut':
+                x = self.current_action.value / self.scale_x
+                self.line = QGraphicsLineItem(x, 0, x, self.pixmap_item.pixmap().height())
+                self.line.setPen(Qt.green)
+                self.scene.addItem(self.line)
+        # if self.current_step == 0:  # Вертикальный разрез
+        #     self.line = QGraphicsLineItem(self.pixmap_item.pixmap().width() // 2, 0,
+        #                                   self.pixmap_item.pixmap().width() // 2, self.pixmap_item.pixmap().height())
+        #     self.line.setPen(Qt.red)
+        #     self.scene.addItem(self.line)
+        #     pos_in_original_image = QPointF(
+        #         self.pixmap_item.pixmap().width() // 2 * self.scale_x,
+        #         0
+        #     )
+        #     action = Action(type='vertical_cut', value=int(pos_in_original_image.x()), final=False)
+        #     self.add_action(action)
+        # elif self.current_step == 1:  # Горизонтальный разрез
+        #     # action = Action(type='horizontal_cut', value=int(pos_in_original_image.y()))
+        #     pass
 
     # def get_lines(self):
     #     return self.lines
@@ -317,6 +350,8 @@ class ImageViewer(QGraphicsView):
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton and (self.current_step in (0, 1)):
+            if self.current_action.final:
+                return
             pos_in_original_image = QPointF(
                 (1000 + self.line.pos().x()) * self.scale_x,
                 (0 + self.line.pos().y()) * self.scale_y

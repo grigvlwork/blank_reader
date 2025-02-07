@@ -24,6 +24,8 @@
 import sys
 import qdarkstyle
 import traceback
+
+from PIL.ImageFont import truetype
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtWidgets import QGraphicsItem, QLabel, QGroupBox, QVBoxLayout, QGraphicsPixmapItem
 from PyQt5.QtWidgets import QApplication, QFileDialog, QMessageBox
@@ -84,6 +86,8 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.next_btn.clicked.connect(self.next_step)
         self.add_vertical_cut_btn.clicked.connect(self.add_vertical)
         self.new_project_btn.clicked.connect(self.create_new_project)
+        self.sciss_btn.clicked.connect(self.confirm_cut)
+        self.delete_cut_btn.clicked.connect(self.delete_cut)
         self.source_lb.setText('')
         self.source_lb.setGeometry(0, 0, 1000, 1000)
         self.source_lb.mousePressEvent = self.mousePressEvent
@@ -104,6 +108,17 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             else:
                 button.hide()  # Скрываем кнопку
 
+    def confirm_cut(self):
+        if self.current_image_index in self.project.actions:
+            self.project.actions[self.current_image_index].final = True
+            self.update_thumbnail(self.current_image_index)
+            self.image_viewer.add_final_line()
+
+    def delete_cut(self):
+        if self.current_image_index in self.project.actions:
+            self.project.actions.remove(self.current_image_index)
+            self.image_viewer.remove_line()
+
     def check_all(self):
         for check_box in self.check_list:
             check_box.setChecked(True)
@@ -113,7 +128,6 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             self.image_viewer.add_line()
             self.image_sa.show()
             self.sciss_btn.setEnabled(True)
-            self.update_thumbnail(self.image_viewer.get_index())
 
     def create_new_project(self):
         self.project = Project()
@@ -237,7 +251,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 scale_x = original_width / image.width
                 x = action.value / scale_x
                 draw = ImageDraw.Draw(image)
-                draw.line((x, 0, x, image.height), fill=Qt.red, width=2)
+                draw.line((x, 0, x, image.height), fill=Qt.black, width=2)
         file = (self.project.work_dir + '/processing/' +
                     STEPS[self.project.current_step] + '/' +
                     '/thumbnails/' + os.path.basename(file))
