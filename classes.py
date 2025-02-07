@@ -53,7 +53,8 @@ class Project:
         if image_index in self.actions.keys():
             return ImageViewer(path, image_index, self.add_action_to_image, self.remove_action_from_image,
                                self.current_step, current_action=self.actions[image_index])
-        return ImageViewer(path, image_index, self.add_action_to_image, self.current_step)
+        return ImageViewer(path, image_index, self.add_action_to_image, self.remove_action_from_image,
+                           self.current_step)
 
     def __getstate__(self) -> dict:
         state = dict()

@@ -223,6 +223,8 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         for i in range(len(self.labels)):
             if self.labels[i] == self.sender():
                 file = self.files[i]
+                if self.current_image_index == i:
+                    return
                 self.current_image_index = i
                 self.highlight_thumbnail(i)
                 self.image_viewer = self.project.create_viewer(file, i)
@@ -261,7 +263,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 scale_x = original_width / image.width
                 x = action.value / scale_x
                 draw = ImageDraw.Draw(image)
-                draw.line((x, 0, x, image.height), fill=Qt.green, width=2)
+                draw.line((x, 0, x, image.height), fill=(0, 255, 0), width=6)
         file = (self.project.work_dir + '/processing/' +
                     STEPS[self.project.current_step] + '/' +
                     '/thumbnails/' + os.path.splitext(os.path.basename(file))[0] + '.jpg')
