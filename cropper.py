@@ -30,6 +30,8 @@ from PyQt5 import QtGui, QtCore
 from PyQt5.QtWidgets import QGraphicsItem, QLabel, QGroupBox, QVBoxLayout, QGraphicsPixmapItem
 from PyQt5.QtWidgets import QApplication, QFileDialog, QMessageBox
 from PIL import ImageFont, ImageDraw
+from sympy.physics.units import action
+
 from cropper_ui import Ui_MainWindow
 from classes import *
 from functions import *
@@ -110,7 +112,10 @@ class MyWidget(QMainWindow, Ui_MainWindow):
 
     def confirm_cut(self):
         if self.current_image_index in self.project.actions:
-            self.project.actions[self.current_image_index].final = True
+            draft_action = self.project.actions[self.current_image_index]
+            self.project.actions[self.current_image_index] = Action(type=draft_action.type,
+                                                                    value=draft_action.value,
+                                                                    final=True)
             self.update_thumbnail(self.current_image_index)
             self.image_viewer.add_final_line()
 

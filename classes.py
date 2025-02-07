@@ -301,8 +301,8 @@ class ImageViewer(QGraphicsView):
                 self.pixmap_item.pixmap().width() // 2 * self.scale_x,
                 0
             )
-            action = Action(type='vertical_cut', value=int(pos_in_original_image.x()), final=False)
-            self.add_action(action)
+            self.current_action = Action(type='vertical_cut', value=int(pos_in_original_image.x()), final=False)
+            self.add_action(self.current_action)
         elif self.current_step == 1:  # Горизонтальный разрез
             # action = Action(type='horizontal_cut', value=int(pos_in_original_image.y()))
             pass
@@ -358,8 +358,12 @@ class ImageViewer(QGraphicsView):
             )
             action = None
             if self.current_step == 0:  # Вертикальный разрез
-                action = Action(type='vertical_cut', value=int(pos_in_original_image.x()))
+                action = Action(type='vertical_cut',
+                                value=int(pos_in_original_image.x()),
+                                final=False)
             elif self.current_step == 1:  # Горизонтальный разрез
-                action = Action(type='horizontal_cut', value=int(pos_in_original_image.y()))
+                action = Action(type='horizontal_cut',
+                                value=int(pos_in_original_image.y()),
+                                final=False)
             self.add_action(action)
             self.mouse_press_pos = None
