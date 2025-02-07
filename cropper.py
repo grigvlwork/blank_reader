@@ -123,6 +123,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
     def delete_cut(self):
         if self.current_image_index in self.project.actions:
             self.project.actions.pop(self.current_image_index)
+            self.update_thumbnail(self.current_image_index)
             self.image_viewer.remove_line()
 
     def check_all(self):
