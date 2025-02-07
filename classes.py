@@ -45,9 +45,13 @@ class Project:
     def add_action_to_image(self, image_index, action: Action):
         self.actions[image_index] = action
 
+    def remove_action_from_image(self, image_index):
+        if image_index in self.actions:
+            self.actions.pop(image_index)
+
     def create_viewer(self, path, image_index):
         if image_index in self.actions.keys():
-            return ImageViewer(path, image_index, self.add_action_to_image,
+            return ImageViewer(path, image_index, self.add_action_to_image, self.remove_action_from_image,
                                self.current_step, current_action=self.actions[image_index])
         return ImageViewer(path, image_index, self.add_action_to_image, self.current_step)
 
@@ -232,11 +236,13 @@ class Project:
 class ImageViewer(QGraphicsView):
     def __init__(self, image_path, image_index,
                  on_action_added: Callable[[int, str], None],
+                 on_action_removed: Callable[[int], None],
                  current_step, current_action=None):
         super().__init__()
         self.current_step = current_step
         self.image_index = image_index
         self.on_action_added = on_action_added
+        self.on_action_removed = on_action_removed
         self.scene = QGraphicsScene(self)
         self.setScene(self.scene)
         self.pixmap = QPixmap(image_path)
@@ -268,27 +274,37 @@ class ImageViewer(QGraphicsView):
             self.line.setPen(color)
             self.scene.addItem(self.line)
 
-    def add_vertical_cut(self, position: int):
-        action = Action(type="vertical_cut", value=position, final=False)
-        self.on_action_added(self.image_index, action)
-
-    def add_horizontal_cut(self, position: int):
-        action = Action(type="horizontal_cut", value=position, final=False)
-        self.on_action_added(self.image_index, action)
+    # def add_vertical_cut(self, position: int):
+    #     if self.current_action is not None:
+    #         return
+    #     self.current_action = Action(type="vertical_cut", value=position, final=False)
+    #     self.on_action_added(self.image_index, self.current_action)
+    #
+    # def add_horizontal_cut(self, position: int):
+    #     if self.current_action is not None:
+    #         return
+    #     self.current_action = Action(type="horizontal_cut", value=position, final=False)
+    #     self.on_action_added(self.image_index, self.current_action)
 
     def add_action(self):
         # self.actions.append(action)
         if self.on_action_added:
             self.on_action_added(self.image_index, self.current_action)  # Сообщаем Project
 
-    def set_current_step(self, current_step):
-        self.current_step = current_step
+
+    def remove_action(self):
+        if self.on_action_removed:
+            self.on_action_removed(self.image_index)  # Сообщаем Project
+
+    # def set_current_step(self, current_step):
+    #     self.current_step = current_step
 
     def remove_line(self):
         if self.line is not None:
             self.scene.removeItem(self.line)
             self.line = None
-            self.actions().remove(self.image_index)
+            self.remove_action()
+            self.current_action = None
 
     def add_line(self):
         if self.line is not None:

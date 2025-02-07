@@ -253,7 +253,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         original_width = image.width
         original_height = image.height
         image.thumbnail((400, 400))
-        # image = image.convert('RGB')
+        image = image.convert('RGB')
         if index in self.project.actions:
             action = self.project.actions[index]
             if action.type == 'vertical_cut':
