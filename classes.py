@@ -37,6 +37,8 @@ class Project:
         self.check_list = None
         self.steps = STEPS
         self.text_steps = TEXT_STEPS
+        self.actions = None # действия на текущем этапе
+        self.history = None # словарь {этап: actions}
         if directory_name is not None:
             self.load_project()
         else:
@@ -62,8 +64,9 @@ class Project:
         state["file_project_name"] = self.file_project_name
         state["current_step"] = self.current_step
         state["files"] = self.files
-        state["actions"] = self.actions
+        # state["actions"] = self.actions
         state["check_list"] = self.check_list
+        state["history"] = self.history
         return state
 
     def get_current_files(self):
@@ -76,6 +79,9 @@ class Project:
 
     def get_current_text_step(self):
         return self.text_steps[self.current_step]
+
+    def set_check_list(self, check_list):
+        self.check_list = check_list
 
     def get_current_check_list(self):
         # _, __, check_list = zip(*self.action_steps[self.current_step])
@@ -100,9 +106,11 @@ class Project:
         self.work_dir = state["work_dir"]
         self.file_project_name = state["file_project_name"]
         self.current_step = state["current_step"]
-        self.actions = state["actions"]
+        # self.actions = state["actions"]
         self.files = state["files"]
         self.check_list = state["check_list"]
+        self.history = state["history"]
+        self.actions = self.history[self.current_step]
 
     def load_project(self):
         file_name = self.get_possible_project_name()
@@ -112,9 +120,10 @@ class Project:
                 self.work_dir = temp.work_dir
                 self.file_project_name = temp.file_project_name
                 self.current_step = temp.current_step
-                self.actions = temp.actions
                 self.files = temp.files
                 self.check_list = temp.check_list
+                self.history = temp.history
+                self.actions = self.history[self.current_step]
                 return True
         except OSError as e:
             print("OS error({0}): {1}".format(e.errno, e.strerror))
@@ -122,6 +131,9 @@ class Project:
 
     def save_project(self):
         try:
+            if self.history is None:
+                self.history = dict()
+            self.history[self.current_step] = self.actions
             with open(self.file_project_name, "wb") as fp:
                 pickle.dump(self, fp)
                 return True
