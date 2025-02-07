@@ -118,10 +118,11 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                                                                     final=True)
             self.update_thumbnail(self.current_image_index)
             self.image_viewer.add_final_line()
+            self.project.save_project()
 
     def delete_cut(self):
         if self.current_image_index in self.project.actions:
-            self.project.actions.remove(self.current_image_index)
+            self.project.actions.pop(self.current_image_index)
             self.image_viewer.remove_line()
 
     def check_all(self):
@@ -197,7 +198,9 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 self.check_list.append(check_box)
                 num += 1
                 label = Mylabel(self)
-                label.setPixmap(QPixmap(file).scaled(200, 400, QtCore.Qt.KeepAspectRatio))
+                image = Image.open(file)
+                pix = pil2pixmap(image)
+                label.setPixmap(pix.scaled(200, 400, QtCore.Qt.KeepAspectRatio))
                 self.labels.append(label)
                 v_sp = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
                 mini_v_layout.addWidget(label_num)
@@ -250,20 +253,22 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         original_width = image.width
         original_height = image.height
         image.thumbnail((400, 400))
+        # image = image.convert('RGB')
         if index in self.project.actions:
             action = self.project.actions[index]
             if action.type == 'vertical_cut':
                 scale_x = original_width / image.width
                 x = action.value / scale_x
                 draw = ImageDraw.Draw(image)
-                draw.line((x, 0, x, image.height), fill=Qt.black, width=2)
+                draw.line((x, 0, x, image.height), fill=Qt.green, width=2)
         file = (self.project.work_dir + '/processing/' +
                     STEPS[self.project.current_step] + '/' +
-                    '/thumbnails/' + os.path.basename(file))
-        image.save(file)
+                    '/thumbnails/' + os.path.splitext(os.path.basename(file))[0] + '.jpg')
+        image.save(file, format='JPEG')
         # self.thumbnails.append(new_name)
         thumbnail = self.labels[index]
-        thumbnail.setPixmap(QPixmap(file).scaled(200, 400, QtCore.Qt.KeepAspectRatio))
+        pix = pil2pixmap(image)
+        thumbnail.setPixmap(pix.scaled(200, 400, QtCore.Qt.KeepAspectRatio))
 
     def next_step(self):
         self.save_project()

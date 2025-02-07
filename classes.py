@@ -212,8 +212,9 @@ class Project:
             image = Image.open(file)
             image.thumbnail((400, 400))
             new_name = self.work_dir + '/processing/' + self.steps[self.current_step] + \
-                       '/thumbnails/' + os.path.basename(file)
-            image.save(new_name)
+                       '/thumbnails/' + os.path.splitext(os.path.basename(file))[0] + '.jpg'
+            image = image.convert('RGB')
+            image.save(new_name, format='JPEG')
             thumbnails.append(new_name)
         return thumbnails
 
@@ -275,10 +276,10 @@ class ImageViewer(QGraphicsView):
         action = Action(type="horizontal_cut", value=position, final=False)
         self.on_action_added(self.image_index, action)
 
-    def add_action(self, action):
+    def add_action(self):
         # self.actions.append(action)
         if self.on_action_added:
-            self.on_action_added(self.image_index, action)  # Сообщаем Project
+            self.on_action_added(self.image_index, self.current_action)  # Сообщаем Project
 
     def set_current_step(self, current_step):
         self.current_step = current_step
@@ -302,7 +303,7 @@ class ImageViewer(QGraphicsView):
                 0
             )
             self.current_action = Action(type='vertical_cut', value=int(pos_in_original_image.x()), final=False)
-            self.add_action(self.current_action)
+            self.add_action()
         elif self.current_step == 1:  # Горизонтальный разрез
             # action = Action(type='horizontal_cut', value=int(pos_in_original_image.y()))
             pass
@@ -315,6 +316,9 @@ class ImageViewer(QGraphicsView):
                 self.line = QGraphicsLineItem(x, 0, x, self.pixmap_item.pixmap().height())
                 self.line.setPen(Qt.green)
                 self.scene.addItem(self.line)
+                self.current_action = Action(type=self.current_action.type,
+                                             value=self.current_action.value,
+                                             final=True)
         # if self.current_step == 0:  # Вертикальный разрез
         #     self.line = QGraphicsLineItem(self.pixmap_item.pixmap().width() // 2, 0,
         #                                   self.pixmap_item.pixmap().width() // 2, self.pixmap_item.pixmap().height())
@@ -337,10 +341,16 @@ class ImageViewer(QGraphicsView):
         return self.image_index
 
     def mousePressEvent(self, event):
+        if self.current_action.final:
+            self.mouse_press_pos = None
+            return
         if event.button() == Qt.LeftButton and (self.current_step in (0, 1)):
             self.mouse_press_pos = event.pos()
 
     def mouseMoveEvent(self, event):
+        if self.current_action.final:
+            self.mouse_press_pos = None
+            return
         if self.mouse_press_pos is not None and (self.current_step in (0, 1)):
             delta = event.pos() - self.mouse_press_pos
             delta.setY(0)
@@ -349,21 +359,22 @@ class ImageViewer(QGraphicsView):
             self.mouse_press_pos = event.pos()
 
     def mouseReleaseEvent(self, event):
+        if self.current_action.final:
+            self.mouse_press_pos = None
+            return
         if event.button() == Qt.LeftButton and (self.current_step in (0, 1)):
-            if self.current_action.final:
-                return
             pos_in_original_image = QPointF(
                 (1000 + self.line.pos().x()) * self.scale_x,
                 (0 + self.line.pos().y()) * self.scale_y
             )
-            action = None
+            self.current_action = None
             if self.current_step == 0:  # Вертикальный разрез
-                action = Action(type='vertical_cut',
+                self.current_action = Action(type='vertical_cut',
                                 value=int(pos_in_original_image.x()),
                                 final=False)
             elif self.current_step == 1:  # Горизонтальный разрез
-                action = Action(type='horizontal_cut',
+                self.current_action = Action(type='horizontal_cut',
                                 value=int(pos_in_original_image.y()),
                                 final=False)
-            self.add_action(action)
+            self.add_action()
             self.mouse_press_pos = None
