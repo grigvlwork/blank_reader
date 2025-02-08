@@ -288,11 +288,15 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 x = action.value / scale_x
                 draw = ImageDraw.Draw(image)
                 draw.line((x, 0, x, image.height), fill=(0, 255, 0), width=6)
+            elif action.type == 'horizontal_cut':
+                scale_y = original_height / image.height
+                y = action.value / scale_y
+                draw = ImageDraw.Draw(image)
+                draw.line((0, y, image.width, y), fill=(0, 255, 0), width=6)
         file = (self.project.work_dir + '/processing/' +
                     STEPS[self.project.current_step] + '/' +
                     '/thumbnails/' + os.path.splitext(os.path.basename(file))[0] + '.jpg')
         image.save(file, format='JPEG')
-        # self.thumbnails.append(new_name)
         thumbnail = self.labels[index]
         pix = pil2pixmap(image)
         thumbnail.setPixmap(pix.scaled(200, 400, QtCore.Qt.KeepAspectRatio))
