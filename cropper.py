@@ -287,12 +287,11 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.save_project()
         self.project.set_check_list(check_list)
         if self.project.next_step():
-            self.work_dir = self.project.get_current_step_dir()
-            self.thumbnails = []
-            self.files = self.project.get_current_files()
-            self.generate_thumbnails()
-            self.show_thumbnails()
-            self.setWindowTitle('Обработка изображений - ' + self.project.get_current_text_step())
+            self.files = self.project.load_current_files()
+            self.thumbnails = self.project.get_current_thumbnails()
+            self.checked = self.project.get_current_check_list()
+            self.show_thumbnails(self.checked)
+            self.setWindowTitle('Обработка изображений - ' + TEXT_STEPS[self.project.current_step])
             self.show_buttons()
 
     def rotate_right(self):

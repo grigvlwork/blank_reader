@@ -64,7 +64,6 @@ class Project:
         state["file_project_name"] = self.file_project_name
         state["current_step"] = self.current_step
         state["files"] = self.files
-        # state["actions"] = self.actions
         state["check_list"] = self.check_list
         state["history"] = self.history
         return state
@@ -74,7 +73,6 @@ class Project:
         return self.files
 
     def get_current_action(self):
-        # _, action, __ = zip(*self.action_steps[self.current_step])
         return self.actions
 
     def get_current_text_step(self):
@@ -84,7 +82,6 @@ class Project:
         self.check_list = check_list
 
     def get_current_check_list(self):
-        # _, __, check_list = zip(*self.action_steps[self.current_step])
         return self.check_list
 
     def get_current_step_dir(self):
@@ -195,14 +192,11 @@ class Project:
             width, height = image.size
             # Координата X для вертикального разреза
             cut_position = action.value  # Например, разрез посередине
-
             # Создаем две новые области для кропа
             left_half = image.crop((0, 0, cut_position, height))
             right_half = image.crop((cut_position, 0, width, height))
-
             # Сохраняем левую половину
             left_half.save(left_name)
-
             # Сохраняем правую половину
             right_half.save(right_name)
 
@@ -219,20 +213,23 @@ class Project:
             check_list = self.get_current_check_list()
             files = self.get_current_files()
             actions = self.get_current_action()
-            t = 0
             for i in range(len(files)):
                 if check_list[i]:
-                    self.apply_action(files[i], actions[i])
-                    # t += 1
-                    # if angles[i] != 0:
-                    #     dest = self.work_dir + '/processing/vertical_cut/' + os.path.basename(files[i])
-                    #     if not self.rotate(files[i], dest, angles[i]):
-                    #         return -1
-                    # else:
-                    #     shutil.copy2(files[i], self.work_dir + '/processing/vertical_cut')
+                    if i in self.actions:
+                        self.apply_action(files[i], actions[i])
+                    else:
+                        file = self.files[i]
+                        new_file = os.path.join(self.work_dir + '/processing/' + STEPS[self.current_step + 1],
+                                                file)
+                        try:
+                            shutil.copy2(file, new_file)
+                        except OSError:
+                            return False
             self.actions = dict()
-            self.check_list = [False for _ in range(t)]
+            self.check_list = None
             self.current_step += 1
+            # self.load_current_files()
+            self.generate_thumbnails()
             self.save_project()
             return self.current_step
 
@@ -370,23 +367,6 @@ class ImageViewer(QGraphicsView):
                 self.current_action = Action(type=self.current_action.type,
                                              value=self.current_action.value,
                                              final=True)
-        # if self.current_step == 0:  # Вертикальный разрез
-        #     self.line = QGraphicsLineItem(self.pixmap_item.pixmap().width() // 2, 0,
-        #                                   self.pixmap_item.pixmap().width() // 2, self.pixmap_item.pixmap().height())
-        #     self.line.setPen(Qt.red)
-        #     self.scene.addItem(self.line)
-        #     pos_in_original_image = QPointF(
-        #         self.pixmap_item.pixmap().width() // 2 * self.scale_x,
-        #         0
-        #     )
-        #     action = Action(type='vertical_cut', value=int(pos_in_original_image.x()), final=False)
-        #     self.add_action(action)
-        # elif self.current_step == 1:  # Горизонтальный разрез
-        #     # action = Action(type='horizontal_cut', value=int(pos_in_original_image.y()))
-        #     pass
-
-    # def get_lines(self):
-    #     return self.lines
 
     def get_index(self):
         return self.image_index
