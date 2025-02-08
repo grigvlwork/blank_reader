@@ -345,8 +345,17 @@ class ImageViewer(QGraphicsView):
             self.current_action = Action(type='vertical_cut', value=int(pos_in_original_image.x()), final=False)
             self.add_action()
         elif self.current_step == 1:  # Горизонтальный разрез
+            self.line = QGraphicsLineItem(0, self.pixmap_item.pixmap().height() // 2,
+                                          self.pixmap_item.pixmap().width(), self.pixmap_item.pixmap().height() // 2)
+            self.line.setPen(Qt.red)
+            self.scene.addItem(self.line)
+            pos_in_original_image = QPointF(
+                0, self.pixmap_item.pixmap().heght() // 2 * self.scale_y
+            )
+            self.current_action = Action(type='horizontal_cut', value=int(pos_in_original_image.y()), final=False)
+            self.add_action()
             # action = Action(type='horizontal_cut', value=int(pos_in_original_image.y()))
-            pass
+
 
     def add_final_line(self):
         if self.line is not None:
@@ -359,11 +368,21 @@ class ImageViewer(QGraphicsView):
                 self.current_action = Action(type=self.current_action.type,
                                              value=self.current_action.value,
                                              final=True)
+            elif self.current_action.type == 'horizontal_cut':
+                y = self.current_action.value / self.scale_y
+                self.line = QGraphicsLineItem(0, y, self.pixmap_item.pixmap().width(), y)
+                self.line.setPen(Qt.green)
+                self.scene.addItem(self.line)
+                self.current_action = Action(type=self.current_action.type,
+                                             value=self.current_action.value,
+                                             final=True)
 
     def get_index(self):
         return self.image_index
 
     def mousePressEvent(self, event):
+        if self.current_action is None:
+            return
         if self.current_action.final:
             self.mouse_press_pos = None
             return
@@ -371,6 +390,8 @@ class ImageViewer(QGraphicsView):
             self.mouse_press_pos = event.pos()
 
     def mouseMoveEvent(self, event):
+        if self.current_action is None:
+            return
         if self.current_action.final:
             self.mouse_press_pos = None
             return
@@ -382,6 +403,8 @@ class ImageViewer(QGraphicsView):
             self.mouse_press_pos = event.pos()
 
     def mouseReleaseEvent(self, event):
+        if self.current_action is None:
+            return
         if self.current_action.final:
             self.mouse_press_pos = None
             return

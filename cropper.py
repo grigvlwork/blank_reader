@@ -87,6 +87,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.check_all_btn.clicked.connect(self.check_all)
         self.next_btn.clicked.connect(self.next_step)
         self.add_vertical_cut_btn.clicked.connect(self.add_vertical)
+        self.add_horizontal_cut_btn.clicked.connect(self.add_horizontal)
         self.new_project_btn.clicked.connect(self.create_new_project)
         self.sciss_btn.clicked.connect(self.confirm_cut)
         self.delete_cut_btn.clicked.connect(self.delete_cut)
@@ -131,6 +132,12 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             check_box.setChecked(True)
 
     def add_vertical(self):
+        if self.image_viewer is not None:
+            self.image_viewer.add_line()
+            self.image_sa.show()
+            self.sciss_btn.setEnabled(True)
+
+    def add_horizontal(self):
         if self.image_viewer is not None:
             self.image_viewer.add_line()
             self.image_sa.show()
