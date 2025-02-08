@@ -184,9 +184,11 @@ class Project:
     def apply_action(self, file, action):
         if action.type == 'vertical_cut':
             left_name = self.work_dir + '/processing/' + self.steps[self.current_step + 1] + \
-                        '/thumbnails/' + os.path.splitext(os.path.basename(file))[0] + 'v0'
+                        '/' + os.path.splitext(os.path.basename(file))[0] + 'v0' + \
+                        os.path.splitext(os.path.basename(file))[1]
             right_name = self.work_dir + '/processing/' + self.steps[self.current_step + 1] + \
-                         '/thumbnails/' + os.path.splitext(os.path.basename(file))[0] + 'v1'
+                         '/' + os.path.splitext(os.path.basename(file))[0] + 'v1' + \
+                        os.path.splitext(os.path.basename(file))[1]
             # Открываем исходное изображение
             image = Image.open(file)
             width, height = image.size
@@ -207,6 +209,8 @@ class Project:
                 os.remove(file_path)
             if os.path.isdir(self.work_dir + '/processing/' + STEPS[self.current_step + 1] + '/thumbnails'):
                 shutil.rmtree(self.work_dir + '/processing/' + STEPS[self.current_step + 1] + '/thumbnails')
+            if not os.path.isdir(self.work_dir + '/processing/' + STEPS[self.current_step + 1] + '/thumbnails'):
+                os.mkdir(self.work_dir + '/processing/' + STEPS[self.current_step + 1] + '/thumbnails')
         except OSError:
             return False
         if self.current_step == 0:  # Переделать на вертикальный разрез
@@ -228,7 +232,7 @@ class Project:
             self.actions = dict()
             self.check_list = None
             self.current_step += 1
-            # self.load_current_files()
+            self.load_current_files()
             self.generate_thumbnails()
             self.save_project()
             return self.current_step
@@ -239,7 +243,7 @@ class Project:
         else:
             current_step_dir = self.work_dir + '/processing/' + self.steps[self.current_step]
             files = [os.path.join(current_step_dir, f) for f in os.listdir(current_step_dir) if
-                     os.path.isfile(os.path.join(self.work_dir, f))]
+                     os.path.isfile(os.path.join(current_step_dir, f))]
             self.files = files
             return files
 
@@ -306,18 +310,6 @@ class ImageViewer(QGraphicsView):
             self.line = QGraphicsLineItem(x, 0, x, self.pixmap_item.pixmap().height())
             self.line.setPen(color)
             self.scene.addItem(self.line)
-
-    # def add_vertical_cut(self, position: int):
-    #     if self.current_action is not None:
-    #         return
-    #     self.current_action = Action(type="vertical_cut", value=position, final=False)
-    #     self.on_action_added(self.image_index, self.current_action)
-    #
-    # def add_horizontal_cut(self, position: int):
-    #     if self.current_action is not None:
-    #         return
-    #     self.current_action = Action(type="horizontal_cut", value=position, final=False)
-    #     self.on_action_added(self.image_index, self.current_action)
 
     def add_action(self):
         # self.actions.append(action)

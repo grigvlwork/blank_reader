@@ -183,8 +183,19 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             self.labels[index].setStyleSheet("border: 2px solid green;")  # Рамка красного цвета
 
     def show_thumbnails(self, checked=None):
+        # Если нет параметров, то создаем пустой список
         if checked is None:
             checked = []
+        # Очищаем текущий layout
+        if hasattr(self, 'group_box'):
+            self.group_box.deleteLater()
+        # Создаем новый GroupBox
+        group_box = QGroupBox()
+        v_layout = QVBoxLayout()
+        group_box.setLayout(v_layout)
+        # Очищаем списки
+        self.labels.clear()
+        self.check_list.clear()
         if len(self.thumbnails) > 0:
             v_layout = QVBoxLayout()
             group_box = QGroupBox()
@@ -211,13 +222,11 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 h_layout.addLayout(mini_v_layout)
                 h_layout.addWidget(label)
                 v_layout.addLayout(h_layout)
-                if self.project.current_step == 0:
-                    label.clicked.connect(self.thumbnail_click)
-                elif self.project.current_step == 1:
-                    label.clicked.connect(self.thumbnail_click_v_cut)
+                label.clicked.connect(self.thumbnail_click)
             group_box.setLayout(v_layout)
             self.thumbnails_sa.setWidget(group_box)
             self.thumbnails_sa.show()
+            self.image_sa.hide()
 
     def thumbnail_click(self):
         for i in range(len(self.labels)):
@@ -274,7 +283,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         thumbnail.setPixmap(pix.scaled(200, 400, QtCore.Qt.KeepAspectRatio))
 
     def next_step(self):
-        check_list = [x.is_checked() for x in self.check_list]
+        check_list = [x.isChecked() for x in self.check_list]
         if not all(check_list):
             reply = QMessageBox.question(None, 'Переход на следующий этап',
                                          'Будут обработаны только отмеченные файлы, пометить все файлы перед переходом?',
@@ -283,16 +292,19 @@ class MyWidget(QMainWindow, Ui_MainWindow):
 
             if reply == QMessageBox.Yes:
                 self.check_all()
-                check_list = [x.is_checked() for x in self.check_list]
+                check_list = [x.isChecked() for x in self.check_list]
         self.save_project()
         self.project.set_check_list(check_list)
-        if self.project.next_step():
+        cur_step = self.project.next_step()
+        if cur_step:
             self.files = self.project.load_current_files()
             self.thumbnails = self.project.get_current_thumbnails()
             self.checked = self.project.get_current_check_list()
             self.show_thumbnails(self.checked)
             self.setWindowTitle('Обработка изображений - ' + TEXT_STEPS[self.project.current_step])
             self.show_buttons()
+        else:
+            print('Ошибка при переходе')
 
     def rotate_right(self):
         pass
@@ -370,13 +382,6 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             pic.setFlags(QGraphicsItem.ItemIsSelectable | QGraphicsItem.ItemIsMovable)
 
     def save_project(self):
-        # checked = []
-        # actions = []
-        # for cb in self.check_list:
-        #     checked.append(cb.isChecked())
-        # if self.project.current_step == 0:
-        #     actions = self.actions
-        # self.project.set_current_action_steps(actions, checked)
         self.project.save_project()
 
 
