@@ -226,9 +226,17 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             group_box.setLayout(v_layout)
             self.thumbnails_sa.setWidget(group_box)
             self.thumbnails_sa.show()
-            self.image_sa.hide()
+            self.thumbnail_click(0)
 
-    def thumbnail_click(self):
+    def thumbnail_click(self, index=None):
+        if index is not None:
+            self.current_image_index = index
+            self.highlight_thumbnail(index)
+            file = self.files[index]
+            self.image_viewer = self.project.create_viewer(file, index)
+            self.image_sa.setWidget(self.image_viewer)
+            self.image_sa.show()
+            return
         for i in range(len(self.labels)):
             if self.labels[i] == self.sender():
                 file = self.files[i]
