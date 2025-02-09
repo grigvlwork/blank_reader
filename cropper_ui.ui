@@ -134,14 +134,14 @@
          </sizepolicy>
         </property>
         <property name="toolTip">
-         <string>Поворот вправо на 90 градусов</string>
+         <string>Поворот на 180 градусов</string>
         </property>
         <property name="text">
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="icons.qrc">
-          <normaloff>:/images/images/flip.svg</normaloff>:/images/images/flip.svg</iconset>
+         <iconset>
+          <normaloff>images/flip.svg</normaloff>images/flip.svg</iconset>
         </property>
         <property name="iconSize">
          <size>

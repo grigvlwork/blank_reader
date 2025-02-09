@@ -9,6 +9,28 @@ from PyQt5.QtGui import QImage, QPixmap
 import os
 import sqlite3
 
+def overlay_image(source_image_path, overlay_image_path, output_image_path, position=(0, 0)):
+    try:
+        # Открываем основное изображение
+        base_image = Image.open(source_image_path)
+
+        # Открываем накладываемое изображение
+        overlay_image = Image.open(overlay_image_path)
+
+        # Накладываем изображение
+        base_image.paste(overlay_image, position, overlay_image)
+
+        # Сохраняем результат
+        base_image.save(output_image_path, quality=100)
+
+        # Закрываем изображения
+        base_image.close()
+        overlay_image.close()
+
+        return True
+    except Exception as e:
+        print(f"Ошибка: {e}")
+        return False
 
 def create_project_database(path:str)->bool:
     last_directory_name = os.path.basename(os.path.normpath(path))

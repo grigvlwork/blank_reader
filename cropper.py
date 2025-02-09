@@ -79,8 +79,8 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         }
         self.theme_btn.clicked.connect(self.change_theme)
         self.open_btn.clicked.connect(self.open_folder)
-        self.rotate_clock_btn.clicked.connect(self.rotate_right)
-        self.rotate_counter_clock_btn.clicked.connect(self.rotate_left)
+        self.flip_btn.clicked.connect(self.flip)
+        # self.rotate_counter_clock_btn.clicked.connect(self.rotate_left)
         self.save_btn.clicked.connect(self.save_project)
         self.check_all_btn.clicked.connect(self.check_all)
         self.next_btn.clicked.connect(self.next_step)
@@ -323,8 +323,10 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         else:
             print('Ошибка при переходе')
 
-    def rotate_right(self):
-        pass
+    def flip(self):
+        if self.image_viewer is not None:
+            self.image_viewer.flip()
+            self.image_sa.show()
         # self.rotates[self.current_image_index] += 90
         # if self.rotates[self.current_image_index] >= 0:
         #     self.write_on_thumbnails(f'Right {self.rotates[self.current_image_index]}')

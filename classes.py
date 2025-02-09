@@ -6,6 +6,7 @@ import os
 import shutil
 from PIL import Image
 from typing import Callable, NamedTuple, Union
+from functions import overlay_image, pil2pixmap
 
 STEPS = ["vertical_cut", "horizontal_cut", "orientation", "angle_adjust", "word_select",
          "letter_select", "output"]
@@ -302,6 +303,7 @@ class ImageViewer(QGraphicsView):
         self.on_action_removed = on_action_removed
         self.scene = QGraphicsScene(self)
         self.setScene(self.scene)
+        self.image_path = image_path
         self.pixmap = QPixmap(image_path)
         original_width = self.pixmap.width()
         original_height = self.pixmap.height()
@@ -349,6 +351,24 @@ class ImageViewer(QGraphicsView):
             self.line = None
             self.remove_action()
             self.current_action = None
+
+    def flip(self):
+        if self.current_step == 2: # Переворот
+            # Открываем изображение
+            image = Image.open(self.image_path)
+
+            # Поворачиваем изображение на 180 градусов
+            rotated_image = image.rotate(180, expand=True)
+            self.scene.removeItem(self.pixmap_item)
+            self.pixmap = pil2pixmap(rotated_image)
+            scaled_pixmap = self.pixmap.scaled(2000, 1000, transformMode=Qt.SmoothTransformation,
+                                               aspectRatioMode=2)
+            self.pixmap_item = QGraphicsPixmapItem(scaled_pixmap)
+            self.scene.addItem(self.pixmap_item)
+            self.current_action = Action(type='orientation', value=180, final=True)
+            self.add_action()
+
+
 
     def add_line(self):
         if self.line is not None:
