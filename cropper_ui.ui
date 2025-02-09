@@ -126,7 +126,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="rotate_clock_btn">
+       <widget class="QPushButton" name="flip_btn">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -140,34 +140,8 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset>
-          <normaloff>images/clockwise_rotate.svg</normaloff>images/clockwise_rotate.svg</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>32</width>
-          <height>32</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="rotate_counter_clock_btn">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="toolTip">
-         <string>Поворот влево на 90 градусов</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset>
-          <normaloff>images/counterclockwise_rotate.svg</normaloff>images/counterclockwise_rotate.svg</iconset>
+         <iconset resource="icons.qrc">
+          <normaloff>:/images/images/flip.svg</normaloff>:/images/images/flip.svg</iconset>
         </property>
         <property name="iconSize">
          <size>

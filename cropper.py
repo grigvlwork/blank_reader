@@ -10,7 +10,7 @@
 # 1) rotates Пропускаем
 # 2) vertical_cut (к именам файлов добавим vN(0, 1))
 # 3) horizontal_cut (к именам файлов добавим hN(0, 1))
-# 4) orientation
+# 4) orientation(некоторые нужно повернуть на 180)
 # 5) angle_adjust
 # 6) word_select (к именам файлов добавим wN(00, 01, 02, ...))
 # 7) letter_select(к именам файлов добавим lN(00, 01, 02, ...))
@@ -56,8 +56,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             "open": self.open_btn,
             "save": self.save_btn,
             "check_all": self.check_all_btn,
-            "rotate_clock": self.rotate_clock_btn,
-            "rotate_counter_clock": self.rotate_counter_clock_btn,
+            "flip": self.flip_btn,
             "zoom_out": self.zoom_out_btn,
             "zoom_in": self.zoom_in_btn,
             "add_vertical_cut": self.add_vertical_cut_btn,
@@ -76,8 +75,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                                "zoom_in", "zoom_out", "add_horizontal_cut",
                                "delete_cut", "sciss_btn", "previous", "next"],
             "orientation": ["new_project", "open", "save", "check_all",
-                            "zoom_in", "zoom_out", "rotate_clock",
-                            "rotate_counter_clock", "previous", "next"]
+                            "zoom_in", "zoom_out", "flip", "previous", "next"]
         }
         self.theme_btn.clicked.connect(self.change_theme)
         self.open_btn.clicked.connect(self.open_folder)

@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="images">
+    <file>images/flip-red.svg</file>
+    <file>images/flip.svg</file>
     <file>images/counterclockwise_rotate.svg</file>
     <file>images/clockwise_rotate.svg</file>
     <file>images/check.svg</file>

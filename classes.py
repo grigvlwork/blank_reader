@@ -144,7 +144,8 @@ class Project:
     def new_project(self, window):
         self.work_dir = ""
         self.work_dir = QFileDialog.getExistingDirectory(window, 'Select Folder')
-        # Проверить что в папке нет уже существующего проекта, если есть то либо загружаем старый либо создаем новый
+        # Проверить что в папке нет уже существующего проекта, если есть,
+        # то либо загружаем старый, либо создаем новый
         if self.work_dir == "":
             return False
         possible_project_name = self.get_possible_project_name()
@@ -201,6 +202,25 @@ class Project:
             left_half.save(left_name)
             # Сохраняем правую половину
             right_half.save(right_name)
+        elif action.type == 'horizontal_cut':
+            top_name = self.work_dir + '/processing/' + self.steps[self.current_step + 1] + \
+                        '/' + os.path.splitext(os.path.basename(file))[0] + 'h0' + \
+                        os.path.splitext(os.path.basename(file))[1]
+            bottom_name = self.work_dir + '/processing/' + self.steps[self.current_step + 1] + \
+                         '/' + os.path.splitext(os.path.basename(file))[0] + 'h1' + \
+                        os.path.splitext(os.path.basename(file))[1]
+            # Открываем исходное изображение
+            image = Image.open(file)
+            width, height = image.size
+            # Координата Y для горизонтального разреза
+            cut_position = action.value  # Например, разрез посередине
+            # Создаем две новые области для кропа
+            top_half = image.crop((0, 0, width, cut_position))
+            bottom_half = image.crop((0, cut_position, width, height))
+            # Сохраняем верхнюю половину
+            top_half.save(top_name)
+            # Сохраняем нижнюю половину
+            bottom_half.save(bottom_name)
 
     def next_step(self):
         try:
@@ -213,7 +233,7 @@ class Project:
                 os.mkdir(self.work_dir + '/processing/' + STEPS[self.current_step + 1] + '/thumbnails')
         except OSError:
             return False
-        if self.current_step == 0:  # Переделать на вертикальный разрез
+        if self.current_step in (0, 1):  # Вертикальный разрез
             check_list = self.get_current_check_list()
             files = self.get_current_files()
             actions = self.get_current_action()
@@ -229,13 +249,13 @@ class Project:
                             shutil.copy2(file, new_file)
                         except OSError:
                             return False
-            self.actions = dict()
-            self.check_list = None
-            self.current_step += 1
-            self.load_current_files()
-            self.generate_thumbnails()
-            self.save_project()
-            return self.current_step
+        self.actions = dict()
+        self.check_list = None
+        self.current_step += 1
+        self.load_current_files()
+        self.generate_thumbnails()
+        self.save_project()
+        return self.current_step
 
     def load_current_files(self):
         if self.work_dir is None:
