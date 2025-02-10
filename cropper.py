@@ -7,14 +7,14 @@ import os
 #
 # Нужно сделать обработку в виде проекта(папки) processing с
 # подкаталогами для шагов обработки
-# 1) rotates Пропускаем
-# 2) vertical_cut (к именам файлов добавим vN(0, 1))
-# 3) horizontal_cut (к именам файлов добавим hN(0, 1))
-# 4) orientation(некоторые нужно повернуть на 180)
-# 5) angle_adjust
-# 6) word_select (к именам файлов добавим wN(00, 01, 02, ...))
-# 7) letter_select(к именам файлов добавим lN(00, 01, 02, ...))
-# 8) Формирование папки output в которой вырезанные буквы и цифры разложены по папкам 0 1 2 3 а б в ...
+#  ) rotates Пропускаем
+# 0) vertical_cut (к именам файлов добавим vN(0, 1))
+# 1) horizontal_cut (к именам файлов добавим hN(0, 1))
+# 2) orientation(некоторые нужно повернуть на 180)
+# 3) angle_adjust
+# 4) word_select (к именам файлов добавим wN(00, 01, 02, ...))
+# 5) letter_select(к именам файлов добавим lN(00, 01, 02, ...))
+# 6) Формирование папки output в которой вырезанные буквы и цифры разложены по папкам 0 1 2 3 а б в ...
 # Нажатие на кнопку действия создаёт(перезаписывает) файл(ы) в папке следующего этапа.
 # К следующему этапу можно перейти если обработаны или подтверждены файлы текущего этапа
 # Возможно отслеживать только изменения по действиям текущего этапа?
@@ -78,7 +78,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             "orientation": ["new_project", "open", "save", "check_all",
                             "zoom_in", "zoom_out", "flip", "previous", "next"],
             "angle_adjust":["new_project", "open", "save", "check_all",
-                            "zoom_in", "zoom_out", "angle", "previous", "next"]
+                            "zoom_in", "zoom_out", "angle_btn", "previous", "next"]
         }
         self.theme_btn.clicked.connect(self.change_theme)
         self.open_btn.clicked.connect(self.open_folder)
@@ -91,6 +91,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.add_horizontal_cut_btn.clicked.connect(self.add_horizontal)
         self.new_project_btn.clicked.connect(self.create_new_project)
         self.sciss_btn.clicked.connect(self.confirm_cut)
+        self.angle_btn.clicked.connect(self.angle_adjust)
         self.delete_cut_btn.clicked.connect(self.delete_cut)
         self.source_lb.setText('')
         self.source_lb.setGeometry(0, 0, 1000, 1000)
@@ -127,6 +128,9 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             self.project.actions.pop(self.current_image_index)
             self.update_thumbnail(self.current_image_index)
             self.image_viewer.remove_line()
+
+    def angle_adjust(self):
+        pass
 
     def check_all(self):
         for check_box in self.check_list:

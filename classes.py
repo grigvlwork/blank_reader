@@ -1,3 +1,4 @@
+import cv2
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QPixmap
@@ -17,7 +18,7 @@ TEXT_STEPS = ["вертикальный разрез", "горизонтальн
 
 class Action(NamedTuple):
     type: str  # "cut", "crop", "rotate"
-    value: Union[int, tuple]  # Число или кортеж
+    value: Union[int, float, tuple]  # Число или кортеж
     final: bool
 
 
@@ -311,6 +312,7 @@ class ImageViewer(QGraphicsView):
         self.setScene(self.scene)
         self.image_path = image_path
         self.pixmap = QPixmap(image_path)
+        self.pos_in_original_image = None
         original_width = self.pixmap.width()
         original_height = self.pixmap.height()
         # Масштабирование изображения
@@ -389,6 +391,51 @@ class ImageViewer(QGraphicsView):
             self.current_action = Action(type='orientation', value=180, final=True)
             self.add_action()
 
+    def angle_adjust_auto(self):
+        if self.current_step == 3:
+            # Загружаем изображение
+            img = cv2.imread(self.image_path)
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+            # Применяем фильтр Кэнни для выделения границ
+            edges = cv2.Canny(gray, 50, 150, apertureSize=3)
+
+            # Находим контуры
+            contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+            # Ищем самый большой контур
+            max_area = 0
+            best_rect = None
+
+            for cnt in contours:
+                area = cv2.contourArea(cnt)
+                if area > max_area:
+                    max_area = area
+                    best_rect = cv2.minAreaRect(cnt)
+
+            # Если нашли подходящий контур, определяем угол поворота
+            if best_rect is not None:
+                angle = best_rect[-1]
+
+                if angle < -45:
+                    angle += 90
+            self.current_action = Action(type='angle_adjust', value=angle, final=False)
+            self.add_action()
+
+
+    def angle_adjust_manual(self):
+        if self.current_step == 3:
+            if self.line is not None:
+                return
+            self.line = QGraphicsLineItem(0, self.pixmap_item.pixmap().height() // 2,
+                                          self.pixmap_item.pixmap().width(), self.pixmap_item.pixmap().height() // 2)
+            self.line.setPen(Qt.red)
+            self.scene.addItem(self.line)
+            self.pos_in_original_image = QPointF(
+                self.pixmap_item.pixmap().width() // 2 * self.scale_x,
+                0
+            )
+
     def add_line(self):
         if self.line is not None:
             return
@@ -453,13 +500,13 @@ class ImageViewer(QGraphicsView):
         if self.current_action.final:
             self.mouse_press_pos = None
             return
-        if self.mouse_press_pos is not None and (self.current_step in (0, 1)):
+        if self.mouse_press_pos is not None and (self.current_step in (0, 1, 3)):
             new_pos = self.line.pos()
-            if self.current_step == 0:
+            if self.current_step == 0: # Вертикальный разрез
                 delta = event.pos() - self.mouse_press_pos
                 delta.setY(0)
                 new_pos += delta
-            elif self.current_step == 1:
+            elif self.current_step in (1, 3): # Горизонтальный разрез, настройка угла
                 delta = event.pos() - self.mouse_press_pos
                 delta.setX(0)
                 new_pos += delta
