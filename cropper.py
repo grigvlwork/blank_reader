@@ -63,6 +63,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             "add_horizontal_cut": self.add_horizontal_cut_btn,
             "delete_cut": self.delete_cut_btn,
             "sciss_btn": self.sciss_btn,
+            "angle_btn": self.angle_btn,
             "previous": self.previous_btn,
             "next": self.next_btn
         }
@@ -75,7 +76,9 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                                "zoom_in", "zoom_out", "add_horizontal_cut",
                                "delete_cut", "sciss_btn", "previous", "next"],
             "orientation": ["new_project", "open", "save", "check_all",
-                            "zoom_in", "zoom_out", "flip", "previous", "next"]
+                            "zoom_in", "zoom_out", "flip", "previous", "next"],
+            "angle_adjust":["new_project", "open", "save", "check_all",
+                            "zoom_in", "zoom_out", "angle", "previous", "next"]
         }
         self.theme_btn.clicked.connect(self.change_theme)
         self.open_btn.clicked.connect(self.open_folder)

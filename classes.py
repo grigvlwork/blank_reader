@@ -222,6 +222,12 @@ class Project:
             top_half.save(top_name)
             # Сохраняем нижнюю половину
             bottom_half.save(bottom_name)
+        elif action.type == 'horizontal_cut':
+            new_name = self.work_dir + '/processing/' + self.steps[self.current_step + 1] + \
+                       '/' + os.path.basename(file)
+            image = Image.open(file).rotate(180)
+            image.save(new_name)
+
 
     def next_step(self):
         try:
@@ -234,7 +240,7 @@ class Project:
                 os.mkdir(self.work_dir + '/processing/' + STEPS[self.current_step + 1] + '/thumbnails')
         except OSError:
             return False
-        if self.current_step in (0, 1):  # Вертикальный разрез
+        if self.current_step in (0, 1, 2):
             check_list = self.get_current_check_list()
             files = self.get_current_files()
             actions = self.get_current_action()
@@ -244,8 +250,8 @@ class Project:
                         self.apply_action(files[i], actions[i])
                     else:
                         file = self.files[i]
-                        new_file = os.path.join(self.work_dir + '/processing/' + STEPS[self.current_step + 1],
-                                                file)
+                        new_file = self.work_dir + '/processing/' + self.steps[self.current_step + 1] + \
+                                   '/' + os.path.basename(file)
                         try:
                             shutil.copy2(file, new_file)
                         except OSError:
@@ -337,6 +343,17 @@ class ImageViewer(QGraphicsView):
             self.line = QGraphicsLineItem(0, y, self.pixmap_item.pixmap().width(), y)
             self.line.setPen(color)
             self.scene.addItem(self.line)
+        elif self.current_action.type == 'orientation':
+            image = Image.open(self.image_path)
+            # Поворачиваем изображение на 180 градусов
+            rotated_image = image.rotate(180, expand=True)
+            self.scene.removeItem(self.pixmap_item)
+            self.pixmap = pil2pixmap(rotated_image)
+            scaled_pixmap = self.pixmap.scaled(2000, 1000, transformMode=Qt.SmoothTransformation,
+                                               aspectRatioMode=2)
+            self.pixmap_item = QGraphicsPixmapItem(scaled_pixmap)
+            self.scene.addItem(self.pixmap_item)
+
 
     def add_action(self):
         # self.actions.append(action)
