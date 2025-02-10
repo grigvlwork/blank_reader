@@ -84,7 +84,7 @@ class Ui_MainWindow(object):
         self.flip_btn.setSizePolicy(sizePolicy)
         self.flip_btn.setText("")
         icon5 = QtGui.QIcon()
-        icon5.addPixmap(QtGui.QPixmap("images/flip.svg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon5.addPixmap(QtGui.QPixmap("images/flip_thumb.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.flip_btn.setIcon(icon5)
         self.flip_btn.setIconSize(QtCore.QSize(32, 32))
         self.flip_btn.setObjectName("flip_btn")

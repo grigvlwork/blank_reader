@@ -1,5 +1,5 @@
 '''Модуль для обработки изображений и вырезания отдельных символов из них'''
-
+import os
 # Нужно сделать базу данных проекта(создается при создании проекта) - структура:
 # файлы -> ID(hash) -> Этапы -> каждый этап берет определенный ID на вход и
 # применяет к нему операцию(кортеж) и на выходе 1,2... новых ID(На каждом этапе генерятся (только иконки?)
@@ -253,23 +253,23 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 self.image_sa.setWidget(self.image_viewer)
                 self.image_sa.show()
 
-    def apply_action_to_image(self, action: Action, image):
-        """Применяет операцию к изображению."""
-        updated_image = image
-        if action.type == 'vertical_cut':
-            # Логика обрезки изображения
-            pass
-        elif action.type == 'crop':
-            # Логика кадрирования изображения
-            pass
-        elif action.type == 'rotate':
-            # Логика поворота изображения
-            pass
-        else:
-            raise ValueError(f'Неизвестный тип операции: {action.type}')
-
-        # Возвращаем обновленное изображение
-        return updated_image
+    # def apply_action_to_image(self, action: Action, image):
+    #     """Применяет операцию к изображению."""
+    #     updated_image = image
+    #     if action.type == 'vertical_cut':
+    #         # Логика обрезки изображения
+    #         pass
+    #     elif action.type == 'crop':
+    #         # Логика кадрирования изображения
+    #         pass
+    #     elif action.type == 'rotate':
+    #         # Логика поворота изображения
+    #         pass
+    #     else:
+    #         raise ValueError(f'Неизвестный тип операции: {action.type}')
+    #
+    #     # Возвращаем обновленное изображение
+    #     return updated_image
 
     def update_thumbnail(self, index):
         """Обновляет иконку по индексу."""
@@ -291,6 +291,13 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 y = action.value / scale_y
                 draw = ImageDraw.Draw(image)
                 draw.line((0, y, image.width, y), fill=(0, 255, 0), width=6)
+            elif action.type == 'orientation':
+                foreground = Image.open(os.getcwd() + "/images/flip_thumb.png").convert("RGBA")
+                image = Image.open(file).convert('RGBA')
+                image.thumbnail((400, 400))
+                image = image.rotate(180)
+                image.paste(foreground, (250, 150), foreground)
+                image = image.convert('RGB')
         file = (self.project.work_dir + '/processing/' +
                     STEPS[self.project.current_step] + '/' +
                     '/thumbnails/' + os.path.splitext(os.path.basename(file))[0] + '.jpg')
@@ -327,6 +334,8 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         if self.image_viewer is not None:
             self.image_viewer.flip()
             self.image_sa.show()
+            self.update_thumbnail(self.current_image_index)
+            self.project.save_project()
         # self.rotates[self.current_image_index] += 90
         # if self.rotates[self.current_image_index] >= 0:
         #     self.write_on_thumbnails(f'Right {self.rotates[self.current_image_index]}')

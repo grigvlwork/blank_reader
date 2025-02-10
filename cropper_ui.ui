@@ -141,7 +141,7 @@
         </property>
         <property name="icon">
          <iconset>
-          <normaloff>images/flip.svg</normaloff>images/flip.svg</iconset>
+          <normaloff>images/flip_thumb.png</normaloff>images/flip_thumb.png</iconset>
         </property>
         <property name="iconSize">
          <size>

@@ -190,7 +190,7 @@ class Project:
                         os.path.splitext(os.path.basename(file))[1]
             right_name = self.work_dir + '/processing/' + self.steps[self.current_step + 1] + \
                          '/' + os.path.splitext(os.path.basename(file))[0] + 'v1' + \
-                        os.path.splitext(os.path.basename(file))[1]
+                         os.path.splitext(os.path.basename(file))[1]
             # Открываем исходное изображение
             image = Image.open(file)
             width, height = image.size
@@ -205,11 +205,11 @@ class Project:
             right_half.save(right_name)
         elif action.type == 'horizontal_cut':
             top_name = self.work_dir + '/processing/' + self.steps[self.current_step + 1] + \
-                        '/' + os.path.splitext(os.path.basename(file))[0] + 'h0' + \
-                        os.path.splitext(os.path.basename(file))[1]
+                       '/' + os.path.splitext(os.path.basename(file))[0] + 'h0' + \
+                       os.path.splitext(os.path.basename(file))[1]
             bottom_name = self.work_dir + '/processing/' + self.steps[self.current_step + 1] + \
-                         '/' + os.path.splitext(os.path.basename(file))[0] + 'h1' + \
-                        os.path.splitext(os.path.basename(file))[1]
+                          '/' + os.path.splitext(os.path.basename(file))[0] + 'h1' + \
+                          os.path.splitext(os.path.basename(file))[1]
             # Открываем исходное изображение
             image = Image.open(file)
             width, height = image.size
@@ -332,6 +332,11 @@ class ImageViewer(QGraphicsView):
             self.line = QGraphicsLineItem(x, 0, x, self.pixmap_item.pixmap().height())
             self.line.setPen(color)
             self.scene.addItem(self.line)
+        elif self.current_action.type == 'horizontal_cut':
+            y = self.current_action.value / self.scale_y
+            self.line = QGraphicsLineItem(0, y, self.pixmap_item.pixmap().width(), y)
+            self.line.setPen(color)
+            self.scene.addItem(self.line)
 
     def add_action(self):
         # self.actions.append(action)
@@ -353,10 +358,9 @@ class ImageViewer(QGraphicsView):
             self.current_action = None
 
     def flip(self):
-        if self.current_step == 2: # Переворот
+        if self.current_step == 2:  # Переворот
             # Открываем изображение
             image = Image.open(self.image_path)
-
             # Поворачиваем изображение на 180 градусов
             rotated_image = image.rotate(180, expand=True)
             self.scene.removeItem(self.pixmap_item)
@@ -367,8 +371,6 @@ class ImageViewer(QGraphicsView):
             self.scene.addItem(self.pixmap_item)
             self.current_action = Action(type='orientation', value=180, final=True)
             self.add_action()
-
-
 
     def add_line(self):
         if self.line is not None:
@@ -395,7 +397,6 @@ class ImageViewer(QGraphicsView):
             self.current_action = Action(type='horizontal_cut', value=int(pos_in_original_image.y()), final=False)
             self.add_action()
             # action = Action(type='horizontal_cut', value=int(pos_in_original_image.y()))
-
 
     def add_final_line(self):
         if self.line is not None:
