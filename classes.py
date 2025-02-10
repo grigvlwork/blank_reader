@@ -459,6 +459,10 @@ class ImageViewer(QGraphicsView):
         self.rotation_marker.setBrush(QBrush(Qt.blue))
         self.rotation_marker.setFlag(QGraphicsItem.ItemIsMovable)
         self.rotation_marker.setAcceptHoverEvents(True)
+        # self.rotation_marker.hoverEnterEvent.connect(self.on_rotation_marker_hover_enter)
+
+        # Регистрация события move
+        self.rotation_marker.moveEvent.connect(self.on_rotation_marker_move)
         self.scene.addItem(self.rotation_marker)
 
     def rotation_marker_hover_enter_event(self, event):
