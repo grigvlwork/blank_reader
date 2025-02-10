@@ -422,8 +422,12 @@ class ImageViewer(QGraphicsView):
             if best_rect is not None:
                 angle = best_rect[-1]
 
+                # Обработка угла OpenCV
                 if angle < -45:
                     angle += 90
+                elif angle > 45:
+                    angle -= 90
+
                 image = Image.open(self.image_path)
                 rotated_image = image.rotate(angle, expand=True)
                 self.scene.removeItem(self.pixmap_item)
@@ -436,7 +440,8 @@ class ImageViewer(QGraphicsView):
                 self.add_action()
 
     def angle_adjust_manual(self):
-        if self.current_step == 3:
+        pass
+        # if self.current_step == 3:
             # if self.line is not None:
             #     return
             # self.line = QGraphicsLineItem(0, self.pixmap_item.pixmap().height() // 2,
@@ -447,46 +452,46 @@ class ImageViewer(QGraphicsView):
             #     self.pixmap_item.pixmap().width() // 2 * self.scale_x,
             #     0
             # )
-            self.create_rotation_marker()
-
-    def create_rotation_marker(self):
-        if self.rotation_marker is not None:
-            return
-        marker_size = 20
-        marker_center = QPointF(self.pixmap_item.pixmap().width() / 2, self.pixmap_item.pixmap().height())
-        self.rotation_marker = QGraphicsEllipseItem(marker_center.x() - marker_size / 2,
-                                                    marker_center.y() - marker_size / 2, marker_size, marker_size)
-        self.rotation_marker.setBrush(QBrush(Qt.blue))
-        self.rotation_marker.setFlag(QGraphicsItem.ItemIsMovable)
-        self.rotation_marker.setAcceptHoverEvents(True)
-        # self.rotation_marker.hoverEnterEvent.connect(self.on_rotation_marker_hover_enter)
-
-        # Регистрация события move
-        self.rotation_marker.moveEvent.connect(self.on_rotation_marker_move)
-        self.scene.addItem(self.rotation_marker)
-
-    def rotation_marker_hover_enter_event(self, event):
-        self.rotation_marker.setCursor(Qt.SizeAllCursor)
-
-    def rotation_marker_move_event(self, event):
-        if self.rotation_marker.isUnderMouse():
-            center = QPointF(self.pixmap_item.pixmap().width() / 2, self.pixmap_item.pixmap().height() / 2)
-            radius = 100  # Радиус окружности, по которой движется маркер
-
-            # Вычисление нового положения маркера на окружности
-            delta = event.pos() - center
-            angle = math.atan2(delta.y(), delta.x())
-            new_position = center + QPointF(radius * math.cos(angle), radius * math.sin(angle))
-
-            # Применение нового угла поворота
-            self.rotation_marker.setPos(new_position)
-            self.rotate(angle * 180 / math.pi)
-
-    def rotate(self, angle):
-        transform = self.pixmap_item.transform()
-        transform.reset()
-        transform.rotate(angle)
-        self.pixmap_item.setTransform(transform)
+    #         self.create_rotation_marker()
+    #
+    # def create_rotation_marker(self):
+    #     if self.rotation_marker is not None:
+    #         return
+    #     marker_size = 20
+    #     marker_center = QPointF(self.pixmap_item.pixmap().width() / 2, self.pixmap_item.pixmap().height())
+    #     self.rotation_marker = QGraphicsEllipseItem(marker_center.x() - marker_size / 2,
+    #                                                 marker_center.y() - marker_size / 2, marker_size, marker_size)
+    #     self.rotation_marker.setBrush(QBrush(Qt.blue))
+    #     self.rotation_marker.setFlag(QGraphicsItem.ItemIsMovable)
+    #     self.rotation_marker.setAcceptHoverEvents(True)
+    #     # self.rotation_marker.hoverEnterEvent.connect(self.on_rotation_marker_hover_enter)
+    #
+    #     # Регистрация события move
+    #     self.rotation_marker.moveEvent.connect(self.on_rotation_marker_move)
+    #     self.scene.addItem(self.rotation_marker)
+    #
+    # def rotation_marker_hover_enter_event(self, event):
+    #     self.rotation_marker.setCursor(Qt.SizeAllCursor)
+    #
+    # def rotation_marker_move_event(self, event):
+    #     if self.rotation_marker.isUnderMouse():
+    #         center = QPointF(self.pixmap_item.pixmap().width() / 2, self.pixmap_item.pixmap().height() / 2)
+    #         radius = 100  # Радиус окружности, по которой движется маркер
+    #
+    #         # Вычисление нового положения маркера на окружности
+    #         delta = event.pos() - center
+    #         angle = math.atan2(delta.y(), delta.x())
+    #         new_position = center + QPointF(radius * math.cos(angle), radius * math.sin(angle))
+    #
+    #         # Применение нового угла поворота
+    #         self.rotation_marker.setPos(new_position)
+    #         self.rotate(angle * 180 / math.pi)
+    #
+    # def rotate(self, angle):
+    #     transform = self.pixmap_item.transform()
+    #     transform.reset()
+    #     transform.rotate(angle)
+    #     self.pixmap_item.setTransform(transform)
 
     def add_line(self):
         if self.line is not None:
