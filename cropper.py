@@ -77,8 +77,8 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                                "delete_cut", "sciss_btn", "previous", "next"],
             "orientation": ["new_project", "open", "save", "check_all",
                             "zoom_in", "zoom_out", "flip", "previous", "next"],
-            "angle_adjust":["new_project", "open", "save", "check_all",
-                            "zoom_in", "zoom_out", "angle_btn", "previous", "next"]
+            "angle_adjust": ["new_project", "open", "save", "check_all",
+                             "zoom_in", "zoom_out", "angle_btn", "previous", "next"]
         }
         self.theme_btn.clicked.connect(self.change_theme)
         self.open_btn.clicked.connect(self.open_folder)
@@ -130,7 +130,10 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             self.image_viewer.remove_line()
 
     def angle_adjust(self):
-        pass
+        if self.image_viewer is not None:
+            self.image_viewer.angle_adjust()
+            self.image_sa.show()
+            # self.sciss_btn.setEnabled(True)
 
     def check_all(self):
         for check_box in self.check_list:
@@ -306,8 +309,8 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 image.paste(foreground, (250, 150), foreground)
                 image = image.convert('RGB')
         file = (self.project.work_dir + '/processing/' +
-                    STEPS[self.project.current_step] + '/' +
-                    '/thumbnails/' + os.path.splitext(os.path.basename(file))[0] + '.jpg')
+                STEPS[self.project.current_step] + '/' +
+                '/thumbnails/' + os.path.splitext(os.path.basename(file))[0] + '.jpg')
         image.save(file, format='JPEG')
         thumbnail = self.labels[index]
         pix = pil2pixmap(image)

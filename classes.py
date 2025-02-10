@@ -1,7 +1,9 @@
+import math
+
 import cv2
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QBrush
 import pickle
 import os
 import shutil
@@ -229,7 +231,6 @@ class Project:
             image = Image.open(file).rotate(180)
             image.save(new_name)
 
-
     def next_step(self):
         try:
             for filename in os.listdir(self.work_dir + '/processing/' + STEPS[self.current_step + 1]):
@@ -304,6 +305,7 @@ class ImageViewer(QGraphicsView):
                  on_action_removed: Callable[[int], None],
                  current_step, current_action=None):
         super().__init__()
+        self.rotation_marker = None
         self.current_step = current_step
         self.image_index = image_index
         self.on_action_added = on_action_added
@@ -356,7 +358,6 @@ class ImageViewer(QGraphicsView):
             self.pixmap_item = QGraphicsPixmapItem(scaled_pixmap)
             self.scene.addItem(self.pixmap_item)
 
-
     def add_action(self):
         # self.actions.append(action)
         if self.on_action_added:
@@ -391,6 +392,10 @@ class ImageViewer(QGraphicsView):
             self.current_action = Action(type='orientation', value=180, final=True)
             self.add_action()
 
+    def angle_adjust(self):
+        self.angle_adjust_auto()
+        self.angle_adjust_manual()
+
     def angle_adjust_auto(self):
         if self.current_step == 3:
             # Загружаем изображение
@@ -419,22 +424,65 @@ class ImageViewer(QGraphicsView):
 
                 if angle < -45:
                     angle += 90
-            self.current_action = Action(type='angle_adjust', value=angle, final=False)
-            self.add_action()
-
+                image = Image.open(self.image_path)
+                rotated_image = image.rotate(angle, expand=True)
+                self.scene.removeItem(self.pixmap_item)
+                self.pixmap = pil2pixmap(rotated_image)
+                scaled_pixmap = self.pixmap.scaled(2000, 1000, transformMode=Qt.SmoothTransformation,
+                                                   aspectRatioMode=2)
+                self.pixmap_item = QGraphicsPixmapItem(scaled_pixmap)
+                self.scene.addItem(self.pixmap_item)
+                self.current_action = Action(type='angle_adjust', value=angle, final=False)
+                self.add_action()
 
     def angle_adjust_manual(self):
         if self.current_step == 3:
-            if self.line is not None:
-                return
-            self.line = QGraphicsLineItem(0, self.pixmap_item.pixmap().height() // 2,
-                                          self.pixmap_item.pixmap().width(), self.pixmap_item.pixmap().height() // 2)
-            self.line.setPen(Qt.red)
-            self.scene.addItem(self.line)
-            self.pos_in_original_image = QPointF(
-                self.pixmap_item.pixmap().width() // 2 * self.scale_x,
-                0
-            )
+            # if self.line is not None:
+            #     return
+            # self.line = QGraphicsLineItem(0, self.pixmap_item.pixmap().height() // 2,
+            #                               self.pixmap_item.pixmap().width(), self.pixmap_item.pixmap().height() // 2)
+            # self.line.setPen(Qt.red)
+            # self.scene.addItem(self.line)
+            # self.pos_in_original_image = QPointF(
+            #     self.pixmap_item.pixmap().width() // 2 * self.scale_x,
+            #     0
+            # )
+            self.create_rotation_marker()
+
+    def create_rotation_marker(self):
+        if self.rotation_marker is not None:
+            return
+        marker_size = 20
+        marker_center = QPointF(self.pixmap_item.pixmap().width() / 2, self.pixmap_item.pixmap().height())
+        self.rotation_marker = QGraphicsEllipseItem(marker_center.x() - marker_size / 2,
+                                                    marker_center.y() - marker_size / 2, marker_size, marker_size)
+        self.rotation_marker.setBrush(QBrush(Qt.blue))
+        self.rotation_marker.setFlag(QGraphicsItem.ItemIsMovable)
+        self.rotation_marker.setAcceptHoverEvents(True)
+        self.scene.addItem(self.rotation_marker)
+
+    def rotation_marker_hover_enter_event(self, event):
+        self.rotation_marker.setCursor(Qt.SizeAllCursor)
+
+    def rotation_marker_move_event(self, event):
+        if self.rotation_marker.isUnderMouse():
+            center = QPointF(self.pixmap_item.pixmap().width() / 2, self.pixmap_item.pixmap().height() / 2)
+            radius = 100  # Радиус окружности, по которой движется маркер
+
+            # Вычисление нового положения маркера на окружности
+            delta = event.pos() - center
+            angle = math.atan2(delta.y(), delta.x())
+            new_position = center + QPointF(radius * math.cos(angle), radius * math.sin(angle))
+
+            # Применение нового угла поворота
+            self.rotation_marker.setPos(new_position)
+            self.rotate(angle * 180 / math.pi)
+
+    def rotate(self, angle):
+        transform = self.pixmap_item.transform()
+        transform.reset()
+        transform.rotate(angle)
+        self.pixmap_item.setTransform(transform)
 
     def add_line(self):
         if self.line is not None:
@@ -502,11 +550,11 @@ class ImageViewer(QGraphicsView):
             return
         if self.mouse_press_pos is not None and (self.current_step in (0, 1, 3)):
             new_pos = self.line.pos()
-            if self.current_step == 0: # Вертикальный разрез
+            if self.current_step == 0:  # Вертикальный разрез
                 delta = event.pos() - self.mouse_press_pos
                 delta.setY(0)
                 new_pos += delta
-            elif self.current_step in (1, 3): # Горизонтальный разрез, настройка угла
+            elif self.current_step in (1, 3):  # Горизонтальный разрез, настройка угла
                 delta = event.pos() - self.mouse_press_pos
                 delta.setX(0)
                 new_pos += delta
