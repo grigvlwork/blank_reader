@@ -140,8 +140,13 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             self.image_viewer.remove_line()
 
     def check_all(self):
-        for check_box in self.check_list:
-            check_box.setChecked(True)
+        check_list = [x.isChecked() for x in self.check_list]
+        if all(check_list):
+            for check_box in self.check_list:
+                check_box.setChecked(False)
+        else:
+            for check_box in self.check_list:
+                check_box.setChecked(True)
 
     def add_vertical(self):
         check_list = [x.isChecked() for x in self.check_list]
@@ -266,7 +271,9 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             self.current_image_index = index
             self.highlight_thumbnail(index)
             file = self.files[index]
-            self.image_viewer = self.project.create_viewer(file, index)
+            container_size = self.image_sa.size()
+            # print(container_size)
+            self.image_viewer = self.project.create_viewer(file, index, container_size)
             self.image_sa.setWidget(self.image_viewer)
             self.image_sa.show()
             return
