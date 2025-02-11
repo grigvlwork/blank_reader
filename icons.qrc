@@ -1,5 +1,8 @@
 <RCC>
   <qresource prefix="images">
+    <file>images/add_grid.svg</file>
+    <file>images/yes_black.svg</file>
+    <file>images/yes_color.svg</file>
     <file>images/flip-red.svg</file>
     <file>images/flip.svg</file>
     <file>images/counterclockwise_rotate.svg</file>

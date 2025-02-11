@@ -59,8 +59,8 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             "save": self.save_btn,
             "check_all": self.check_all_btn,
             "flip": self.flip_btn,
-            "zoom_out": self.zoom_out_btn,
-            "zoom_in": self.zoom_in_btn,
+            "add_grid": self.add_grid_btn,
+            "confirm_btn": self.confirm_btn,
             "add_vertical_cut": self.add_vertical_cut_btn,
             "add_horizontal_cut": self.add_horizontal_cut_btn,
             "delete_cut": self.delete_cut_btn,
@@ -72,15 +72,13 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.step_buttons = {
             "start": ["new_project", "open"],
             "vertical_cut": ["new_project", "open", "save", "check_all",
-                             "zoom_in", "zoom_out", "add_vertical_cut",
-                             "delete_cut", "sciss_btn", "next"],
+                             "add_vertical_cut", "delete_cut", "sciss_btn", "next"],
             "horizontal_cut": ["new_project", "open", "save", "check_all",
-                               "zoom_in", "zoom_out", "add_horizontal_cut",
-                               "delete_cut", "sciss_btn", "previous", "next"],
+                               "add_horizontal_cut", "delete_cut", "sciss_btn", "previous", "next"],
             "orientation": ["new_project", "open", "save", "check_all",
-                            "zoom_in", "zoom_out", "flip", "previous", "next"]
-            # "angle_adjust": ["new_project", "open", "save", "check_all",
-            #                  "zoom_in", "zoom_out", "angle_btn", "previous", "next"]
+                            "flip", "previous", "next"],
+            "word_select": ["new_project", "open", "save", "check_all",
+                             "add_grid", "delete_cut", "confirm_btn", "previous", "next"]
         }
         self.theme_btn.clicked.connect(self.change_theme)
         self.open_btn.clicked.connect(self.open_folder)
