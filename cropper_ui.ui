@@ -152,7 +152,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="zoom_out_btn">
+       <widget class="QPushButton" name="add_word_btn">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -160,14 +160,14 @@
          </sizepolicy>
         </property>
         <property name="toolTip">
-         <string>Уменьшить масштаб</string>
+         <string>Добавить слово</string>
         </property>
         <property name="text">
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="icons.qrc">
-          <normaloff>:/images/images/zoom_out.svg</normaloff>:/images/images/zoom_out.svg</iconset>
+         <iconset>
+          <normaloff>images/add_word.svg</normaloff>images/add_word.svg</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -178,7 +178,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="zoom_in_btn">
+       <widget class="QPushButton" name="increase_word_btn">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -186,14 +186,40 @@
          </sizepolicy>
         </property>
         <property name="toolTip">
-         <string>Увеличить масштаб</string>
+         <string>Увеличить слово</string>
         </property>
         <property name="text">
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="icons.qrc">
-          <normaloff>:/images/images/zoom_in.svg</normaloff>:/images/images/zoom_in.svg</iconset>
+         <iconset>
+          <normaloff>images/increase_word.svg</normaloff>images/increase_word.svg</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="confirm_word_btn">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Сохранить слово</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>images/confirm_word.svg</normaloff>images/confirm_word.svg</iconset>
         </property>
         <property name="iconSize">
          <size>

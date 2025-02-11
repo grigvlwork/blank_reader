@@ -129,6 +129,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                                                      value=draft_action.value,
                                                      final=True)
                     self.update_thumbnail(i)
+            self.thumbnail_click()
         else:
             if self.current_image_index in self.project.actions:
                 draft_action = self.project.actions[self.current_image_index]
@@ -161,6 +162,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 image = Image.open(self.files[i])
                 x = image.width // 2
                 self.project.actions[i] = Action('vertical_cut', value=x, final=False)
+                self.thumbnail_click()
         else:
             if self.image_viewer is not None:
                 self.image_viewer.add_line()
@@ -174,6 +176,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 image = Image.open(self.files[i])
                 y = image.height // 2
                 self.project.actions[i] = Action('horizontal_cut', value=y, final=False)
+                self.thumbnail_click()
         else:
             if self.image_viewer is not None:
                 self.image_viewer.add_line()
