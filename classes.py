@@ -247,13 +247,19 @@ class Project:
                 best_rect = cv2.minAreaRect(cnt)
         if best_rect is not None:
             angle = best_rect[-1]
-            if angle < -30:
-                angle += 90
-            elif angle > 30:
-                angle -= 90
-            image = Image.open(file)
-            rotated_image = image.rotate(angle, expand=True)
-            rotated_image.save(new_file)
+            # if angle < -30:
+            #     angle += 90
+            # elif angle > 30:
+            #     angle -= 90
+            if -10 < angle < 10:
+                image = Image.open(file)
+                rotated_image = image.rotate(angle, expand=True)
+                rotated_image.save(new_file)
+            else:
+                image = Image.open(file)
+                # rotated_image = image.rotate(angle, expand=True)
+                image.save(new_file)
+
 
     def next_step(self):
         try:
