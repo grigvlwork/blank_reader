@@ -404,7 +404,8 @@ class ImageViewer(QGraphicsView):
             w = GRID_WIDTH / self.scale_x
             h = GRID_HEIGHT / self.scale_y
             self.grid = QGraphicsRectItem()
-            self.grid.setRect(QRectF(x, y, w, h))
+            self.grid.setRect(QRectF(0, 0, w, h))
+            self.grid.setPos(x, y)
             self.grid.setPen(Qt.red)
             self.scene.addItem(self.grid)
 
@@ -440,7 +441,6 @@ class ImageViewer(QGraphicsView):
             self.current_action = Action(type='orientation', value=180, final=True)
             self.add_action()
 
-
     def add_line(self):
         if self.line is not None:
             return
@@ -469,15 +469,17 @@ class ImageViewer(QGraphicsView):
     def add_grid(self):
         if self.grid is not None:
             return
-        x = 100 / self.scale_x
-        y = 285 / self.scale_y
+        x = 0
+        y = 0
         w = GRID_WIDTH / self.scale_x
         h = GRID_HEIGHT / self.scale_y
         self.grid = QGraphicsRectItem()
         self.grid.setRect(QRectF(x, y, w, h))
         self.grid.setPen(Qt.red)
         self.scene.addItem(self.grid)
-        self.current_action = Action(type='word_select', value=(x, y), final=False)
+        self.current_action = Action(type='word_select',
+                                     value=(x * self.scale_x, y * self.scale_y),
+                                     final=False)
         self.add_action()
 
     def add_final_line(self):
@@ -509,7 +511,7 @@ class ImageViewer(QGraphicsView):
         if self.current_action.final:
             self.mouse_press_pos = None
             return
-        if event.button() == Qt.LeftButton and (self.current_step in (0, 1)):
+        if event.button() == Qt.LeftButton and (self.current_step in (0, 1, 3)):
             self.mouse_press_pos = event.pos()
 
     def mouseMoveEvent(self, event):
@@ -532,42 +534,41 @@ class ImageViewer(QGraphicsView):
             self.mouse_press_pos = event.pos()
         elif self.mouse_press_pos is not None and self.current_step == 3:
             new_pos = self.grid.pos()
-            print(new_pos)
             delta = event.pos() - self.mouse_press_pos
             new_pos += delta
             self.grid.setPos(new_pos)
             self.mouse_press_pos = event.pos()
 
 
-def mouseReleaseEvent(self, event):
-    if self.current_action is None:
-        return
-    if self.current_action.final:
-        self.mouse_press_pos = None
-        return
-    if event.button() == Qt.LeftButton and (self.current_step in (0, 1, 3)):
-        self.current_action = None
-        if self.current_step == 0:  # Вертикальный разрез
-            pos_in_original_image = QPointF(
-                (self.container_width // 2 + self.line.pos().x()) * self.scale_x,
-                (0 + self.line.pos().y()) * self.scale_y
-            )
-            self.current_action = Action(type='vertical_cut',
-                                         value=int(pos_in_original_image.x()),
-                                         final=False)
-        elif self.current_step == 1:  # Горизонтальный разрез
-            pos_in_original_image = QPointF(
-                (0 + self.line.pos().x()) * self.scale_x,
-                (self.pixmap_item.pixmap().height() // 2 + self.line.pos().y()) * self.scale_y
-            )
-            self.current_action = Action(type='horizontal_cut',
-                                         value=int(pos_in_original_image.y()),
-                                         final=False)
-        elif self.current_step == 3:
-            pos_in_original_image = QPointF(self.grid.pos().x() * self.scale_x,
-                                            self.grid.pos().y() * self.scale_y)
-            self.current_action = Action(type='word_select',
-                                         value=(pos_in_original_image.x(), pos_in_original_image.y()),
-                                         final=False)
-        self.add_action()
-        self.mouse_press_pos = None
+    def mouseReleaseEvent(self, event):
+        if self.current_action is None:
+            return
+        if self.current_action.final:
+            self.mouse_press_pos = None
+            return
+        if event.button() == Qt.LeftButton and (self.current_step in (0, 1, 3)):
+            self.current_action = None
+            if self.current_step == 0:  # Вертикальный разрез
+                pos_in_original_image = QPointF(
+                    (self.container_width // 2 + self.line.pos().x()) * self.scale_x,
+                    (0 + self.line.pos().y()) * self.scale_y
+                )
+                self.current_action = Action(type='vertical_cut',
+                                             value=int(pos_in_original_image.x()),
+                                             final=False)
+            elif self.current_step == 1:  # Горизонтальный разрез
+                pos_in_original_image = QPointF(
+                    (0 + self.line.pos().x()) * self.scale_x,
+                    (self.pixmap_item.pixmap().height() // 2 + self.line.pos().y()) * self.scale_y
+                )
+                self.current_action = Action(type='horizontal_cut',
+                                             value=int(pos_in_original_image.y()),
+                                             final=False)
+            elif self.current_step == 3:
+                pos_in_original_image = QPointF(self.grid.pos().x() * self.scale_x,
+                                                self.grid.pos().y() * self.scale_y)
+                self.current_action = Action(type='word_select',
+                                             value=(pos_in_original_image.x(), pos_in_original_image.y()),
+                                             final=False)
+            self.add_action()
+            self.mouse_press_pos = None
