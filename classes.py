@@ -55,12 +55,13 @@ class Project:
         if image_index in self.actions:
             self.actions.pop(image_index)
 
-    def create_viewer(self, path, image_index):
+    def create_viewer(self, path, image_index, container_size):
         if image_index in self.actions.keys():
             return ImageViewer(path, image_index, self.add_action_to_image, self.remove_action_from_image,
-                               self.current_step, current_action=self.actions[image_index])
+                               self.current_step, current_action=self.actions[image_index],
+                               container_size=container_size)
         return ImageViewer(path, image_index, self.add_action_to_image, self.remove_action_from_image,
-                           self.current_step)
+                           self.current_step, container_size=container_size)
 
     def __getstate__(self) -> dict:
         state = dict()
@@ -347,7 +348,8 @@ class ImageViewer(QGraphicsView):
         original_width = self.pixmap.width()
         original_height = self.pixmap.height()
         # Масштабирование изображения
-        scaled_pixmap = self.pixmap.scaled(2000, 1000, transformMode=Qt.SmoothTransformation,
+        self.container_width, self.container_height = container_size
+        scaled_pixmap = self.pixmap.scaled(self.container_width, self.container_height, transformMode=Qt.SmoothTransformation,
                                            aspectRatioMode=2)
         self.pixmap_item = QGraphicsPixmapItem(scaled_pixmap)
         self.scene.addItem(self.pixmap_item)
@@ -382,7 +384,8 @@ class ImageViewer(QGraphicsView):
             rotated_image = image.rotate(180, expand=True)
             self.scene.removeItem(self.pixmap_item)
             self.pixmap = pil2pixmap(rotated_image)
-            scaled_pixmap = self.pixmap.scaled(2000, 1000, transformMode=Qt.SmoothTransformation,
+            scaled_pixmap = self.pixmap.scaled(self.container_width, self.container_height,
+                                               transformMode=Qt.SmoothTransformation,
                                                aspectRatioMode=2)
             self.pixmap_item = QGraphicsPixmapItem(scaled_pixmap)
             self.scene.addItem(self.pixmap_item)
@@ -414,7 +417,7 @@ class ImageViewer(QGraphicsView):
             rotated_image = image.rotate(180, expand=True)
             self.scene.removeItem(self.pixmap_item)
             self.pixmap = pil2pixmap(rotated_image)
-            scaled_pixmap = self.pixmap.scaled(2000, 1000, transformMode=Qt.SmoothTransformation,
+            scaled_pixmap = self.pixmap.scaled(self.container_width, self.container_height, transformMode=Qt.SmoothTransformation,
                                                aspectRatioMode=2)
             self.pixmap_item = QGraphicsPixmapItem(scaled_pixmap)
             self.scene.addItem(self.pixmap_item)
@@ -512,7 +515,7 @@ class ImageViewer(QGraphicsView):
             self.current_action = None
             if self.current_step == 0:  # Вертикальный разрез
                 pos_in_original_image = QPointF(
-                    (1000 + self.line.pos().x()) * self.scale_x,
+                    (self.container_width // 2 + self.line.pos().x()) * self.scale_x,
                     (0 + self.line.pos().y()) * self.scale_y
                 )
                 self.current_action = Action(type='vertical_cut',

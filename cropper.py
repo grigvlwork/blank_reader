@@ -273,13 +273,13 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             self.thumbnail_click(0)
 
     def thumbnail_click(self, index=None):
-        container_size = self.image_sa.size()
+        container_size = (self.image_sa.size().width(), self.image_sa.size().height())
         # print(container_size)
         if index is not None:
             self.current_image_index = index
             self.highlight_thumbnail(index)
             file = self.files[index]
-            self.image_viewer = self.project.create_viewer(file, index)
+            self.image_viewer = self.project.create_viewer(file, index, container_size)
             self.image_sa.setWidget(self.image_viewer)
             self.image_sa.show()
             return
@@ -290,7 +290,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                     return
                 self.current_image_index = i
                 self.highlight_thumbnail(i)
-                self.image_viewer = self.project.create_viewer(file, i)
+                self.image_viewer = self.project.create_viewer(file, i, container_size)
                 self.image_sa.setWidget(self.image_viewer)
                 self.image_sa.show()
 
