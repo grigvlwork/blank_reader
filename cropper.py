@@ -11,8 +11,8 @@ import os
 # 0) vertical_cut (к именам файлов добавим vN(0, 1))
 # 1) horizontal_cut (к именам файлов добавим hN(0, 1))
 # 2) orientation(некоторые нужно повернуть на 180)
-# 3) angle_adjust
-# 4) word_select (к именам файлов добавим wN(00, 01, 02, ...))
+#  ) angle_adjust  выполняется после шага 2 автоматически
+# 3) word_select (к именам файлов добавим wN(00, 01, 02, ...))
 # 5) letter_select(к именам файлов добавим lN(00, 01, 02, ...))
 # 6) Формирование папки output в которой вырезанные буквы и цифры разложены по папкам 0 1 2 3 а б в ...
 # Нажатие на кнопку действия создаёт(перезаписывает) файл(ы) в папке следующего этапа.
@@ -63,7 +63,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             "add_horizontal_cut": self.add_horizontal_cut_btn,
             "delete_cut": self.delete_cut_btn,
             "sciss_btn": self.sciss_btn,
-            "angle_btn": self.angle_btn,
+            # "angle_btn": self.angle_btn,
             "previous": self.previous_btn,
             "next": self.next_btn
         }
@@ -76,9 +76,9 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                                "zoom_in", "zoom_out", "add_horizontal_cut",
                                "delete_cut", "sciss_btn", "previous", "next"],
             "orientation": ["new_project", "open", "save", "check_all",
-                            "zoom_in", "zoom_out", "flip", "previous", "next"],
-            "angle_adjust": ["new_project", "open", "save", "check_all",
-                             "zoom_in", "zoom_out", "angle_btn", "previous", "next"]
+                            "zoom_in", "zoom_out", "flip", "previous", "next"]
+            # "angle_adjust": ["new_project", "open", "save", "check_all",
+            #                  "zoom_in", "zoom_out", "angle_btn", "previous", "next"]
         }
         self.theme_btn.clicked.connect(self.change_theme)
         self.open_btn.clicked.connect(self.open_folder)
@@ -91,7 +91,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.add_horizontal_cut_btn.clicked.connect(self.add_horizontal)
         self.new_project_btn.clicked.connect(self.create_new_project)
         self.sciss_btn.clicked.connect(self.confirm_cut)
-        self.angle_btn.clicked.connect(self.angle_adjust)
+        # self.angle_btn.clicked.connect(self.angle_adjust)
         self.delete_cut_btn.clicked.connect(self.delete_cut)
         self.source_lb.setText('')
         self.source_lb.setGeometry(0, 0, 1000, 1000)
@@ -129,11 +129,11 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             self.update_thumbnail(self.current_image_index)
             self.image_viewer.remove_line()
 
-    def angle_adjust(self):
-        if self.image_viewer is not None:
-            self.image_viewer.angle_adjust()
-            self.image_sa.show()
-            # self.sciss_btn.setEnabled(True)
+    # def angle_adjust(self):
+    #     if self.image_viewer is not None:
+    #         self.image_viewer.angle_adjust()
+    #         self.image_sa.show()
+    #         # self.sciss_btn.setEnabled(True)
 
     def check_all(self):
         for check_box in self.check_list:
@@ -346,20 +346,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             self.image_sa.show()
             self.update_thumbnail(self.current_image_index)
             self.project.save_project()
-        # self.rotates[self.current_image_index] += 90
-        # if self.rotates[self.current_image_index] >= 0:
-        #     self.write_on_thumbnails(f'Right {self.rotates[self.current_image_index]}')
-        # else:
-        #     self.write_on_thumbnails(f'Left {-self.rotates[self.current_image_index]}')
 
-    def rotate_left(self):
-        pass
-        # self.rotates[self.current_image_index] -= 90
-        # # self.rotates[self.current_image_index] %= 360
-        # if self.rotates[self.current_image_index] >= 0:
-        #     self.write_on_thumbnails(f'Right {self.rotates[self.current_image_index]}')
-        # else:
-        #     self.write_on_thumbnails(f'Left {-self.rotates[self.current_image_index]}')
 
     def write_on_thumbnails(self, text):
         im = Image.open(self.thumbnails[self.current_image_index])
@@ -394,8 +381,6 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.thumbnails = [os.path.join(td, f) for f in os.listdir(td) if
                            os.path.isfile(os.path.join(td, f))]
 
-    def rotate_image(self, angle):
-        pass
 
     # https://python-scripts.com/draw-circle-rectangle-line
 
