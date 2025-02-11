@@ -13,8 +13,8 @@ import os
 # 2) orientation(некоторые нужно повернуть на 180)
 #  ) angle_adjust  выполняется после шага 2 автоматически
 # 3) word_select (к именам файлов добавим wN(00, 01, 02, ...))
-# 5) letter_select(к именам файлов добавим lN(00, 01, 02, ...))
-# 6) Формирование папки output в которой вырезанные буквы и цифры разложены по папкам 0 1 2 3 а б в ...
+# 4) letter_select(к именам файлов добавим lN(00, 01, 02, ...))
+# 5) Формирование папки output в которой вырезанные буквы и цифры разложены по папкам 0 1 2 3 а б в ...
 # Нажатие на кнопку действия создаёт(перезаписывает) файл(ы) в папке следующего этапа.
 # К следующему этапу можно перейти если обработаны или подтверждены файлы текущего этапа
 # Возможно отслеживать только изменения по действиям текущего этапа?
@@ -83,7 +83,6 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.theme_btn.clicked.connect(self.change_theme)
         self.open_btn.clicked.connect(self.open_folder)
         self.flip_btn.clicked.connect(self.flip)
-        # self.rotate_counter_clock_btn.clicked.connect(self.rotate_left)
         self.save_btn.clicked.connect(self.save_project)
         self.check_all_btn.clicked.connect(self.check_all)
         self.next_btn.clicked.connect(self.next_step)
@@ -91,6 +90,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.add_horizontal_cut_btn.clicked.connect(self.add_horizontal)
         self.new_project_btn.clicked.connect(self.create_new_project)
         self.sciss_btn.clicked.connect(self.confirm_cut)
+        self.add_grid_btn.clicked.connect(self.add_grid)
         self.resized.connect(self.thumbnail_click)
         self.delete_cut_btn.clicked.connect(self.delete_cut)
         self.source_lb.setText('')
@@ -105,6 +105,13 @@ class MyWidget(QMainWindow, Ui_MainWindow):
     def resizeEvent(self, event):
         self.resized.emit()
         return super(MyWidget, self).resizeEvent(event)
+
+    def add_grid(self):
+        if self.image_viewer is not None:
+            self.image_viewer.add_grid()
+            self.image_sa.show()
+            self.confirm_btn.setEnabled(True)
+
 
     def show_buttons(self):
         if self.project is None:

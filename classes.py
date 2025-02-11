@@ -16,6 +16,8 @@ STEPS = ["vertical_cut", "horizontal_cut", "orientation", "word_select",
 TEXT_STEPS = ["вертикальный разрез", "горизонтальный разрез",
               "ориентация бланка", "выбор слов",
               "выбор букв", "вывод результата"]
+GRID_WIDTH = 3240
+GRID_HEIGHT = 2000
 
 
 class Action(NamedTuple):
@@ -363,6 +365,7 @@ class ImageViewer(QGraphicsView):
         self.scale_y = original_height / scaled_pixmap.height()
         self.mouse_press_pos = None
         self.line = None
+        self.grid = None
         self.current_action = current_action
         if current_action is not None:
             self.apply_action()
@@ -458,7 +461,23 @@ class ImageViewer(QGraphicsView):
             )
             self.current_action = Action(type='horizontal_cut', value=int(pos_in_original_image.y()), final=False)
             self.add_action()
-            # action = Action(type='horizontal_cut', value=int(pos_in_original_image.y()))
+
+    def add_grid(self):
+        if self.grid is not None:
+            return
+        x = 100 / self.scale_x
+        y = 285 / self.scale_y
+        w = GRID_WIDTH / self.scale_x
+        h = GRID_HEIGHT / self.scale_y
+        self.grid = QGraphicsRectItem()
+        self.grid.setRect(QRectF(x, y, w, h))
+        self.grid.setPen(Qt.red)
+        self.scene.addItem(self.grid)
+        pos_in_original_image = QPointF(x, y)
+        self.current_action = Action(type='word_select', value=(x, y), final=False)
+        self.add_action()
+
+
 
     def add_final_line(self):
         if self.line is not None:
@@ -517,7 +536,7 @@ class ImageViewer(QGraphicsView):
         if self.current_action.final:
             self.mouse_press_pos = None
             return
-        if event.button() == Qt.LeftButton and (self.current_step in (0, 1)):
+        if event.button() == Qt.LeftButton and (self.current_step in (0, 1, 3)):
             self.current_action = None
             if self.current_step == 0:  # Вертикальный разрез
                 pos_in_original_image = QPointF(
@@ -532,9 +551,14 @@ class ImageViewer(QGraphicsView):
                     (0 + self.line.pos().x()) * self.scale_x,
                     (self.pixmap_item.pixmap().height() // 2 + self.line.pos().y()) * self.scale_y
                 )
-                print(self.line.pos())
                 self.current_action = Action(type='horizontal_cut',
                                              value=int(pos_in_original_image.y()),
+                                             final=False)
+            elif self.current_step == 3:
+                pos_in_original_image = QPointF(self.grid.pos().x() * self.scale_x,
+                                                self.grid.pos().y() * self.scale_y)
+                self.current_action = Action(type='word_select',
+                                             value=(pos_in_original_image.x(),pos_in_original_image.y()),
                                              final=False)
             self.add_action()
             self.mouse_press_pos = None
