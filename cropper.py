@@ -129,21 +129,22 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             self.update_thumbnail(self.current_image_index)
             self.image_viewer.remove_line()
 
-    # def angle_adjust(self):
-    #     if self.image_viewer is not None:
-    #         self.image_viewer.angle_adjust()
-    #         self.image_sa.show()
-    #         # self.sciss_btn.setEnabled(True)
-
     def check_all(self):
         for check_box in self.check_list:
             check_box.setChecked(True)
 
     def add_vertical(self):
-        if self.image_viewer is not None:
-            self.image_viewer.add_line()
-            self.image_sa.show()
-            self.sciss_btn.setEnabled(True)
+        check_list = [x.isChecked() for x in self.check_list]
+        if all(check_list):
+            for i in range(len(self.files)):
+                image = Image.open(self.files[i])
+                x = image.width // 2
+                self.project.actions[i] = Action('vertical_cut', value=x, final=False)
+        else:
+            if self.image_viewer is not None:
+                self.image_viewer.add_line()
+                self.image_sa.show()
+                self.sciss_btn.setEnabled(True)
 
     def add_horizontal(self):
         if self.image_viewer is not None:
@@ -262,24 +263,6 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 self.image_viewer = self.project.create_viewer(file, i)
                 self.image_sa.setWidget(self.image_viewer)
                 self.image_sa.show()
-
-    # def apply_action_to_image(self, action: Action, image):
-    #     """Применяет операцию к изображению."""
-    #     updated_image = image
-    #     if action.type == 'vertical_cut':
-    #         # Логика обрезки изображения
-    #         pass
-    #     elif action.type == 'crop':
-    #         # Логика кадрирования изображения
-    #         pass
-    #     elif action.type == 'rotate':
-    #         # Логика поворота изображения
-    #         pass
-    #     else:
-    #         raise ValueError(f'Неизвестный тип операции: {action.type}')
-    #
-    #     # Возвращаем обновленное изображение
-    #     return updated_image
 
     def update_thumbnail(self, index):
         """Обновляет иконку по индексу."""
