@@ -262,7 +262,6 @@ class Project:
                 # rotated_image = image.rotate(angle, expand=True)
                 image.save(new_file)
 
-
     def next_step(self):
         try:
             for filename in os.listdir(self.work_dir + '/processing/' + STEPS[self.current_step + 1]):
@@ -357,7 +356,8 @@ class ImageViewer(QGraphicsView):
         original_height = self.pixmap.height()
         # Масштабирование изображения
         self.container_width, self.container_height = container_size
-        scaled_pixmap = self.pixmap.scaled(self.container_width, self.container_height, transformMode=Qt.SmoothTransformation,
+        scaled_pixmap = self.pixmap.scaled(self.container_width, self.container_height,
+                                           transformMode=Qt.SmoothTransformation,
                                            aspectRatioMode=2)
         self.pixmap_item = QGraphicsPixmapItem(scaled_pixmap)
         self.scene.addItem(self.pixmap_item)
@@ -398,6 +398,15 @@ class ImageViewer(QGraphicsView):
                                                aspectRatioMode=2)
             self.pixmap_item = QGraphicsPixmapItem(scaled_pixmap)
             self.scene.addItem(self.pixmap_item)
+        elif self.current_action.type == 'word_select':
+            x = self.current_action.value[0] / self.scale_x
+            y = self.current_action.value[1] / self.scale_y
+            w = GRID_WIDTH / self.scale_x
+            h = GRID_HEIGHT / self.scale_y
+            self.grid = QGraphicsRectItem()
+            self.grid.setRect(QRectF(x, y, w, h))
+            self.grid.setPen(Qt.red)
+            self.scene.addItem(self.grid)
 
     def add_action(self):
         # self.actions.append(action)
@@ -407,9 +416,6 @@ class ImageViewer(QGraphicsView):
     def remove_action(self):
         if self.on_action_removed:
             self.on_action_removed(self.image_index)  # Сообщаем Project
-
-    # def set_current_step(self, current_step):
-    #     self.current_step = current_step
 
     def remove_line(self):
         if self.line is not None:
@@ -426,15 +432,13 @@ class ImageViewer(QGraphicsView):
             rotated_image = image.rotate(180, expand=True)
             self.scene.removeItem(self.pixmap_item)
             self.pixmap = pil2pixmap(rotated_image)
-            scaled_pixmap = self.pixmap.scaled(self.container_width, self.container_height, transformMode=Qt.SmoothTransformation,
+            scaled_pixmap = self.pixmap.scaled(self.container_width, self.container_height,
+                                               transformMode=Qt.SmoothTransformation,
                                                aspectRatioMode=2)
             self.pixmap_item = QGraphicsPixmapItem(scaled_pixmap)
             self.scene.addItem(self.pixmap_item)
             self.current_action = Action(type='orientation', value=180, final=True)
             self.add_action()
-
-    # def angle_adjust(self):
-    #     self.angle_adjust_auto()
 
 
     def add_line(self):
@@ -473,11 +477,8 @@ class ImageViewer(QGraphicsView):
         self.grid.setRect(QRectF(x, y, w, h))
         self.grid.setPen(Qt.red)
         self.scene.addItem(self.grid)
-        pos_in_original_image = QPointF(x, y)
         self.current_action = Action(type='word_select', value=(x, y), final=False)
         self.add_action()
-
-
 
     def add_final_line(self):
         if self.line is not None:
@@ -517,48 +518,56 @@ class ImageViewer(QGraphicsView):
         if self.current_action.final:
             self.mouse_press_pos = None
             return
-        if self.mouse_press_pos is not None and (self.current_step in (0, 1, 3)):
+        if self.mouse_press_pos is not None and (self.current_step in (0, 1)):
             new_pos = self.line.pos()
             if self.current_step == 0:  # Вертикальный разрез
                 delta = event.pos() - self.mouse_press_pos
                 delta.setY(0)
                 new_pos += delta
-            elif self.current_step in (1, 3):  # Горизонтальный разрез, настройка угла
+            elif self.current_step == 1:  # Горизонтальный разрез, настройка угла
                 delta = event.pos() - self.mouse_press_pos
                 delta.setX(0)
                 new_pos += delta
             self.line.setPos(new_pos)
             self.mouse_press_pos = event.pos()
+        elif self.mouse_press_pos is not None and self.current_step == 3:
+            new_pos = self.grid.pos()
+            print(new_pos)
+            delta = event.pos() - self.mouse_press_pos
+            new_pos += delta
+            self.grid.setPos(new_pos)
+            self.mouse_press_pos = event.pos()
 
-    def mouseReleaseEvent(self, event):
-        if self.current_action is None:
-            return
-        if self.current_action.final:
-            self.mouse_press_pos = None
-            return
-        if event.button() == Qt.LeftButton and (self.current_step in (0, 1, 3)):
-            self.current_action = None
-            if self.current_step == 0:  # Вертикальный разрез
-                pos_in_original_image = QPointF(
-                    (self.container_width // 2 + self.line.pos().x()) * self.scale_x,
-                    (0 + self.line.pos().y()) * self.scale_y
-                )
-                self.current_action = Action(type='vertical_cut',
-                                             value=int(pos_in_original_image.x()),
-                                             final=False)
-            elif self.current_step == 1:  # Горизонтальный разрез
-                pos_in_original_image = QPointF(
-                    (0 + self.line.pos().x()) * self.scale_x,
-                    (self.pixmap_item.pixmap().height() // 2 + self.line.pos().y()) * self.scale_y
-                )
-                self.current_action = Action(type='horizontal_cut',
-                                             value=int(pos_in_original_image.y()),
-                                             final=False)
-            elif self.current_step == 3:
-                pos_in_original_image = QPointF(self.grid.pos().x() * self.scale_x,
-                                                self.grid.pos().y() * self.scale_y)
-                self.current_action = Action(type='word_select',
-                                             value=(pos_in_original_image.x(),pos_in_original_image.y()),
-                                             final=False)
-            self.add_action()
-            self.mouse_press_pos = None
+
+def mouseReleaseEvent(self, event):
+    if self.current_action is None:
+        return
+    if self.current_action.final:
+        self.mouse_press_pos = None
+        return
+    if event.button() == Qt.LeftButton and (self.current_step in (0, 1, 3)):
+        self.current_action = None
+        if self.current_step == 0:  # Вертикальный разрез
+            pos_in_original_image = QPointF(
+                (self.container_width // 2 + self.line.pos().x()) * self.scale_x,
+                (0 + self.line.pos().y()) * self.scale_y
+            )
+            self.current_action = Action(type='vertical_cut',
+                                         value=int(pos_in_original_image.x()),
+                                         final=False)
+        elif self.current_step == 1:  # Горизонтальный разрез
+            pos_in_original_image = QPointF(
+                (0 + self.line.pos().x()) * self.scale_x,
+                (self.pixmap_item.pixmap().height() // 2 + self.line.pos().y()) * self.scale_y
+            )
+            self.current_action = Action(type='horizontal_cut',
+                                         value=int(pos_in_original_image.y()),
+                                         final=False)
+        elif self.current_step == 3:
+            pos_in_original_image = QPointF(self.grid.pos().x() * self.scale_x,
+                                            self.grid.pos().y() * self.scale_y)
+            self.current_action = Action(type='word_select',
+                                         value=(pos_in_original_image.x(), pos_in_original_image.y()),
+                                         final=False)
+        self.add_action()
+        self.mouse_press_pos = None
