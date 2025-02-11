@@ -330,7 +330,9 @@ class ImageViewer(QGraphicsView):
     def __init__(self, image_path, image_index,
                  on_action_added: Callable[[int, str], None],
                  on_action_removed: Callable[[int], None],
-                 current_step, current_action=None):
+                 current_step,
+                 current_action=None,
+                 container_size=(2000, 1000)):
         super().__init__()
         self.rotation_marker = None
         self.current_step = current_step

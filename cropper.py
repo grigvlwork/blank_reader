@@ -38,6 +38,8 @@ from functions import *
 
 
 class MyWidget(QMainWindow, Ui_MainWindow):
+    resized = QtCore.pyqtSignal()
+
     def __init__(self):
         super().__init__()
         self.checked = None
@@ -91,7 +93,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.add_horizontal_cut_btn.clicked.connect(self.add_horizontal)
         self.new_project_btn.clicked.connect(self.create_new_project)
         self.sciss_btn.clicked.connect(self.confirm_cut)
-        # self.angle_btn.clicked.connect(self.angle_adjust)
+        self.resized.connect(self.thumbnail_click)
         self.delete_cut_btn.clicked.connect(self.delete_cut)
         self.source_lb.setText('')
         self.source_lb.setGeometry(0, 0, 1000, 1000)
@@ -101,6 +103,10 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.pixmap = None
         self.project = None
         self.show_buttons()
+
+    def resizeEvent(self, event):
+        self.resized.emit()
+        return super(MyWidget, self).resizeEvent(event)
 
     def show_buttons(self):
         if self.project is None:
@@ -267,13 +273,13 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             self.thumbnail_click(0)
 
     def thumbnail_click(self, index=None):
+        container_size = self.image_sa.size()
+        # print(container_size)
         if index is not None:
             self.current_image_index = index
             self.highlight_thumbnail(index)
             file = self.files[index]
-            container_size = self.image_sa.size()
-            # print(container_size)
-            self.image_viewer = self.project.create_viewer(file, index, container_size)
+            self.image_viewer = self.project.create_viewer(file, index)
             self.image_sa.setWidget(self.image_viewer)
             self.image_sa.show()
             return
