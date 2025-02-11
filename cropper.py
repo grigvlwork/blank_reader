@@ -114,14 +114,24 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 button.hide()  # Скрываем кнопку
 
     def confirm_cut(self):
-        if self.current_image_index in self.project.actions:
-            draft_action = self.project.actions[self.current_image_index]
-            self.project.actions[self.current_image_index] = Action(type=draft_action.type,
-                                                                    value=draft_action.value,
-                                                                    final=True)
-            self.update_thumbnail(self.current_image_index)
-            self.image_viewer.add_final_line()
-            self.project.save_project()
+        check_list = [x.isChecked() for x in self.check_list]
+        if all(check_list):
+            for i in range(len(check_list)):
+                if i in self.project.actions:
+                    draft_action = self.project.actions[i]
+                    self.project.actions[i] = Action(type=draft_action.type,
+                                                     value=draft_action.value,
+                                                     final=True)
+                    self.update_thumbnail(i)
+        else:
+            if self.current_image_index in self.project.actions:
+                draft_action = self.project.actions[self.current_image_index]
+                self.project.actions[self.current_image_index] = Action(type=draft_action.type,
+                                                                        value=draft_action.value,
+                                                                        final=True)
+                self.update_thumbnail(self.current_image_index)
+                self.image_viewer.add_final_line()
+        self.project.save_project()
 
     def delete_cut(self):
         if self.current_image_index in self.project.actions:
@@ -147,10 +157,17 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 self.sciss_btn.setEnabled(True)
 
     def add_horizontal(self):
-        if self.image_viewer is not None:
-            self.image_viewer.add_line()
-            self.image_sa.show()
-            self.sciss_btn.setEnabled(True)
+        check_list = [x.isChecked() for x in self.check_list]
+        if all(check_list):
+            for i in range(len(self.files)):
+                image = Image.open(self.files[i])
+                y = image.height // 2
+                self.project.actions[i] = Action('horizontal_cut', value=y, final=False)
+        else:
+            if self.image_viewer is not None:
+                self.image_viewer.add_line()
+                self.image_sa.show()
+                self.sciss_btn.setEnabled(True)
 
     def create_new_project(self):
         self.project = Project()
@@ -330,7 +347,6 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             self.update_thumbnail(self.current_image_index)
             self.project.save_project()
 
-
     def write_on_thumbnails(self, text):
         im = Image.open(self.thumbnails[self.current_image_index])
         font = ImageFont.truetype('./data/consolas.ttf', size=42)
@@ -363,7 +379,6 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         td = self.work_dir + '/thumbnails'
         self.thumbnails = [os.path.join(td, f) for f in os.listdir(td) if
                            os.path.isfile(os.path.join(td, f))]
-
 
     # https://python-scripts.com/draw-circle-rectangle-line
 
