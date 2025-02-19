@@ -18,6 +18,8 @@ TEXT_STEPS = ["вертикальный разрез", "горизонтальн
               "выбор букв", "вывод результата"]
 GRID_WIDTH = 3240
 GRID_HEIGHT = 2000
+ANGLE_SCALE = 1
+DELTA_ANGLE = 0.1
 
 
 class Action(NamedTuple):
@@ -279,7 +281,7 @@ class Project:
                 os.mkdir(self.work_dir + '/processing/' + STEPS[self.current_step + 1] + '/thumbnails')
         except OSError:
             return False
-        if self.current_step in (0, 1, 2):
+        if self.current_step in (0, 1, 2, 3):
             check_list = self.get_current_check_list()
             files = self.get_current_files()
             actions = self.get_current_action()
@@ -348,9 +350,10 @@ class ImageViewer(QGraphicsView):
                  current_action=None,
                  container_size=(2000, 1000)):
         super().__init__()
+        self.angle = None
         self.rotation_line = None
         self.rotation_handle = None
-        self.rotation_marker = None
+        # self.rotation_marker = None
         self.current_step = current_step
         self.image_index = image_index
         self.on_action_added = on_action_added
@@ -399,6 +402,16 @@ class ImageViewer(QGraphicsView):
             image = Image.open(self.image_path)
             # Поворачиваем изображение на 180 градусов
             rotated_image = image.rotate(180, expand=True)
+            self.scene.removeItem(self.pixmap_item)
+            self.pixmap = pil2pixmap(rotated_image)
+            scaled_pixmap = self.pixmap.scaled(self.container_width, self.container_height,
+                                               transformMode=Qt.SmoothTransformation,
+                                               aspectRatioMode=2)
+            self.pixmap_item = QGraphicsPixmapItem(scaled_pixmap)
+            self.scene.addItem(self.pixmap_item)
+        elif self.current_action.type == 'rotation':
+            image = Image.open(self.image_path)
+            rotated_image = image.rotate(-self.current_action.value, expand=True)
             self.scene.removeItem(self.pixmap_item)
             self.pixmap = pil2pixmap(rotated_image)
             scaled_pixmap = self.pixmap.scaled(self.container_width, self.container_height,
@@ -475,26 +488,13 @@ class ImageViewer(QGraphicsView):
             self.add_action()
 
     def rotate(self):
-        if self.rotation_handle is not None:
-            return  # Уже добавлено
-        # Координаты для кружка (немного выше центра изображения)
-        x = self.pixmap_item.boundingRect().center().x()
-        y = self.pixmap_item.boundingRect().top() - 20  # Немного выше изображения
-        radius = 10  # Размер кружка
-        # Создаём кружок (ручку для вращения)
-        self.rotation_handle = QGraphicsEllipseItem(-radius, -radius, 2 * radius, 2 * radius)
-        self.rotation_handle.setBrush(Qt.blue)
-        self.rotation_handle.setZValue(2)  # Поверх изображения
-        self.rotation_handle.setPos(x, y)
-        self.scene.addItem(self.rotation_handle)
-        # Горизонтальная линия для сравнения
+        self.angle = 0
         line_x1 = self.pixmap_item.boundingRect().left()
         line_x2 = self.pixmap_item.boundingRect().right()
         line_y = self.pixmap_item.boundingRect().top() + self.pixmap_item.boundingRect().height() / 2
         self.rotation_line = QGraphicsLineItem(line_x1, line_y, line_x2, line_y)
         self.rotation_line.setPen(Qt.red)
         self.scene.addItem(self.rotation_line)
-        # Сохраняем действие
         self.current_action = Action(type='rotate', value=0, final=False)
         self.add_action()
 
@@ -534,6 +534,11 @@ class ImageViewer(QGraphicsView):
                                              value=self.current_action.value,
                                              final=True)
 
+    def fix_rotation(self):
+        self.current_action = Action(type=self.current_action.type,
+                                     value=self.current_action.value,
+                                     final=True)
+
     def get_index(self):
         return self.image_index
 
@@ -544,6 +549,8 @@ class ImageViewer(QGraphicsView):
             self.mouse_press_pos = None
             return
         if event.button() == Qt.LeftButton and (self.current_step in (0, 1, 3, 4)):
+            self.mouse_press_pos = event.pos()
+        if event.button() == Qt.RightButton and self.current_step == 3:
             self.mouse_press_pos = event.pos()
 
     def mouseMoveEvent(self, event):
@@ -571,27 +578,9 @@ class ImageViewer(QGraphicsView):
             self.grid.setPos(new_pos)
             self.mouse_press_pos = event.pos()
         elif self.mouse_press_pos is not None and self.current_step == 3:  # Новый шаг для вращения
-            center = self.pixmap_item.mapToScene(self.pixmap_item.boundingRect().center())  # Центр изображения
-            new_pos = event.scenePos()  # Получаем новую позицию мыши в сцене
-
-            # Вычисляем угол между центром изображения и позицией мыши
-            dx = new_pos.x() - center.x()
-            dy = new_pos.y() - center.y()
-            angle = math.degrees(math.atan2(dy, dx))  # Угол в градусах
-
-            # Устанавливаем угол поворота для изображения
-            self.pixmap_item.setRotation(angle)
-
-            # Перемещаем rotation_handle в новую позицию
-            radius = 20  # Радиус от центра изображения до ручки
-            handle_x = center.x() + radius * math.cos(math.radians(angle))
-            handle_y = center.y() + radius * math.sin(math.radians(angle))
-            self.rotation_handle.setPos(handle_x, handle_y)
-
-            # Сохраняем угол в current_action
-            self.current_action.value = angle
-
-            # Запоминаем последнюю позицию мыши
+            delta = event.pos() - self.mouse_press_pos
+            self.angle += delta.x() * DELTA_ANGLE
+            self.pixmap_item.setRotation(self.angle)
             self.mouse_press_pos = event.pos()
 
 
@@ -611,6 +600,7 @@ class ImageViewer(QGraphicsView):
                 self.current_action = Action(type='vertical_cut',
                                              value=int(pos_in_original_image.x()),
                                              final=False)
+                print(self.current_action)
             elif self.current_step == 1:  # Горизонтальный разрез
                 pos_in_original_image = QPointF(
                     (0 + self.line.pos().x()) * self.scale_x,
@@ -620,15 +610,10 @@ class ImageViewer(QGraphicsView):
                                              value=int(pos_in_original_image.y()),
                                              final=False)
             elif self.current_step == 3:  # Вращение
-                center = self.pixmap_item.mapToScene(self.pixmap_item.boundingRect().center())  # Центр изображения
-                new_pos = event.scenePos()  # Получаем новую позицию мыши в сцене
-
-                # Вычисляем угол между центром изображения и позицией мыши
-                dx = new_pos.x() - center.x()
-                dy = new_pos.y() - center.y()
-                angle = math.degrees(math.atan2(dy, dx))
+                delta = event.pos() - self.mouse_press_pos
+                self.angle += delta.x() * DELTA_ANGLE
                 self.current_action = Action(type='rotation',
-                                             value=angle,
+                                             value=self.angle,
                                              final=False)
             elif self.current_step == 4:
                 pos_in_original_image = QPointF(self.grid.pos().x() * self.scale_x,

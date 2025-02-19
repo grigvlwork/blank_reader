@@ -76,10 +76,10 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                                "add_horizontal_cut", "delete_cut", "sciss_btn", "previous", "next"],
             "orientation": ["new_project", "open", "save", "check_all",
                             "flip", "previous", "next"],
-            "rotate": ["new_project", "open", "save", "check_all",
-                            "rotate", "previous", "next"],
+            "rotation": ["new_project", "open", "save", "check_all",
+                         "rotate", "confirm_btn", "previous", "next"],
             "word_select": ["new_project", "open", "save", "check_all",
-                             "add_grid", "delete_cut", "confirm_btn", "previous", "next"]
+                            "add_grid", "delete_cut", "confirm_btn", "previous", "next"]
         }
         self.theme_btn.clicked.connect(self.change_theme)
         self.open_btn.clicked.connect(self.open_folder)
@@ -92,6 +92,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.new_project_btn.clicked.connect(self.create_new_project)
         self.sciss_btn.clicked.connect(self.confirm_cut)
         self.rotate_btn.clicked.connect(self.rotate)
+        self.confirm_btn.clicked.connect(self.confirm)
         self.add_grid_btn.clicked.connect(self.add_grid)
         self.resized.connect(self.thumbnail_click)
         self.delete_cut_btn.clicked.connect(self.delete_cut)
@@ -113,7 +114,6 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             self.image_viewer.add_grid()
             self.image_sa.show()
             self.confirm_btn.setEnabled(True)
-
 
     def show_buttons(self):
         if self.project is None:
@@ -284,7 +284,6 @@ class MyWidget(QMainWindow, Ui_MainWindow):
 
     def thumbnail_click(self, index=None):
         container_size = (self.image_sa.size().width(), self.image_sa.size().height())
-        # print(container_size)
         if index is not None:
             self.current_image_index = index
             self.highlight_thumbnail(index)
@@ -331,6 +330,13 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 image = image.rotate(180)
                 image.paste(foreground, (250, 150), foreground)
                 image = image.convert('RGB')
+            elif action.type == 'rotation':
+                foreground = Image.open(os.getcwd() + "/images/rotation.png").convert("RGBA")
+                image = Image.open(file).convert('RGBA')
+                image.thumbnail((400, 400))
+                image = image.rotate(action.value)
+                image.paste(foreground, (300, 200), foreground)
+                image = image.convert('RGB')
         file = (self.project.work_dir + '/processing/' +
                 STEPS[self.project.current_step] + '/' +
                 '/thumbnails/' + os.path.splitext(os.path.basename(file))[0] + '.jpg')
@@ -370,11 +376,20 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             self.update_thumbnail(self.current_image_index)
             self.project.save_project()
 
+    def confirm(self):
+        if self.current_image_index in self.project.actions:
+            draft_action = self.project.actions[self.current_image_index]
+            self.project.actions[self.current_image_index] = Action(type=draft_action.type,
+                                                                    value=draft_action.value,
+                                                                    final=True)
+            self.update_thumbnail(self.current_image_index)
+            self.image_viewer.fix_rotation()
+        self.project.save_project()
+
     def rotate(self):
         if self.image_viewer is not None:
             self.image_viewer.rotate()
             self.image_sa.show()
-
 
     def write_on_thumbnails(self, text):
         im = Image.open(self.thumbnails[self.current_image_index])
