@@ -240,8 +240,8 @@ class Project:
             new_name = self.work_dir + '/processing/' + self.steps[self.current_step + 1] + \
                        '/' + os.path.basename(file)
             image = Image.open(file).rotate(action.value)
-            image.save(file)
-            self.angle_adjust(file, new_name)
+            image.save(new_name)
+
 
     def angle_adjust(self, file, new_file):
         img = cv2.imread(file)
@@ -363,6 +363,7 @@ class ImageViewer(QGraphicsView):
         self.image_path = image_path
         self.pixmap = QPixmap(image_path)
         self.pos_in_original_image = None
+        self.right_btn = False
         original_width = self.pixmap.width()
         original_height = self.pixmap.height()
         # Масштабирование изображения
@@ -489,11 +490,15 @@ class ImageViewer(QGraphicsView):
 
     def rotate(self):
         self.angle = 0
-        line_x1 = self.pixmap_item.boundingRect().left()
-        line_x2 = self.pixmap_item.boundingRect().right()
-        line_y = self.pixmap_item.boundingRect().top() + self.pixmap_item.boundingRect().height() / 2
-        self.rotation_line = QGraphicsLineItem(line_x1, line_y, line_x2, line_y)
+        # line_x1 = self.pixmap_item.boundingRect().left()
+        # line_x2 = self.pixmap_item.boundingRect().right()
+        # line_y = self.pixmap_item.boundingRect().top() + self.pixmap_item.boundingRect().height() / 2
+        # self.rotation_line = QGraphicsLineItem(line_x1, line_y, line_x2, line_y)
+        # self.rotation_line.setPen(Qt.red)
+        self.rotation_line = QGraphicsLineItem(0, self.pixmap_item.pixmap().height() // 2,
+                                      self.pixmap_item.pixmap().width(), self.pixmap_item.pixmap().height() // 2)
         self.rotation_line.setPen(Qt.red)
+        self.scene.addItem(self.rotation_line)
         self.scene.addItem(self.rotation_line)
         self.current_action = Action(type='rotate', value=0, final=False)
         self.add_action()
@@ -550,8 +555,10 @@ class ImageViewer(QGraphicsView):
             return
         if event.button() == Qt.LeftButton and (self.current_step in (0, 1, 3, 4)):
             self.mouse_press_pos = event.pos()
+            self.right_btn = False
         if event.button() == Qt.RightButton and self.current_step == 3:
             self.mouse_press_pos = event.pos()
+            self.right_btn = True
 
     def mouseMoveEvent(self, event):
         if self.current_action is None:
@@ -577,12 +584,17 @@ class ImageViewer(QGraphicsView):
             new_pos += delta
             self.grid.setPos(new_pos)
             self.mouse_press_pos = event.pos()
-        elif self.mouse_press_pos is not None and self.current_step == 3:  # Новый шаг для вращения
+        elif self.mouse_press_pos is not None and self.current_step == 3:
             delta = event.pos() - self.mouse_press_pos
-            self.angle += delta.x() * DELTA_ANGLE
-            self.pixmap_item.setRotation(self.angle)
+            if not self.right_btn:
+                self.angle += delta.x() * DELTA_ANGLE
+                self.pixmap_item.setRotation(self.angle)
+            else:
+                new_pos = self.rotation_line.pos()
+                delta.setX(0)
+                new_pos += delta
+                self.rotation_line.setPos(new_pos)
             self.mouse_press_pos = event.pos()
-
 
     def mouseReleaseEvent(self, event):
         if self.current_action is None:
@@ -609,12 +621,14 @@ class ImageViewer(QGraphicsView):
                 self.current_action = Action(type='horizontal_cut',
                                              value=int(pos_in_original_image.y()),
                                              final=False)
-            elif self.current_step == 3:  # Вращение
-                delta = event.pos() - self.mouse_press_pos
-                self.angle += delta.x() * DELTA_ANGLE
-                self.current_action = Action(type='rotation',
-                                             value=self.angle,
-                                             final=False)
+            elif self.current_step == 3:
+                if not self.right_btn:
+                    delta = event.pos() - self.mouse_press_pos
+                    self.angle += delta.x() * DELTA_ANGLE
+                    self.current_action = Action(type='rotation',
+                                                 value=self.angle,
+                                                 final=False)
+
             elif self.current_step == 4:
                 pos_in_original_image = QPointF(self.grid.pos().x() * self.scale_x,
                                                 self.grid.pos().y() * self.scale_y)
