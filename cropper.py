@@ -11,10 +11,10 @@ import os
 # 0) vertical_cut (к именам файлов добавим vN(0, 1))
 # 1) horizontal_cut (к именам файлов добавим hN(0, 1))
 # 2) orientation(некоторые нужно повернуть на 180)
-#  ) angle_adjust  выполняется после шага 2 автоматически
-# 3) word_select (к именам файлов добавим wN(00, 01, 02, ...))
-# 4) letter_select(к именам файлов добавим lN(00, 01, 02, ...))
-# 5) Формирование папки output в которой вырезанные буквы и цифры разложены по папкам 0 1 2 3 а б в ...
+#  3) angle_adjust выполняется после шага 2 автоматически + ручная корректировка по необходимости
+# 4) word_select (к именам файлов добавим wN(00, 01, 02, ...))
+# 5) letter_select(к именам файлов добавим lN(00, 01, 02, ...))
+# 6) Формирование папки output в которой вырезанные буквы и цифры разложены по папкам 0 1 2 3 а б в ...
 # Нажатие на кнопку действия создаёт(перезаписывает) файл(ы) в папке следующего этапа.
 # К следующему этапу можно перейти если обработаны или подтверждены файлы текущего этапа
 # Возможно отслеживать только изменения по действиям текущего этапа?
@@ -25,12 +25,10 @@ import sys
 import qdarkstyle
 import traceback
 
-from PIL.ImageFont import truetype
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtWidgets import QGraphicsItem, QLabel, QGroupBox, QVBoxLayout, QGraphicsPixmapItem
 from PyQt5.QtWidgets import QApplication, QFileDialog, QMessageBox
 from PIL import ImageFont, ImageDraw
-from sympy.physics.units import action
 
 from cropper_ui import Ui_MainWindow
 from classes import *
@@ -59,6 +57,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             "save": self.save_btn,
             "check_all": self.check_all_btn,
             "flip": self.flip_btn,
+            "rotate": self.rotate_btn,
             "add_grid": self.add_grid_btn,
             "confirm_btn": self.confirm_btn,
             "add_vertical_cut": self.add_vertical_cut_btn,
@@ -77,6 +76,8 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                                "add_horizontal_cut", "delete_cut", "sciss_btn", "previous", "next"],
             "orientation": ["new_project", "open", "save", "check_all",
                             "flip", "previous", "next"],
+            "rotate": ["new_project", "open", "save", "check_all",
+                            "rotate", "previous", "next"],
             "word_select": ["new_project", "open", "save", "check_all",
                              "add_grid", "delete_cut", "confirm_btn", "previous", "next"]
         }
@@ -90,6 +91,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.add_horizontal_cut_btn.clicked.connect(self.add_horizontal)
         self.new_project_btn.clicked.connect(self.create_new_project)
         self.sciss_btn.clicked.connect(self.confirm_cut)
+        self.rotate_btn.clicked.connect(self.rotate)
         self.add_grid_btn.clicked.connect(self.add_grid)
         self.resized.connect(self.thumbnail_click)
         self.delete_cut_btn.clicked.connect(self.delete_cut)
@@ -367,6 +369,12 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             self.image_sa.show()
             self.update_thumbnail(self.current_image_index)
             self.project.save_project()
+
+    def rotate(self):
+        if self.image_viewer is not None:
+            self.image_viewer.rotate()
+            self.image_sa.show()
+
 
     def write_on_thumbnails(self, text):
         im = Image.open(self.thumbnails[self.current_image_index])
