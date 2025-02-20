@@ -337,6 +337,12 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 image = image.rotate(-action.value)
                 image.paste(foreground, (300, 200), foreground)
                 image = image.convert('RGB')
+            elif action.type == 'word_select':
+                foreground = Image.open(os.getcwd() + "/images/grid.png").convert("RGBA")
+                image = Image.open(file).convert('RGBA')
+                image.thumbnail((400, 400))
+                image.paste(foreground, (300, 200), foreground)
+                image = image.convert('RGB')
         file = (self.project.work_dir + '/processing/' +
                 STEPS[self.project.current_step] + '/' +
                 '/thumbnails/' + os.path.splitext(os.path.basename(file))[0] + '.jpg')
