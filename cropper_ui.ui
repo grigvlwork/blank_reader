@@ -160,7 +160,7 @@
          </sizepolicy>
         </property>
         <property name="toolTip">
-         <string>Поворот на 180 градусов</string>
+         <string>Поворот изображения</string>
         </property>
         <property name="text">
          <string/>
@@ -194,6 +194,32 @@
         <property name="icon">
          <iconset resource="icons.qrc">
           <normaloff>:/images/images/add_grid.svg</normaloff>:/images/images/add_grid.svg</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="contour_btn">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Найти контуры</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/images/images/border.svg</normaloff>:/images/images/border.svg</iconset>
         </property>
         <property name="iconSize">
          <size>

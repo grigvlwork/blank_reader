@@ -3,7 +3,7 @@ from math import ceil
 import cv2
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QPixmap, QBrush
+from PyQt5.QtGui import QPixmap, QBrush, QImage
 import pickle
 import os
 import shutil
@@ -26,6 +26,11 @@ class Action(NamedTuple):
     type: str  # "cut", "crop", "rotate"
     value: Union[int, float, tuple]  # Число или кортеж
     final: bool
+
+
+class Contoured(NamedTuple):
+    pixmap: QPixmap
+    rectangles: tuple
 
 
 class Mylabel(QLabel):
@@ -269,7 +274,6 @@ class Project:
             # image = Image.open(file).rotate(-action.value)
             # image.save(new_name)
 
-
     def angle_adjust(self, file, new_file):
         img = cv2.imread(file)
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -459,6 +463,24 @@ class ImageViewer(QGraphicsView):
             self.grid.setPen(Qt.red)
             self.scene.addItem(self.grid)
 
+    def contouring(self, file):
+        img = cv2.imread(file)
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        _, thresh = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY_INV)
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+        thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
+        contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        rectangles = []
+        for cnt in contours:
+            x, y, w, h = cv2.boundingRect(cnt)
+            rectangles.append((x, y, w, h))  # Добавляем координаты прямоугольника в список
+            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)  # Рисуем зеленый прямоугольник
+        height, width, channels = img.shape
+        bytes_per_line = 3 * width
+        q_img = QImage(img.data, width, height, bytes_per_line, QImage.Format_RGB888).rgbSwapped()
+        pixmap = QPixmap.fromImage(q_img)
+        return Contoured(pixmap=pixmap, rectangles=tuple(rectangles))
+
     def add_action(self):
         # self.actions.append(action)
         if self.on_action_added:
@@ -521,7 +543,8 @@ class ImageViewer(QGraphicsView):
             return
         self.angle = 0
         self.rotation_line = QGraphicsLineItem(0, self.pixmap_item.pixmap().height() // 2,
-                                      self.pixmap_item.pixmap().width(), self.pixmap_item.pixmap().height() // 2)
+                                               self.pixmap_item.pixmap().width(),
+                                               self.pixmap_item.pixmap().height() // 2)
         self.rotation_line.setPen(Qt.red)
         self.scene.addItem(self.rotation_line)
         self.current_action = Action(type='rotate', value=0, final=False)

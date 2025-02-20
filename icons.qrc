@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="images">
+    <file>images/border.svg</file>
     <file>images/add_grid.svg</file>
     <file>images/yes_black.svg</file>
     <file>images/yes_color.svg</file>
