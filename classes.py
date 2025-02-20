@@ -96,17 +96,17 @@ class Project:
     def get_current_step_dir(self):
         return self.work_dir + '/processing/' + self.steps[self.current_step]
 
-    def rotate(self, source, destination, angle):
-        try:
-            file = source
-            new_file = destination
-            im = Image.open(file)
-            im_rotate = im.rotate(-angle, expand=True)
-            im_rotate.save(new_file, quality=100)
-            im.close()
-            return True
-        except OSError:
-            return False
+    # def rotate(self, source, destination, angle):
+    #     try:
+    #         file = source
+    #         new_file = destination
+    #         im = Image.open(file)
+    #         im_rotate = im.rotate(-angle, expand=True)
+    #         im_rotate.save(new_file, quality=100)
+    #         im.close()
+    #         return True
+    #     except OSError:
+    #         return False
 
     def __setstate__(self, state: dict):
         self.work_dir = state["work_dir"]
@@ -239,7 +239,7 @@ class Project:
         elif action.type == 'rotation':
             new_name = self.work_dir + '/processing/' + self.steps[self.current_step + 1] + \
                        '/' + os.path.basename(file)
-            image = Image.open(file).rotate(action.value)
+            image = Image.open(file).rotate(-action.value)
             image.save(new_name)
 
 
