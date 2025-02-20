@@ -612,7 +612,6 @@ class ImageViewer(QGraphicsView):
                 self.current_action = Action(type='vertical_cut',
                                              value=int(pos_in_original_image.x()),
                                              final=False)
-                print(self.current_action)
             elif self.current_step == 1:  # Горизонтальный разрез
                 pos_in_original_image = QPointF(
                     (0 + self.line.pos().x()) * self.scale_x,
