@@ -489,16 +489,12 @@ class ImageViewer(QGraphicsView):
             self.add_action()
 
     def rotate(self):
+        if self.rotation_line is not None:
+            return
         self.angle = 0
-        # line_x1 = self.pixmap_item.boundingRect().left()
-        # line_x2 = self.pixmap_item.boundingRect().right()
-        # line_y = self.pixmap_item.boundingRect().top() + self.pixmap_item.boundingRect().height() / 2
-        # self.rotation_line = QGraphicsLineItem(line_x1, line_y, line_x2, line_y)
-        # self.rotation_line.setPen(Qt.red)
         self.rotation_line = QGraphicsLineItem(0, self.pixmap_item.pixmap().height() // 2,
                                       self.pixmap_item.pixmap().width(), self.pixmap_item.pixmap().height() // 2)
         self.rotation_line.setPen(Qt.red)
-        self.scene.addItem(self.rotation_line)
         self.scene.addItem(self.rotation_line)
         self.current_action = Action(type='rotate', value=0, final=False)
         self.add_action()
