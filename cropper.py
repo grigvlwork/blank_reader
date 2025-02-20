@@ -79,7 +79,9 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             "rotation": ["new_project", "open", "save", "check_all",
                          "rotate", "confirm_btn", "previous", "next"],
             "word_select": ["new_project", "open", "save", "check_all",
-                            "add_grid", "delete_cut", "confirm_btn", "previous", "next"]
+                            "add_grid", "delete_cut", "confirm_btn", "previous", "next"],
+            "letter_select": ["new_project", "open", "save", "check_all",
+                              "add_grid", "delete_cut", "confirm_btn", "previous", "next"]
         }
         self.theme_btn.clicked.connect(self.change_theme)
         self.open_btn.clicked.connect(self.open_folder)

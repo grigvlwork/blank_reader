@@ -602,3 +602,46 @@ elif self.current_action.type == 'rotate':
 При apply_action() восстанавливаем угол.
 Теперь изображение можно немного вращать! 😎
 Попробуй внедрить код и скажи, если что-то не так. 🚀
+
+from PIL import Image
+
+def crop_image_with_negative_x(input_file, output_file, crop_params):
+    """
+    Обрезает изображение с учетом отрицательной координаты x.
+
+    :param input_file: Имя входного файла изображения
+    :param output_file: Имя выходного файла изображения
+    :param crop_params: Кортеж (x, y, width, height)
+    """
+    # Открываем изображение
+    image = Image.open(input_file)
+    width, height = image.size
+    x, y, crop_width, crop_height = crop_params
+
+    # Если x отрицательный, добавляем слева пустую область
+    if x < 0:
+        # Создаем новое изображение с увеличенной шириной
+        new_width = width + abs(x)
+        new_image = Image.new("RGB", (new_width, height), (255, 255, 255))  # Белый фон
+        new_image.paste(image, (abs(x), 0))  # Вставляем исходное изображение справа
+        image = new_image
+        x = 0  # Теперь x начинается с 0
+
+    # Проверяем, чтобы координаты не выходили за границы изображения
+    x = max(0, x)
+    y = max(0, y)
+    crop_width = min(crop_width, image.width - x)
+    crop_height = min(crop_height, image.height - y)
+
+    # Выполняем обрезку
+    cropped_image = image.crop((x, y, x + crop_width, y + crop_height))
+
+    # Сохраняем результат
+    cropped_image.save(output_file)
+
+# Пример использования
+crop_image_with_negative_x(
+    input_file="input_image.jpg",
+    output_file="output_image.jpg",
+    crop_params=(-10, 20, 100, 150)  # Пример: x отрицательный
+)

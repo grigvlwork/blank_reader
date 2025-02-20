@@ -1,4 +1,4 @@
-import math
+from math import ceil
 
 import cv2
 from PyQt5.QtCore import *
@@ -96,18 +96,6 @@ class Project:
     def get_current_step_dir(self):
         return self.work_dir + '/processing/' + self.steps[self.current_step]
 
-    # def rotate(self, source, destination, angle):
-    #     try:
-    #         file = source
-    #         new_file = destination
-    #         im = Image.open(file)
-    #         im_rotate = im.rotate(-angle, expand=True)
-    #         im_rotate.save(new_file, quality=100)
-    #         im.close()
-    #         return True
-    #     except OSError:
-    #         return False
-
     def __setstate__(self, state: dict):
         self.work_dir = state["work_dir"]
         self.file_project_name = state["file_project_name"]
@@ -191,6 +179,39 @@ class Project:
         except OSError:
             return False
 
+    def crop_image(self, file, crop_params):
+        """
+        Обрезает изображение с учетом отрицательной координаты x.
+
+        :param file: Имя входного файла изображения
+        :param crop_params: Кортеж (x, y)
+        """
+        image_parts = [(0, 0, 1675, 152), (1795, 0, 2155, 152),
+                       (2395, 0, 2875, 152), (2995, 0, 3235, 152),
+                       (120, 185, 1560, 337), (1795, 185, 3235, 337)]
+        for i in range(9):
+            y0 = (i + 2) * 185
+            image_parts.append((120, y0, 1560, y0 + 152))
+            image_parts.append((1795, y0, 3235, y0 + 152))
+        # Открываем изображение
+        image = Image.open(file)
+        width, height = image.size
+        x, y = crop_params
+        if x < 0:
+            # Создаем новое изображение с увеличенной шириной
+            new_width = width + ceil(abs(x))
+            new_image = Image.new("RGB", (new_width, height), (255, 255, 255))  # Белый фон
+            new_image.paste(image, (ceil(abs(x)), 0))  # Вставляем исходное изображение справа
+            image = new_image
+            x = 0  # Теперь x начинается с 0
+        for i in range(len(image_parts)):
+            p = image_parts[i]
+            output_file = self.work_dir + '/processing/' + self.steps[self.current_step + 1] + \
+                          '/' + os.path.splitext(os.path.basename(file))[0] + 'w' + str(i).zfill(2) + \
+                          os.path.splitext(os.path.basename(file))[1]
+            cropped_image = image.crop((x + p[0], y + p[1], x + p[2], y + p[3]))
+            cropped_image.save(output_file)
+
     def apply_action(self, file, action):
         if action.type == 'vertical_cut':
             left_name = self.work_dir + '/processing/' + self.steps[self.current_step + 1] + \
@@ -241,6 +262,12 @@ class Project:
                        '/' + os.path.basename(file)
             image = Image.open(file).rotate(-action.value)
             image.save(new_name)
+        elif action.type == 'word_select':
+            self.crop_image(file, action.value)
+            # new_name = self.work_dir + '/processing/' + self.steps[self.current_step + 1] + \
+            #            '/' + os.path.basename(file)
+            # image = Image.open(file).rotate(-action.value)
+            # image.save(new_name)
 
 
     def angle_adjust(self, file, new_file):
@@ -281,7 +308,7 @@ class Project:
                 os.mkdir(self.work_dir + '/processing/' + STEPS[self.current_step + 1] + '/thumbnails')
         except OSError:
             return False
-        if self.current_step in (0, 1, 2, 3):
+        if self.current_step in (0, 1, 2, 3, 4):
             check_list = self.get_current_check_list()
             files = self.get_current_files()
             actions = self.get_current_action()
@@ -420,7 +447,7 @@ class ImageViewer(QGraphicsView):
             self.pixmap_item = QGraphicsPixmapItem(scaled_pixmap)
             self.scene.addItem(self.pixmap_item)
         elif self.current_action.type == 'word_select':
-            print(self.current_action)
+            # print(self.current_action)
             x = self.current_action.value[0] / self.scale_x
             y = self.current_action.value[1] / self.scale_y
             w = GRID_WIDTH / self.scale_x
