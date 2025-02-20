@@ -353,7 +353,6 @@ class ImageViewer(QGraphicsView):
         self.angle = None
         self.rotation_line = None
         self.rotation_handle = None
-        # self.rotation_marker = None
         self.current_step = current_step
         self.image_index = image_index
         self.on_action_added = on_action_added
@@ -421,13 +420,15 @@ class ImageViewer(QGraphicsView):
             self.pixmap_item = QGraphicsPixmapItem(scaled_pixmap)
             self.scene.addItem(self.pixmap_item)
         elif self.current_action.type == 'word_select':
+            print(self.current_action)
             x = self.current_action.value[0] / self.scale_x
             y = self.current_action.value[1] / self.scale_y
             w = GRID_WIDTH / self.scale_x
             h = GRID_HEIGHT / self.scale_y
+            # print(x, y, w, h)
             self.grid = QGraphicsRectItem()
-            self.grid.setRect(QRectF(0, 0, w, h))
-            self.grid.setPos(x, y)
+            self.grid.setRect(QRectF(x, y, w, h))
+            # self.grid.setPos(x, y)
             self.grid.setPen(Qt.red)
             self.scene.addItem(self.grid)
 
@@ -598,7 +599,7 @@ class ImageViewer(QGraphicsView):
         if self.current_action.final:
             self.mouse_press_pos = None
             return
-        if event.button() == Qt.LeftButton and (self.current_step in (0, 1, 3)):
+        if event.button() == Qt.LeftButton and (self.current_step in (0, 1, 3, 4)):
             self.current_action = None
             if self.current_step == 0:  # Вертикальный разрез
                 pos_in_original_image = QPointF(
@@ -625,8 +626,8 @@ class ImageViewer(QGraphicsView):
                                                  final=False)
 
             elif self.current_step == 4:
-                pos_in_original_image = QPointF(self.grid.pos().x() * self.scale_x,
-                                                self.grid.pos().y() * self.scale_y)
+                pos_in_original_image = QPointF(0 + self.grid.pos().x() * self.scale_x,
+                                                0 + self.grid.pos().y() * self.scale_y)
                 self.current_action = Action(type='word_select',
                                              value=(pos_in_original_image.x(), pos_in_original_image.y()),
                                              final=False)
