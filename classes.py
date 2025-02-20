@@ -189,8 +189,8 @@ class Project:
         image_parts = [(0, 0, 1675, 152), (1795, 0, 2155, 152),
                        (2395, 0, 2875, 152), (2995, 0, 3235, 152),
                        (120, 185, 1560, 337), (1795, 185, 3235, 337)]
-        for i in range(9):
-            y0 = (i + 2) * 185
+        for i in range(2, 11):
+            y0 = i * 185
             image_parts.append((120, y0, 1560, y0 + 152))
             image_parts.append((1795, y0, 3235, y0 + 152))
         # Открываем изображение
@@ -396,7 +396,7 @@ class ImageViewer(QGraphicsView):
         self.container_width, self.container_height = container_size
         scaled_pixmap = self.pixmap.scaled(self.container_width, self.container_height,
                                            transformMode=Qt.SmoothTransformation,
-                                           aspectRatioMode=2)
+                                           aspectRatioMode=Qt.KeepAspectRatio)
         self.pixmap_item = QGraphicsPixmapItem(scaled_pixmap)
         self.scene.addItem(self.pixmap_item)
         self.scale_x = original_width / scaled_pixmap.width()

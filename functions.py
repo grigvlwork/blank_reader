@@ -96,6 +96,13 @@ def pil2pixmap(image):
     pixmap = QPixmap.fromImage(qim)
     return pixmap
 
+# Функция преобразования изображения OpenCV в QPixmap
+def cv2_to_qpixmap(cv_img):
+    rgb_img = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
+    height, width, channels = rgb_img.shape
+    bytes_per_line = channels * width
+    q_img = QImage(rgb_img.data, width, height, bytes_per_line, QImage.Format_RGB888)
+    return QPixmap.fromImage(q_img)
 
 def squares_coord(file_name, min_size=10, max_size=100):
     img = cv2.imread(file_name)
