@@ -463,6 +463,16 @@ class ImageViewer(QGraphicsView):
             self.grid.setPen(Qt.red)
             self.scene.addItem(self.grid)
 
+    def contour(self):
+        self.pixmap, rectangles = self.contouring(self.image_path)
+        scaled_pixmap = self.pixmap.scaled(self.container_width, self.container_height,
+                                           transformMode=Qt.SmoothTransformation,
+                                           aspectRatioMode=Qt.KeepAspectRatio)
+        self.pixmap_item = QGraphicsPixmapItem(scaled_pixmap)
+        self.scene.addItem(self.pixmap_item)
+        self.current_action = Action(type='letter_select', value=rectangles, final=False)
+        self.add_action()
+
     def contouring(self, file):
         img = cv2.imread(file)
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -470,11 +480,17 @@ class ImageViewer(QGraphicsView):
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
         thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
         contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        min_width, max_width = 50, 100  # Ширина в пределах 110–130 пикселей
+        min_height, max_height = 60, 170  # Высота в пределах 170–200 пикселей
         rectangles = []
         for cnt in contours:
             x, y, w, h = cv2.boundingRect(cnt)
-            rectangles.append((x, y, w, h))  # Добавляем координаты прямоугольника в список
-            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)  # Рисуем зеленый прямоугольник
+            if (min_width <= w <= max_width and
+                min_height <= h <= max_height):
+                rectangles.append((x, y, w, h))  # Добавляем координаты прямоугольника в список
+                cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)  # Рисуем зеленый прямоугольник
+            # rectangles.append((x, y, w, h))  # Добавляем координаты прямоугольника в список
+            # cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)  # Рисуем зеленый прямоугольник
         height, width, channels = img.shape
         bytes_per_line = 3 * width
         q_img = QImage(img.data, width, height, bytes_per_line, QImage.Format_RGB888).rgbSwapped()

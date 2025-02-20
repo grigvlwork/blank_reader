@@ -59,6 +59,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             "flip": self.flip_btn,
             "rotate": self.rotate_btn,
             "add_grid": self.add_grid_btn,
+            "contour":self.contour_btn,
             "confirm_btn": self.confirm_btn,
             "add_vertical_cut": self.add_vertical_cut_btn,
             "add_horizontal_cut": self.add_horizontal_cut_btn,
@@ -81,7 +82,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             "word_select": ["new_project", "open", "save", "check_all",
                             "add_grid", "delete_cut", "confirm_btn", "previous", "next"],
             "letter_select": ["new_project", "open", "save", "check_all",
-                              "add_grid", "delete_cut", "confirm_btn", "previous", "next"]
+                              "contour", "delete_cut", "confirm_btn", "previous", "next"]
         }
         self.theme_btn.clicked.connect(self.change_theme)
         self.open_btn.clicked.connect(self.open_folder)
@@ -98,6 +99,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.add_grid_btn.clicked.connect(self.add_grid)
         self.resized.connect(self.thumbnail_click)
         self.delete_cut_btn.clicked.connect(self.delete_cut)
+        self.contour_btn.clicked.connect(self.contour)
         self.source_lb.setText('')
         self.source_lb.setGeometry(0, 0, 1000, 1000)
         self.source_lb.mousePressEvent = self.mousePressEvent
@@ -177,6 +179,13 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 self.image_viewer.add_line()
                 self.image_sa.show()
                 self.sciss_btn.setEnabled(True)
+
+    def contour(self):
+        if self.image_viewer is not None:
+            self.image_viewer.contour()
+            self.image_sa.show()
+            self.update_thumbnail(self.current_image_index)
+            self.project.save_project()
 
     def add_horizontal(self):
         check_list = [x.isChecked() for x in self.check_list]
