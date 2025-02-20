@@ -28,11 +28,6 @@ class Action(NamedTuple):
     final: bool
 
 
-class Contoured(NamedTuple):
-    pixmap: QPixmap
-    rectangles: tuple
-
-
 class Mylabel(QLabel):
     clicked = pyqtSignal()
 
@@ -269,10 +264,6 @@ class Project:
             image.save(new_name)
         elif action.type == 'word_select':
             self.crop_image(file, action.value)
-            # new_name = self.work_dir + '/processing/' + self.steps[self.current_step + 1] + \
-            #            '/' + os.path.basename(file)
-            # image = Image.open(file).rotate(-action.value)
-            # image.save(new_name)
 
     def angle_adjust(self, file, new_file):
         img = cv2.imread(file)
@@ -288,10 +279,6 @@ class Project:
                 best_rect = cv2.minAreaRect(cnt)
         if best_rect is not None:
             angle = best_rect[-1]
-            # if angle < -30:
-            #     angle += 90
-            # elif angle > 30:
-            #     angle -= 90
             if -10 < angle < 10:
                 image = Image.open(file)
                 rotated_image = image.rotate(angle, expand=True)
@@ -381,6 +368,7 @@ class ImageViewer(QGraphicsView):
                  current_action=None,
                  container_size=(2000, 1000)):
         super().__init__()
+        self.borders = None
         self.angle = None
         self.rotation_line = None
         self.rotation_handle = None
@@ -451,26 +439,37 @@ class ImageViewer(QGraphicsView):
             self.pixmap_item = QGraphicsPixmapItem(scaled_pixmap)
             self.scene.addItem(self.pixmap_item)
         elif self.current_action.type == 'word_select':
-            # print(self.current_action)
             x = self.current_action.value[0] / self.scale_x
             y = self.current_action.value[1] / self.scale_y
             w = GRID_WIDTH / self.scale_x
             h = GRID_HEIGHT / self.scale_y
-            # print(x, y, w, h)
             self.grid = QGraphicsRectItem()
             self.grid.setRect(QRectF(x, y, w, h))
-            # self.grid.setPos(x, y)
             self.grid.setPen(Qt.red)
             self.scene.addItem(self.grid)
+        elif self.current_action.type == 'letter_select':
+            rectangles = self.current_action.value
+            self.borders = []
+            for rectangle in rectangles:
+                x = rectangle[0] / self.scale_x
+                y = rectangle[1] / self.scale_y
+                w = rectangle[2] / self.scale_x
+                h = rectangle[3] / self.scale_y
+                rect = QGraphicsRectItem()
+                rect.setRect(QRectF(x, y, w, h))
+                rect.setPen(color)
+                self.borders.append(rect)
+                self.scene.addItem(rect)
 
     def contour(self):
-        self.pixmap, rectangles = self.contouring(self.image_path)
-        scaled_pixmap = self.pixmap.scaled(self.container_width, self.container_height,
-                                           transformMode=Qt.SmoothTransformation,
-                                           aspectRatioMode=Qt.KeepAspectRatio)
-        self.pixmap_item = QGraphicsPixmapItem(scaled_pixmap)
-        self.scene.addItem(self.pixmap_item)
+        rectangles = self.contouring(self.image_path)
+        # scaled_pixmap = self.pixmap.scaled(self.container_width, self.container_height,
+        #                                    transformMode=Qt.SmoothTransformation,
+        #                                    aspectRatioMode=Qt.KeepAspectRatio)
+        # self.pixmap_item = QGraphicsPixmapItem(scaled_pixmap)
+        # self.scene.addItem(self.pixmap_item)
         self.current_action = Action(type='letter_select', value=rectangles, final=False)
+        self.apply_action()
         self.add_action()
 
     def contouring(self, file):
@@ -486,19 +485,11 @@ class ImageViewer(QGraphicsView):
         for cnt in contours:
             x, y, w, h = cv2.boundingRect(cnt)
             if (min_width <= w <= max_width and
-                min_height <= h <= max_height):
+                    min_height <= h <= max_height):
                 rectangles.append((x, y, w, h))  # Добавляем координаты прямоугольника в список
-                cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)  # Рисуем зеленый прямоугольник
-            # rectangles.append((x, y, w, h))  # Добавляем координаты прямоугольника в список
-            # cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)  # Рисуем зеленый прямоугольник
-        height, width, channels = img.shape
-        bytes_per_line = 3 * width
-        q_img = QImage(img.data, width, height, bytes_per_line, QImage.Format_RGB888).rgbSwapped()
-        pixmap = QPixmap.fromImage(q_img)
-        return Contoured(pixmap=pixmap, rectangles=tuple(rectangles))
+        return tuple(rectangles)
 
     def add_action(self):
-        # self.actions.append(action)
         if self.on_action_added:
             self.on_action_added(self.image_index, self.current_action)  # Сообщаем Project
 
@@ -624,6 +615,7 @@ class ImageViewer(QGraphicsView):
             self.right_btn = True
 
     def mouseMoveEvent(self, event):
+        print(self.current_action)
         if self.current_action is None:
             return
         if self.current_action.final:
@@ -658,6 +650,14 @@ class ImageViewer(QGraphicsView):
                 new_pos += delta
                 self.rotation_line.setPos(new_pos)
             self.mouse_press_pos = event.pos()
+        elif self.current_step == 5:
+            pos = event.pos()
+            for i, rect in enumerate(self.borders):
+                if rect.contains(pos):
+                    rect.setPen(Qt.yellow, 3)
+                    for j, other_rect in enumerate(self.borders):
+                        if j != i:
+                            other_rect.setPen(Qt.red, 1)
 
     def mouseReleaseEvent(self, event):
         if self.current_action is None:
