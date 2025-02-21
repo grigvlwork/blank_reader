@@ -1,2 +1,7 @@
 /rotated_image.jpg
 /.idea/modules.xml
+/.idea/.gitignore
+/.idea/blank_reader.iml
+/.idea/misc.xml
+/test/rotated.tif
+/.idea/vcs.xml
