@@ -645,3 +645,190 @@ crop_image_with_negative_x(
     output_file="output_image.jpg",
     crop_params=(-10, 20, 100, 150)  # Пример: x отрицательный
 )
+
+Да, можно добавить подсветку прямоугольников при наведении мыши. Вот модифицированный метод mouseMoveEvent с отслеживанием наведения на прямоугольники:
+
+python
+Wrap
+Copy
+def mouseMoveEvent(self, event):
+    # Сначала обработаем существующие действия
+    if self.current_action is None:
+        # Проверяем наведение на прямоугольники только если нет активного действия
+        mouse_pos = event.pos()
+        hovered = False
+        for rect in self.borders:
+            # Восстанавливаем исходный цвет для всех прямоугольников
+            rect.setPen(QPen(color))  # используем исходный color
+
+            # Проверяем, находится ли курсор внутри прямоугольника
+            if rect.rect().contains(mouse_pos):
+                # Устанавливаем цвет подсветки (например, красный)
+                rect.setPen(QPen(Qt.red, 2))  # можно настроить цвет и толщину
+                hovered = True
+
+        self.scene.update()
+        return
+
+    if self.current_action.final:
+        self.mouse_press_pos = None
+        return
+
+    # Существующая логика обработки перемещения
+    if self.mouse_press_pos is not None and (self.current_step in (0, 1)):
+        new_pos = self.line.pos()
+        if self.current_step == 0:  # Вертикальный разрез
+            delta = event.pos() - self.mouse_press_pos
+            delta.setY(0)
+            new_pos += delta
+        elif self.current_step == 1:  # Горизонтальный разрез, настройка угла
+            delta = event.pos() - self.mouse_press_pos
+            delta.setX(0)
+            new_pos += delta
+        self.line.setPos(new_pos)
+        self.mouse_press_pos = event.pos()
+    elif self.mouse_press_pos is not None and self.current_step == 4:
+        new_pos = self.grid.pos()
+        delta = event.pos() - self.mouse_press_pos
+        new_pos += delta
+        self.grid.setPos(new_pos)
+        self.mouse_press_pos = event.pos()
+    elif self.mouse_press_pos is not None and self.current_step == 3:
+        delta = event.pos() - self.mouse_press_pos
+        if not self.right_btn:
+            self.angle += delta.x() * DELTA_ANGLE
+            self.pixmap_item.setRotation(self.angle)
+        else:
+            new_pos = self.rotation_line.pos()
+            delta.setX(0)
+            new_pos += delta
+            self.rotation_line.setPos(new_pos)
+        self.mouse_press_pos = event.pos()
+
+    # Добавляем проверку наведения даже при активном действии
+    mouse_pos = event.pos()
+    for rect in self.borders:
+        rect.setPen(QPen(color))  # восстанавливаем исходный цвет
+        if rect.rect().contains(mouse_pos):
+            rect.setPen(QPen(Qt.red, 2))  # подсвечиваем при наведении
+
+    self.scene.update()
+Основные изменения:
+
+Добавлена проверка положения курсора относительно прямоугольников через rect.rect().contains(mouse_pos)
+При наведении на прямоугольник устанавливается новый цвет через setPen()
+При выходе курсора за пределы прямоугольника восстанавливается исходный цвет
+Добавлен вызов self.scene.update() для обновления отображения
+Вы можете настроить:
+
+Цвет подсветки, заменив Qt.red на любой другой цвет из Qt (например, Qt.yellow, Qt.green и т.д.)
+Толщину линии, изменив значение 2 в QPen(Qt.red, 2)
+Добавить дополнительные эффекты, например rect.setBrush() для заливки
+Также убедитесь, что:
+
+Использованы правильные импорты: from PyQt5.QtCore import QRectF, Qt
+Переменная color определена и доступна в области видимости
+self.borders содержит список прямоугольников QGraphicsRectItem
+Если вам нужно подсвечивать прямоугольники только в определенном состоянии (например, когда нет активного действия), можно убрать второй блок проверки в конец метода и оставить только первый.
+
+
+
+
+
+
+Я пробовал похожий способ, но видимо как-то не так определяются координаты мыши , в чем может быть проблема?
+
+
+Проблема с некорректным определением координат мыши при проверке наведения на прямоугольники может быть связана с несколькими причинами. Давайте разберем возможные проблемы и их решения:
+
+1. Разница в системах координат
+event.pos() возвращает координаты мыши относительно виджета (widget), в котором происходит событие, но прямоугольники (QGraphicsRectItem) находятся в системе координат сцены (QGraphicsScene).
+Если вы используете QGraphicsView, нужно преобразовать координаты мыши из пространства виджета в пространство сцены.
+Решение:
+Используйте метод mapToScene() для преобразования координат:
+
+python
+Wrap
+Copy
+mouse_pos = self.mapToScene(event.pos())
+Тогда проверка будет выглядеть так:
+
+python
+Wrap
+Copy
+mouse_pos = self.mapToScene(event.pos())
+for rect in self.borders:
+    rect.setPen(QPen(color))
+    if rect.rect().contains(mouse_pos):
+        rect.setPen(QPen(Qt.red, 2))
+2. Масштабирование сцены
+В вашем коде есть деление координат на self.scale_x и self.scale_y при создании прямоугольников. Это означает, что прямоугольники находятся в масштабированной системе координат, а координаты мыши — нет.
+Если масштаб применяется к сцене или виду (QGraphicsView), то координаты мыши нужно масштабировать соответствующим образом.
+Решение:
+Учитывайте масштаб при проверке:
+
+python
+Wrap
+Copy
+mouse_pos = self.mapToScene(event.pos())
+scaled_mouse_pos = QPointF(mouse_pos.x() / self.scale_x, mouse_pos.y() / self.scale_y)
+for rect in self.borders:
+    rect.setPen(QPen(color))
+    if rect.rect().contains(scaled_mouse_pos):
+        rect.setPen(QPen(Qt.red, 2))
+3. Позиция прямоугольников в сцене
+Прямоугольники могли быть добавлены с учетом их локальных координат, но при проверке rect.rect().contains() не учитывается их позиция в сцене (если они были перемещены с помощью setPos()).
+Метод rect() возвращает локальный прямоугольник элемента, а не его положение в сцене.
+Решение:
+Используйте метод sceneBoundingRect() вместо rect(), чтобы получить границы прямоугольника в системе координат сцены:
+
+python
+Wrap
+Copy
+mouse_pos = self.mapToScene(event.pos())
+for rect in self.borders:
+    rect.setPen(QPen(color))
+    if rect.sceneBoundingRect().contains(mouse_pos):
+        rect.setPen(QPen(Qt.red, 2))
+4. Обновление сцены
+Если сцена не обновляется должным образом, изменения цвета могут не отображаться. Ваш код уже содержит self.scene.update(), но убедитесь, что он вызывается после всех изменений.
+5. Контекст класса
+Убедитесь, что mouseMoveEvent определен в классе, производном от QGraphicsView, а не от другого виджета, иначе event.pos() может давать координаты в неправильной системе отсчета.
+Исправленный код
+Вот пример с учетом всех возможных проблем:
+
+python
+Wrap
+Copy
+def mouseMoveEvent(self, event):
+    if self.current_action is None:
+        # Преобразуем координаты мыши в систему сцены
+        mouse_pos = self.mapToScene(event.pos())
+
+        # Проверяем наведение на прямоугольники
+        for rect in self.borders:
+            rect.setPen(QPen(color))  # Исходный цвет
+            if rect.sceneBoundingRect().contains(mouse_pos):
+                rect.setPen(QPen(Qt.red, 2))  # Цвет подсветки
+
+        self.scene.update()
+        return
+
+    # Существующая логика
+    if self.current_action.final:
+        self.mouse_press_pos = None
+        return
+
+    # ... остальной код без изменений ...
+Как проверить, в чем именно проблема?
+Вывод координат: Добавьте отладочный вывод, чтобы сравнить координаты мыши и прямоугольников:
+python
+Wrap
+Copy
+mouse_pos = self.mapToScene(event.pos())
+print(f"Mouse pos: {mouse_pos}")
+for rect in self.borders:
+    print(f"Rect bounds: {rect.sceneBoundingRect()}")
+Визуальная проверка: Временно задайте прямоугольникам фиксированные размеры и положение в сцене без масштабирования и проверьте, работает ли наведение.
+Основной совет
+Скорее всего, проблема в системе координат (пункт 1 или 3). Начните с использования mapToScene() и sceneBoundingRect(), это решает большинство подобных вопросов в QGraphicsView. Если проблема сохраняется, уточните, как именно определяются self.borders и какой тип масштабирования применяется к сцене или виду.
